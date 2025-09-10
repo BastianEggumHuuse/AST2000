@@ -5,6 +5,7 @@ import ast2000tools.constants as const
 import ast2000tools.utils as utils
 from ast2000tools.space_mission import SpaceMission
 
+# Initializing ast2000tools
 seed = utils.get_seed('bmthune')
 Mission = SpaceMission(seed)
 system = Mission.system
