@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 # AST imports
 import ast2000tools.constants as const
 import ast2000tools.utils as utils
-from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
 
 seed = utils.get_seed('bmthune')
-system = SolarSystem(seed)
+Mission = SpaceMission(seed)
+system = Mission.system
 
 #Henter data fra system
 a = system.semi_major_axes
@@ -20,11 +21,6 @@ r = np.zeros((len(a),2, len(angles)))
 for i in range(len(a)):        
         r[i][0] = ((a[i]*(1-e[i]**2))/(1+e[i]*np.cos(angles))) * np.cos(angles)
         r[i][1] = ((a[i]*(1-e[i]**2))/(1+e[i]*np.cos(angles))) * np.sin(angles)
-
-
-
-
-
 
 fig, ax = plt.subplots()
 # 1 = 1, 2= 2, 3= 5 , 4 = 4, 5= ?, 6= ? 7=3, 
