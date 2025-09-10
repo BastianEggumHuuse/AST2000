@@ -1,3 +1,6 @@
+# BRUKER IKKE KODEMAL
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
+
 import numpy as np
 import matplotlib.pyplot as plt
 # AST imports
@@ -28,7 +31,6 @@ colours = ["red", 'darkorange', 'mediumblue', 'limegreen', 'purple', 'darkviolet
 #plot
 for i in range(len(r)):
     p = r[i]
-    print(p[0],p[1])
     ax.plot(p[0],p[1], color = colours[i])
 sol = plt.Circle((0, 0), 1, color = 'gold')
 plt.axis('equal')
