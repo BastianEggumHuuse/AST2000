@@ -13,7 +13,7 @@ class Orbitsim:
         self.system = mission.system 
         self.const = const
         self.G = const.G_sol
-        self.SM = const.m_sun
+        self.SM = system.star_mass
 
         #Time
         self.T = TotalTime
@@ -22,6 +22,7 @@ class Orbitsim:
         #Initial values
         self.r0 = InitialPos.T
         self.v0 = InitialVel.T
+        
 
         #Arrays
         self.N_timesteps = int(TotalTime/self.dt)
@@ -31,24 +32,25 @@ class Orbitsim:
 
         self.r[0] = self.r0
         self.v[0] = self.v0
-        self.a[0] = ((self.G*self.SM)/self.norm(self.r[0])**2)*self.hat(self.r[0])
+        self.a[0] = ((-self.G*self.SM)/self.norm(self.r[0])**2)*self.hat(self.r[0])
         self.t = np.linspace(0,self.T,self.N_timesteps)    
 
     def norm(self, v):
         return np.linalg.norm(v, axis=1, keepdims=True)
     def hat(self, v):
+        
         return v/self.norm(v)
 
     def timestep(self,i):
         
         self.r[i] = self.r[i-1] + self.v[i-1]*self.dt + 0.5 * self.a[i-1]*self.dt**2 
-        self.a[i] = ((self.G*self.SM)/self.norm(self.r[i])**2)*self.hat(self.r[i])
+        self.a[i] = ((-self.G*self.SM)/self.norm(self.r[i])**2)*self.hat(self.r[i])
+        
         self.v[i] = self.v[i-1] + 0.5*(self.a[i-1] + self.a[i]) *self.dt
     
     def loop(self):
         for i in range(1,len(self.t)):
-            self.timestep(i)
-
+            self.timestep(i)           
         return(self.r,self.v,self.a,self.t)
     
 
@@ -60,7 +62,8 @@ if __name__ == "__main__":
 
     R0 = system.initial_positions
     V0 = system.initial_velocities
-    TotalTime = 20*system.rotational_periods[0]*365.25
+    TotalTime = np.linalg.norm(R0.T[0]) *2*np.pi/np.linalg.norm(V0.T[0])*20*1.1
+    print(TotalTime)
 
     OrbitPlot = Orbitsim(mission,const, TotalTime, R0, V0)
 
@@ -73,9 +76,11 @@ if __name__ == "__main__":
     #plot
     for p in range(len(OrbitPlot.r0)):
         print(p)
-        ax.plot(r[0][p],r[0][p], color = colours[p])
+        ax.plot(r[0][p],r[1][p], color = colours[p])
 
-    sol = plt.Circle((0, 0), 1, color = 'gold')
+    sol = plt.Circle((0, 0), 1, color = 'gold') 
     plt.axis('equal')
     ax.add_patch(sol)
     plt.show()
+
+    mission.verify_planet_positions(TotalTime,r)
