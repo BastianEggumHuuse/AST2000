@@ -1,0 +1,107 @@
+# BRUKER IKKE KODEMAL
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
+
+
+# Regular imports
+import numpy             as np
+import matplotlib.pyplot as plt
+
+
+# AST imports
+import ast2000tools.constants as const
+import ast2000tools.utils     as utils
+
+from ast2000tools.space_mission import SpaceMission
+
+class NumericalOrbit:
+    def __init__ (self,mission, const, TotalTime, StepsPerYear, InitialPos, InitialVel):
+        
+        # Storing mission, system, and constants
+        self.mission = mission
+        self.system = mission.system 
+        self.const = const
+
+        # Storing gravitational constant and mass of out star
+        self.G = const.G_sol
+        self.SM = self.system.star_mass
+
+        # Storing TotalTime and StepsPerYear (Time is measured in years)
+        self.T = TotalTime
+        self.YSteps = StepsPerYear
+
+        # Setting deltatime and N timesteps
+        self.dt = 1/StepsPerYear
+        self.NSteps = int(TotalTime/self.dt)
+
+        # Setting initial positions and velocities. These are input with dimentions (2,Num_planets), meaning the first dimention contains two elements, 
+        # which each contain all x-values, and all y-values.
+        # Since we want to be able to operate on all the planets simultaneously, we want the dimentions (7,Num_planets), 
+        # meaning the first dimention contains Num_planets elements, which contain a single x and y element.
+        self.r0 = InitialPos.T
+        self.v0 = InitialVel.T
+        
+        # Creating our arrays. Again, we want the dimentions (Num_planets,2) to operate on all planets at the same time.
+        # Since we now want to go through time as well, we add this dimention at the beginning, giving us the dimentions (N_timesteps,Num_planets,2)
+        self.NumPlanets = len(self.r_0)
+        self.r = np.zeros((self.NSteps, self.NumPlanets, 2))
+        self.v = np.copy(self.r)
+        self.a = np.copy(self.r)
+
+        # Setting the initial values for the arrays.
+        self.r[0] = self.r0
+        self.v[0] = self.v0
+        self.a[0] = ((-self.G*self.SM)/self.norm(self.r[0])**2)*self.hat(self.r[0])
+        self.t = np.linspace(0,self.T,self.NSteps)    
+
+    def norm(self, v):
+        return np.linalg.norm(v, axis=1, keepdims=True)
+    def hat(self, v):
+        
+        return v/self.norm(v)
+
+    def timestep(self,i):
+        
+        #self.r[i] = self.r[i-1] + self.v[i-1]*self.dt + 0.5 * self.a[i-1]*self.dt**2 
+        #self.a[i] = ((-self.G*self.SM)/self.norm(self.r[i])**2)*self.hat(self.r[i])
+        #self.v[i] = self.v[i-1] + 0.5*(self.a[i-1] + self.a[i]) *self.dt
+
+        self.r[i+1] = self.r[i] + self.v[i]*self.dt + 0.5 * self.a[i]*self.dt**2 
+        self.a[i+1] = ((-self.G*self.SM)/self.norm(self.r[i+1])**2)*self.hat(self.r[i+1])
+        self.v[i+1] = self.v[i] + 0.5*(self.a[i] + self.a[i+1]) *self.dt
+    
+    def loop(self):
+        for i in range(1,self.NSteps):
+            self.timestep(i)           
+        return(self.r,self.v,self.a,self.t)
+    
+
+if __name__ == "__main__":
+    Seed = utils.get_seed('bmthune')
+
+    mission = SpaceMission(Seed)
+    system = mission.system
+
+    R0 = system.initial_positions
+    V0 = system.initial_velocities
+    TotalTime = np.linalg.norm(R0.T[0]) *2*np.pi/np.linalg.norm(V0.T[0])*20*1.1
+    print(TotalTime)
+
+    OrbitPlot = NumericalOrbit(mission,const, TotalTime, R0, V0)
+
+    r,v,a,t = OrbitPlot.loop()
+    r = r.T
+
+    fig, ax = plt.subplots()
+    # 1 = 1, 2= 2, 3= 5 , 4 = 4, 5= ?, 6= ? 7=3, 
+    colours = ["red", 'darkorange', 'mediumblue', 'limegreen', 'purple', 'darkviolet', 'gold']
+    #plot
+    for p in range(len(OrbitPlot.r0)):
+        print(p)
+        ax.plot(r[0][p],r[1][p], color = colours[p])
+
+    sol = plt.Circle((0, 0), 1, color = 'gold') 
+    plt.axis('equal')
+    ax.add_patch(sol)
+    plt.show()
+
+    mission.verify_planet_positions(TotalTime,r)
