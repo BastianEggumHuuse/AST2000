@@ -31,9 +31,13 @@ class AnalyticalOrbit:
 
         # Colors we display the different planets with
         self.colors = [[1,0.8,0], [1,0.7,0], [1,0.6,0], [1,0.5,0], [1,0.4,0], [1,0.2,0], [1,0.0,0]]
+        # If we want to display the planets with just one color, we use this one instead
+        self.primary = [1,0.2,0]
         #self.colors = ["red", 'darkorange', 'mediumblue', 'limegreen', 'purple', 'darkviolet', 'gold']
 
     def GetColors(self):
+
+        """Method that returns the colors of the planet orbits in the correct order."""
 
         # Color index | Star index
         # 0           | 0
@@ -49,7 +53,9 @@ class AnalyticalOrbit:
         return([self.colors[0],self.colors[1],self.colors[4],self.colors[3],self.colors[5],self.colors[6],self.colors[2]])
 
     def Loop(self):
-        # Looping through all the planets.
+        
+        """Looping through the planets, and calculating their positions for one entire rotation"""
+
         for i in range(self.NumPlanets):
 
             # We find the distance from the star at for all the angles (vectorized)
@@ -66,27 +72,27 @@ if __name__ == "__main__":
       
     # Initializing ast2000tools
     seed = utils.get_seed('bmthune')
-    Mission = SpaceMission(seed)
-    system = Mission.system
+    mission = SpaceMission(seed)
+    system = mission.system
+
+    # Instantiating Analytical orbit class (and running loop)
+    Orbit = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities)
+    r = Orbit.Loop()
 
     # Initializing plotting
     fig, ax = plt.subplots()
-
-    # Instantiating Analytical orbit class (and running loop)
-    Orbit = AnalyticalOrbit(system.semi_major_axes,system.eccentricities)
-    r = Orbit.Loop()
 
     # Plotting Orbit data
     colors = Orbit.GetColors()
     for i in range(Orbit.NumPlanets):
         ax.plot(r[i][0],r[i][1],color = colors[i])
 
-    # Adding the sun
-    sol = plt.Circle((0, 0), 1, color = 'gold')
-    ax.add_patch(sol)
+    # Adding the star
+    star = plt.Circle((0, 0), 1, color = 'gold')
+    ax.add_patch(star)
 
     # Adding title, and axis labels
-    plt.title("Analytisk plott av planetenes baner")
+    plt.title("Plott av planetenes baner, beregnet analytisk")
     plt.xlabel("Posisjon langs x-aksen [AU]")
     plt.ylabel("Posisjon langs y-aksen [AU]")
 
