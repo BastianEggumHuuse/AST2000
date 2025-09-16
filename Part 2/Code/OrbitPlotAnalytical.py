@@ -87,8 +87,8 @@ if __name__ == "__main__":
     for i in range(Orbit.NumPlanets):
         ax.plot(r[i][0],r[i][1],color = colors[i])
 
-    # Adding the star
-    star = plt.Circle((0, 0), 1, color = 'gold')
+    # Adding the star (not to scale)
+    star = plt.Circle((0, 0), 0.75, color = 'gold')
     ax.add_patch(star)
 
     # Adding title, and axis labels

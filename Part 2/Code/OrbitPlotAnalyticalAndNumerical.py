@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Orbit imports
 from OrbitPlotAnalytical import AnalyticalOrbit
-from OrbitPlotNumerical import NumericalOrbit
+from OrbitPlotNumerical import NumericalOrbitFunction
 
 # AST imports
 import ast2000tools.constants as const
@@ -19,20 +19,13 @@ Seed = utils.get_seed('bmthune')
 mission = SpaceMission(Seed)
 system = mission.system
 
-# Getting initial conditions
-R0 = system.initial_positions
-V0 = system.initial_velocities
-# Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
-# To make sure we pass the 20 rotations mark, we multiply the time with 1.1
-TotalTime = np.linalg.norm(R0.T[0]) *2*np.pi/np.linalg.norm(V0.T[0])*20*1.1
-
 # Instantiating Analytical orbit class (and running loop)
 OrbitA = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities)
 r_A = OrbitA.Loop()
 
 # Instantiating the Numerical Orbit class (and running the loop)
-OrbitN = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
-r_N,v_N,a_N,t_N = OrbitN.loop()
+OrbitN = NumericalOrbitFunction("NumericalOrbitData.npz")
+r_N = OrbitN.range(0,OrbitN.TotalTime)
 
 # Initializing plotting
 fig, ax = plt.subplots()
@@ -44,11 +37,11 @@ for i in range(OrbitA.NumPlanets):
 
 # Plotting the orbits of the planets
 colors = OrbitN.GetColors()
-for i in range(OrbitN.NumPlanets):
+for i in range(len(r_N[0])):
     ax.plot(r_N[0][i],r_N[1][i], color = OrbitN.primary)
 
-# Adding the star
-star = plt.Circle((0, 0), 1, color = 'gold')
+# Adding the star (Not to scale)
+star = plt.Circle((0, 0), 0.75, color = 'gold')
 ax.add_patch(star)
 
 # Adding title, and axis labels

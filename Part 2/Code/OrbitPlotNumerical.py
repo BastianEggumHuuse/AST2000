@@ -22,9 +22,9 @@ class NumericalOrbit:
         mission      : instance of the SpaceMission class
         const        : instance of the const package
         TotalTime    : float            | the total time the simulation will run for
-        StepsPerYear : int              |how many timesteps the simulation will run per year
-        InitialPos   : Array(float) |Array containing initial positions for all planets in the system
-        InitialVel   : Array(float) |Array containing initial positions for all planets in the system
+        StepsPerYear : int              | how many timesteps the simulation will run per year
+        InitialPos   : Array(float)     | Array containing initial positions for all planets in the system
+        InitialVel   : Array(float)     | Array containing initial positions for all planets in the system
 
         returns      : self
         """
@@ -179,10 +179,11 @@ class NumericalOrbitFunction:
         npz = np.load(Filepath)
 
         # Setting total time, delta time, and number of time steps, from the read file
-        self.config    = npz["config"]
-        self.TotalTime = self.config[0]
-        self.dt        = self.config[1]
-        self.NumSteps  = self.config[2]
+        self.config       = npz["config"]
+        self.RotationTime = self.config[0]
+        self.TotalTime    = self.config[1]
+        self.dt           = self.config[2]
+        self.NumSteps     = self.config[3]
 
         # Setting r from read file
         self.r = npz["r"]
@@ -198,10 +199,13 @@ class NumericalOrbitFunction:
         Method that returns the position of a given planet along the x and y axes at a given time.
 
         t       : float        | the desired point in time
-        p       : int          |the desired planet index
+        p       : int          | the desired planet index
 
         returns : Array(float) | the position of the given planet at the given time
         """
+
+        if(t < 0):
+            t = self.RotationTime - t
 
         # Finding the index of the given time
         Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
@@ -224,6 +228,13 @@ class NumericalOrbitFunction:
 
         returns : Array(float) | the positions of all planets between t0 and t1.
         """
+
+        if(t0 < 0):
+            t0 = self.RotationTime + t0
+            t1 += self.RotationTime
+        if(t1 < 0):
+            t1 = self.RotationTime + t1
+            t0 += self.RotationTime
 
         # Finding the indexes in the array for t0 and t1
         Index0 = int(np.floor((t0/self.TotalTime)*self.NumSteps))
@@ -266,7 +277,8 @@ if __name__ == "__main__":
     V0 = system.initial_velocities
     # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
     # To make sure we pass the 20 rotations mark, we multiply the time with 2
-    TotalTime = np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0]) * 20 * 1.8
+    RotationTime = (2*np.pi)*((system.semi_major_axes[0]**3)/(const.G_sol*system.star_mass))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
+    TotalTime = RotationTime * 20 * 1.8
 
     # Instantiating the Numerical Orbit class (and running the loop)
     Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
@@ -280,8 +292,8 @@ if __name__ == "__main__":
     for i in range(Orbit.NumPlanets):
         ax.plot(r[0][i],r[1][i], color = colors[i])
 
-    # Adding the star
-    star = plt.Circle((0, 0), 1, color = 'gold')
+    # Adding the star (not to scale)
+    star = plt.Circle((0, 0), 0.75, color = 'gold')
     ax.add_patch(star)
 
     # Adding title, and axis labels
@@ -294,7 +306,7 @@ if __name__ == "__main__":
     plt.show()
 
     # Saving the array r, along with the total time, delta time, and number of timesteps.
-    config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
+    config = np.array([RotationTime,Orbit.T,Orbit.dt,Orbit.NSteps])
     np.savez("NumericalOrbitData",r = r,config = config)
 
     #mission.verify_planet_positions(TotalTime,r)

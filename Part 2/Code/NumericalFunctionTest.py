@@ -13,7 +13,7 @@ from ast2000tools.space_mission import SpaceMission
 
 Func = NumericalOrbitFunction("NumericalOrbitData.npz")
 
-r = Func.range(0,5)
+r = Func.range(0,Func.TotalTime)
 
 # Initializing plotting
 fig, ax = plt.subplots()
@@ -23,8 +23,8 @@ colors = Func.GetColors()
 for i in range(len(r[0])):
     ax.plot(r[0][i],r[1][i], color = colors[i])
 
-# Adding the star
-star = plt.Circle((0, 0), 1, color = 'gold')
+# Adding the star (not to scale)
+star = plt.Circle((0, 0), 0.75, color = 'gold')
 ax.add_patch(star)
 
 # Adding title, and axis labels
