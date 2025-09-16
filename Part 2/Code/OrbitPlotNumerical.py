@@ -16,6 +16,19 @@ from ast2000tools.space_mission import SpaceMission
 class NumericalOrbit:
     def __init__ (self,mission, const, TotalTime, StepsPerYear, InitialPos, InitialVel):
         
+        """
+        Class representing a numerical orbit. The class itself simulates the orbit, when the method loop is called.
+
+        mission      : instance of the SpaceMission class
+        const        : instance of the const package
+        TotalTime    : float            | the total time the simulation will run for
+        StepsPerYear : int              |how many timesteps the simulation will run per year
+        InitialPos   : Array(float) |Array containing initial positions for all planets in the system
+        InitialVel   : Array(float) |Array containing initial positions for all planets in the system
+
+        returns      : self
+        """
+
         # Storing mission, system, and constants
         self.mission = mission
         self.system = mission.system 
@@ -63,7 +76,11 @@ class NumericalOrbit:
 
     def GetColors(self):
 
-        """Method that returns the colors of the planet orbits in the correct order."""
+        """
+        Method that returns the colors of the planet orbits in the correct order.
+        
+        returns : list | list of planet colors in correct order
+        """
 
         # Color index | Star index
         # 0           | 0
@@ -83,6 +100,10 @@ class NumericalOrbit:
         """
         Support method that gets the norms of an array of vectors.
         Used by us mainly to get |r| for all the planets at once.
+
+        v       : Vector we wish to get the norm of
+
+        returns : float | norm of v
         """
 
         return np.linalg.norm(v, axis=1, keepdims=True)
@@ -92,7 +113,11 @@ class NumericalOrbit:
         """
         Support method that returns the unit vector for a given vector
         Used by us mainly to get r_hat for the gravitational acceleration.
-        (Compatible with vectorized code)
+        (Compatible with vectorized code).
+
+        v       : Array(float) | Vector we wish to get the unit vector for.
+
+        returns : Array(float) | unit vector of v
         """
 
         return v/self.norm(v)
@@ -102,7 +127,11 @@ class NumericalOrbit:
         """
         Performs one time step within the orbit simulation. 
         The parameter [i] refers to which timestep we are currently at,
-        meaning that 0 <= i < NSteps - 1
+        meaning that 0 <= i < NSteps - 1.
+
+        i       : int | Index of current step
+
+        returns : void
         """
 
         #self.r[i] = self.r[i-1] + self.v[i-1]*self.dt + 0.5 * self.a[i-1]*self.dt**2 
@@ -120,6 +149,8 @@ class NumericalOrbit:
         Performs the entire loop of the orbit simulation. Since the timestep refers to i+1, we want to skip the final step, to avoid an indexing error.
         Therefore, we loop from 0 (included) to (NSteps - 1) (Excluded).
         The method also returns the arrays r, v, a, and t.
+
+        returns : void
         """
 
         # Loop
@@ -131,6 +162,97 @@ class NumericalOrbit:
         # which gives us the arrays with dimentions (2,NumPlanets,NSteps), letting us plot for all timesteps.
         return(self.r.T,self.v.T,self.a.T,self.t)
     
+class NumericalOrbitFunction:
+
+    def __init__(self,Filepath):
+
+        """
+        This class is a representation of the data stored from the numerical data.
+        Objects of this class can be called to get the position of a given planet at a given time.
+
+        Filepath : String | The path to the .npz file the class reads from.
+
+        returns  : self
+        """
+
+        # Loading the config and r arrays from file
+        npz = np.load(Filepath)
+
+        # Setting total time, delta time, and number of time steps, from the read file
+        self.config    = npz["config"]
+        self.TotalTime = self.config[0]
+        self.dt        = self.config[1]
+        self.NumSteps  = self.config[2]
+
+        # Setting r from read file
+        self.r = npz["r"]
+
+        # Colors we display the different planets with
+        self.colors = [[0,0,1], [0.3,0,1], [0.4,0,1], [0.5,0,1], [0.6,0,1], [0.7,0,1], [0.8,0,1]]
+        self.primary = [0.5,0,1]
+
+
+    def __call__(self,t,p):
+
+        """
+        Method that returns the position of a given planet along the x and y axes at a given time.
+
+        t       : float        | the desired point in time
+        p       : int          |the desired planet index
+
+        returns : Array(float) | the position of the given planet at the given time
+        """
+
+        # Finding the index of the given time
+        Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
+
+        # Finding x and y positions at this index
+        x = (self.r[0][p][Index])
+        y = (self.r[1][p][Index])
+
+        # Returning vector
+        return(np.array([x,y]))
+    
+    def range(self,t0,t1):
+
+        """
+        Method that returns the positions of the planets along the x and y axes between
+        two given points in time.
+
+        t0       : float       | the desired starting time
+        t1       : float       | the desired ending time
+
+        returns : Array(float) | the positions of all planets between t0 and t1.
+        """
+
+        # Finding the indexes in the array for t0 and t1
+        Index0 = int(np.floor((t0/self.TotalTime)*self.NumSteps))
+        Index1 = int(np.floor((t1/self.TotalTime)*self.NumSteps))
+
+        # Creating some empty lists
+        x = []
+        y = []
+
+        # Filling information for x and y axes
+        for p in range(len(self.r[0])):
+            
+            # Using list slicing to get all points at once [start:end]
+            x.append(self.r[0][p][Index0:Index1])
+            y.append(self.r[1][p][Index0:Index1])
+
+        # Returning array
+        return(np.array([x,y]))
+    
+    def GetColors(self):
+
+        """
+        Method that returns the colors of the planet orbits in the correct order.
+        
+        returns : list | list of planet colors in correct order
+        """
+
+        return([self.colors[0],self.colors[1],self.colors[4],self.colors[3],self.colors[5],self.colors[6],self.colors[2]])
+
 
 if __name__ == "__main__":
 
@@ -143,8 +265,8 @@ if __name__ == "__main__":
     R0 = system.initial_positions
     V0 = system.initial_velocities
     # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
-    # To make sure we pass the 20 rotations mark, we multiply the time with 1.1
-    TotalTime = np.linalg.norm(R0.T[0]) *2*np.pi/np.linalg.norm(V0.T[0])*20*1.1
+    # To make sure we pass the 20 rotations mark, we multiply the time with 2
+    TotalTime = np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0]) * 20 * 1.8
 
     # Instantiating the Numerical Orbit class (and running the loop)
     Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
@@ -170,5 +292,9 @@ if __name__ == "__main__":
     # Making axes equal, and showing plot
     plt.axis('equal')
     plt.show()
+
+    # Saving the array r, along with the total time, delta time, and number of timesteps.
+    config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
+    np.savez("NumericalOrbitData",r = r,config = config)
 
     #mission.verify_planet_positions(TotalTime,r)
