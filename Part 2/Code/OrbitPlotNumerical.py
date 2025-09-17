@@ -6,6 +6,7 @@
 import numpy             as np
 import matplotlib.pyplot as plt
 
+from OrbitPlotAnalytical import AnalyticalOrbit
 
 # AST imports
 import ast2000tools.constants as const
@@ -180,10 +181,11 @@ class NumericalOrbitFunction:
 
         # Setting total time, delta time, and number of time steps, from the read file
         self.config       = npz["config"]
-        self.RotationTime = self.config[0]
         self.TotalTime    = self.config[1]
         self.dt           = self.config[2]
         self.NumSteps     = self.config[3]
+
+        self.OrbitTimes   = npz["OrbitTimes"]
 
         # Setting r from read file
         self.r = npz["r"]
@@ -277,8 +279,8 @@ if __name__ == "__main__":
     V0 = system.initial_velocities
     # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
     # To make sure we pass the 20 rotations mark, we multiply the time with 2
-    RotationTime = (2*np.pi)*((system.semi_major_axes[0]**3)/(const.G_sol*system.star_mass + system.masses[0]))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
-    TotalTime = RotationTime * 20 * 1.8
+    OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*system.star_mass + system.masses))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
+    TotalTime = OrbitTimes[0] * 20 * 2
 
     # Instantiating the Numerical Orbit class (and running the loop)
     Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
@@ -306,7 +308,66 @@ if __name__ == "__main__":
     plt.show()
 
     # Saving the array r, along with the total time, delta time, and number of timesteps.
-    config = np.array([RotationTime,Orbit.T,Orbit.dt,Orbit.NSteps])
-    np.savez("NumericalOrbitData",r = r,config = config)
+    config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
+    np.savez("NumericalOrbitData",r = r,config = config,OrbitTimes = OrbitTimes)
 
-    #mission.verify_planet_positions(TotalTime,r)
+    
+
+    # TESTING ZONE!!
+
+    eps = 1e-3
+    relative_eps = 0.01
+    TestCount = 0
+
+    o_A = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities,AphelionAngles=system.aphelion_angles)
+    r_As = o_A.Loop()
+
+    for i in range(Orbit.NumPlanets):
+        # First testing if final position is correct for all planets
+
+        LastOrbitTime = (TotalTime % OrbitTimes[i])
+        OrbitRatio = LastOrbitTime/OrbitTimes[i]
+        Angle = 2*np.pi*OrbitRatio
+
+        # Getting the angle of the final position
+        theta = np.arctan(r[1][i][-1]/r[0][i][-1])
+        if(r[0][i][-1] < 0):
+            theta += np.pi
+
+        # Getting the analytical radius for this angle
+        r_N = np.linalg.norm(np.array([r[0][i][-1],r[1][i][-1]]))
+        #r_A = r_As[int(np.floor(len(o_A.Angles)*OrbitRatio))]
+        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta))
+        # Checking if this matches the numerical radius
+        relative_error = abs(r_N - r_A)/r_A
+
+        #print(r_N,r_A,Angle,np.linalg.norm(np.array([r[0][i][0],r[1][i][0]])))
+
+        if not (relative_error < relative_eps):
+            raise ValueError(f"Final radius for planet {i + 1} not correct!\nValue is {r_N} AU, but should be {r_A} AU")
+        TestCount += 1
+
+        r_0   = np.linalg.norm(np.array([r[0][i][0],r[1][i][0]]))
+        r_max = r_0
+        r_min = r_0
+        t_o   = 0
+
+        # Collecting orbit time, max radius, and min radius
+        for t in range(Orbit.NSteps):
+            r_t = np.linalg.norm(np.array([r[0][i][t],r[1][i][t]]))
+
+            if(r_t > r_max):
+                r_max = r_t
+            if(r_t < r_min):
+                r_min = r_t
+
+            if(t == 0):
+                if(abs(r_0 - r_t) < eps):
+                    t_o = Orbit.dt * t
+
+        t_A = (2*np.pi*(system.semi_major_axes[i]**3/(const.G_sol*system.star_mass + system.masses[i])))
+
+        if not (t_o - t_A < eps):
+            raise ValueError(f"Final orbit time for planet {i + 1} not correct!\nValue is {t_o} AU, but should be {t_A} AU")
+        
+
