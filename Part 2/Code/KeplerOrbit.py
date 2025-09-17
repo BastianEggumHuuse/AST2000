@@ -55,39 +55,30 @@ if __name__ == "__main__":
     TotalTime = AreaFunction.r.RotationTime
 
     # Finding radius at aphelion and perihelion COMMENT THIS!!!!!!!!!
-    r = AreaFunction.r.range(AreaFunction.dt,TotalTime)    
-    r_max = np.linalg.norm(np.array([r[0][0][0],r[1][0][0]]))
-    r_min = r_max
-
-    t_aph = 0
-    t_per = 0
-
-    for t in range(len(r[0][0])):
-        r_len = np.linalg.norm(np.array([r[0][0][t],r[1][0][t]]))
-
-        if(r_len > r_max):
-            r_max = r_len
-            t_aph = t*AreaFunction.dt
-
-        if(r_len < r_min):
-            r_min = r_len
-            t_per = t*AreaFunction.dt
-
-    print(f"Aphelion time : {t_aph} | Periohelion time : {t_per} | Total time : {TotalTime}")
+    t_aph = system.aphelion_angles[0]/(2*np.pi) * AreaFunction.r.RotationTime
+    t_per = (system.aphelion_angles[0] + np.pi)/(2*np.pi) * AreaFunction.r.RotationTime
 
     t_interval = 0.05
-
-    # Initializing plotting
-    fig, ax = plt.subplots()
+    
+    # Finding the positions at 
+    r = AreaFunction.r.range(AreaFunction.dt,TotalTime)   
     r_aph = AreaFunction.r.range(t_aph - t_interval,t_aph + t_interval)
     r_per = AreaFunction.r.range(t_per - t_interval,t_per + t_interval)
 
-    print(t_aph - t_interval,t_aph + t_interval)
+    r_aph_polygon = np.concatenate((np.zeros((2,7,1)),r_aph,np.zeros((2,7,1))),2)
+    r_per_polygon = np.concatenate((np.zeros((2,7,1)),r_per,np.zeros((2,7,1))),2)
+
+    # Initializing plotting
+    fig, ax = plt.subplots()
 
     ax.plot(r[0][0],r[1][0],color = "gold")
-    ax.plot(r_aph[0][0],r_aph[1][0], color = "r")
-    ax.plot(r_per[0][0],r_per[1][0], color = "b")
+    ax.fill(r_aph_polygon[0][0],r_aph_polygon[1][0],color = "royalblue")
+    ax.fill(r_per_polygon[0][0],r_per_polygon[1][0],color = "red")
 
+    A_aph = AreaFunction(t_aph - t_interval,t_aph + t_interval)
+    A_per = AreaFunction(t_per - t_interval,t_per + t_interval)
+
+    print(f"Aphelion area : {A_aph:.5f} AU^2 | Perihelion area : {A_per:.5f} AU^2 | Ratio = {A_aph/A_per:.5f}")
 
     # Making axes equal, and showing plot
     plt.axis('equal')

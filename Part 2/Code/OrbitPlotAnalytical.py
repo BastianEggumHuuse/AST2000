@@ -15,17 +15,18 @@ from ast2000tools.space_mission import SpaceMission
 
 class AnalyticalOrbit:
 
-    def __init__(self,SemiMajors,Eccentricities):
+    def __init__(self,SemiMajors,Eccentricities,AphelionAngles):
         
         # Storing Semi-major axes and Eccentricities for all planets
         self.a = SemiMajors
         self.e = Eccentricities
+        self.AphAngles = AphelionAngles
         # Getting number of planets, for looping later
         self.NumPlanets = len(self.a)
 
         # We wish to go through a full rotation for each planet, so we want an r value for all angles between 0 and 2pi
         # We have chosen 1000 as our number of angles, which gives more than sufficient accuracy
-        self.Angles = np.linspace(0,2*np.pi, 1000)
+        self.Angles = np.linspace(0,1, 1000)
         # Out r-array has the dimention (number of planets, 2, number of angles). This lets us operate on all angles at the same time through vectorization
         self.r = np.zeros((self.NumPlanets,2, len(self.Angles)))
 
@@ -59,12 +60,13 @@ class AnalyticalOrbit:
         for i in range(self.NumPlanets):
 
             # We find the distance from the star at for all the angles (vectorized)
-            r = ((self.a[i]*(1-self.e[i]**2))/(1+self.e[i]*np.cos(self.Angles)))
+            # COMMENT THAT THIS WAS INCORRECT!!!!!!!!!!!
+            r = ((self.a[i]*(1-self.e[i]**2))/(1+self.e[i]*np.cos(self.Angles + np.pi)))
 
             # Setting first all the x-axis positions, and then all the y-axis-positions.
-            self.r[i][0] = r * np.cos(self.Angles)
-            self.r[i][1] = r * np.sin(self.Angles)
-
+            # COMMENT THAT THIS WAS INCORRECT!!!!!!!!!!!
+            self.r[i][0] = r * np.cos(self.Angles + self.AphAngles[i])
+            self.r[i][1] = r * np.sin(self.Angles + self.AphAngles[i])
         # Returning all our positions
         return(self.r)
 
@@ -76,7 +78,7 @@ if __name__ == "__main__":
     system = mission.system
 
     # Instantiating Analytical orbit class (and running loop)
-    Orbit = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities)
+    Orbit = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities,AphelionAngles=system.aphelion_angles)
     r = Orbit.Loop()
 
     # Initializing plotting
