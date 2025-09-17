@@ -26,7 +26,7 @@ class AnalyticalOrbit:
 
         # We wish to go through a full rotation for each planet, so we want an r value for all angles between 0 and 2pi
         # We have chosen 1000 as our number of angles, which gives more than sufficient accuracy
-        self.Angles = np.linspace(0,1, 1000)
+        self.Angles = np.linspace(0,2*np.pi, 1000)
         # Out r-array has the dimention (number of planets, 2, number of angles). This lets us operate on all angles at the same time through vectorization
         self.r = np.zeros((self.NumPlanets,2, len(self.Angles)))
 
@@ -101,3 +101,29 @@ if __name__ == "__main__":
     # Making axes equal, and showing plot
     plt.axis('equal')
     plt.show()
+
+
+
+    # TESTING ZONE!!
+
+    eps = 1e-3
+    TestCount = 0
+
+    for i in range(Orbit.NumPlanets):
+        
+        r_0 = np.linalg.norm(np.array([r[i][0][0],r[i][1][0]]))
+        r_pi = np.linalg.norm(np.array([r[i][0][500],r[i][1][500]]))
+
+        norms = np.linalg.norm(np.array([r[i][0],r[i][1]]).T,axis = 1, keepdims = True)
+        r_min = min(norms)
+        r_max = max(norms)
+
+        if not (abs(r_0 - r_max) < eps):
+            raise ValueError(f"Aphelion radius for planet {i+1} not correct!\nValue is {r_0} AU, but should be {r_max} AU")
+        if not (abs(r_pi - r_min) < eps):
+            raise ValueError(f"Perihelion radius for planet {i+1} not correct!\nValue is {r_pi} AU, but should be {r_min} AU")
+        if not (abs(r_0 + r_pi - 2*Orbit.a[i]) < eps):
+            raise ValueError(f"Total ellipse radius for planet {i+1} not correct!\nValue is {r_0 + r_pi} AU, but should be {2*Orbit.a[i]} AU")
+        TestCount += 3
+
+    print(f"All {TestCount} tests performed, none failed.")
