@@ -337,14 +337,14 @@ if __name__ == "__main__":
         # Getting the analytical radius for this angle
         r_N = np.linalg.norm(np.array([r[0][i][-1],r[1][i][-1]]))
         #r_A = r_As[int(np.floor(len(o_A.Angles)*OrbitRatio))]
-        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta))
+        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (np.pi + system.aphelion_angles[i])))
         # Checking if this matches the numerical radius
         relative_error = abs(r_N - r_A)/r_A
 
         #print(r_N,r_A,Angle,np.linalg.norm(np.array([r[0][i][0],r[1][i][0]])))
 
         if not (relative_error < relative_eps):
-            raise ValueError(f"Final radius for planet {i + 1} not correct!\nValue is {r_N} AU, but should be {r_A} AU")
+            raise ValueError(f"Final radius for planet {i + 1} not correct!\nValue is {r_N} AU, but should be {r_A} AU, ratio is {relative_error}")
         TestCount += 1
 
         r_0   = np.linalg.norm(np.array([r[0][i][0],r[1][i][0]]))
