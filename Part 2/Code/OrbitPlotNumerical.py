@@ -331,13 +331,14 @@ if __name__ == "__main__":
 
         # Getting the angle of the final position
         theta = np.arctan(r[1][i][-1]/r[0][i][-1])
+        #Because arctan is limited between -pi/2 and pi/2 we have to when adjust to make sure we still get the correct angle:
         if(r[0][i][-1] < 0):
             theta += np.pi
 
         # Getting the analytical radius for this angle
         r_N = np.linalg.norm(np.array([r[0][i][-1],r[1][i][-1]]))
         #r_A = r_As[int(np.floor(len(o_A.Angles)*OrbitRatio))]
-        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (np.pi + system.aphelion_angles[i])))
+        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (np.pi + system.aphelion_angles[i]))) #Here we subtract on the angle of the perphileon to adjust for the rotation of the orbits
         # Checking if this matches the numerical radius
         relative_error = abs(r_N - r_A)/r_A
 
