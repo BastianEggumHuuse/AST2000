@@ -20,11 +20,12 @@ mission = SpaceMission(Seed)
 system = mission.system
 
 # Instantiating Analytical orbit class (and running loop)
-OrbitA = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities)
+OrbitA = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities,AphelionAngles=system.aphelion_angles)
 r_A = OrbitA.Loop()
 
 # Instantiating the Numerical Orbit class (and running the loop)
 OrbitN = NumericalOrbitFunction("NumericalOrbitData.npz")
+
 r_N = OrbitN.range(0,OrbitN.TotalTime)
 
 # Initializing plotting
