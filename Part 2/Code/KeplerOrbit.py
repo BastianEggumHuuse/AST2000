@@ -26,18 +26,25 @@ class KeplerArea:
     def __call__(self, t0 = 0, t1 = 1):
         
         A = 0
-
+        S = 0
         t = t0
         while t < t1:
             r0 = self.r(t,self.PlanetIndex)
             t += self.dt
             r1 = self.r(t,self.PlanetIndex)
+            #Calculating the distance between each vector and summing them up,
+            #
+            dS = np.linalg.norm(r1-r0)
+            S += dS
 
             # COMMENT CROSS PRODUCT
             dA = 0.5 * abs(np.cross(r0,r1))
             A += dA
-
-        return A
+        V = S/(t1- t0)
+        
+        return A, S, V
+    
+        
     
     
 if __name__ == "__main__":
@@ -46,20 +53,24 @@ if __name__ == "__main__":
     Seed = utils.get_seed('bmthune')
     mission = SpaceMission(Seed)
     system = mission.system
-
+    Planet_index = 0
     R0 = system.initial_positions
     V0 = system.initial_velocities
 
     # Initializing Area Function
-    AreaFunction = KeplerArea("NumericalOrbitData.npz",0)
-    TotalTime = AreaFunction.r.OrbitTimes[0]
+    AreaFunction = KeplerArea("Git\\AST2000\\Part 2\\Code\\NumericalOrbitData.npz",Planet_index)
+    TotalTime = AreaFunction.r.OrbitTimes[Planet_index]
 
     # Finding radius at aphelion and perihelion COMMENT THIS!!!!!!!!!
-    t_aph = system.aphelion_angles[0]/(2*np.pi) * AreaFunction.r.OrbitTimes[0]
-    t_per = (system.aphelion_angles[0] + np.pi)/(2*np.pi) * AreaFunction.r.OrbitTimes[0]
+    t_aph = system.aphelion_angles[0]/(2*np.pi) * AreaFunction.r.OrbitTimes[Planet_index]
+    t_per = (system.aphelion_angles[0] + np.pi)/(2*np.pi) * AreaFunction.r.OrbitTimes[Planet_index]
 
     t_interval = 0.05
-    
+
+
+
+
+
     # Finding the positions at 
     r = AreaFunction.r.range(AreaFunction.dt,TotalTime)   
     r_aph = AreaFunction.r.range(t_aph - t_interval,t_aph + t_interval)
@@ -75,12 +86,13 @@ if __name__ == "__main__":
     ax.fill(r_aph_polygon[0][0],r_aph_polygon[1][0],color = "royalblue")
     ax.fill(r_per_polygon[0][0],r_per_polygon[1][0],color = "red")
 
-    A_aph = AreaFunction(t_aph - t_interval,t_aph + t_interval)
-    A_per = AreaFunction(t_per - t_interval,t_per + t_interval)
+    A_aph, S_aph, V_aph = AreaFunction(t_aph - t_interval,t_aph + t_interval)
+    A_per, S_per, V_per= AreaFunction(t_per - t_interval,t_per + t_interval)
 
     print(f"Aphelion area : {A_aph:.5f} AU^2 | Perihelion area : {A_per:.5f} AU^2 | Ratio = {A_aph/A_per:.5f}")
+    print(f"Aphelion Distance : {S_aph:.5f} AU | Perihelion Distance : {S_per:.5f} AU")
+    print(f"Aphelion Avreage vel : {V_aph:.5f} AU/Y | Perihelion Avreage vel : {V_per:.5f} AU/Y ")
     
-
     # Making axes equal, and showing plot
     plt.axis('equal')
     plt.show()
