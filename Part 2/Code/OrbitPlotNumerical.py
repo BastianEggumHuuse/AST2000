@@ -181,9 +181,9 @@ class NumericalOrbitFunction:
 
         # Setting total time, delta time, and number of time steps, from the read file
         self.config       = npz["config"]
-        self.TotalTime    = self.config[1]
-        self.dt           = self.config[2]
-        self.NumSteps     = self.config[3]
+        self.TotalTime    = self.config[0]
+        self.dt           = self.config[1]
+        self.NumSteps     = self.config[2]
 
         self.OrbitTimes   = npz["OrbitTimes"]
 
@@ -319,16 +319,14 @@ if __name__ == "__main__":
     relative_eps = 0.01
     TestCount = 0
 
-    o_A = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities,AphelionAngles=system.aphelion_angles)
-    r_As = o_A.Loop()
+    AnalyticalOrbitInstance = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities,AphelionAngles=system.aphelion_angles)
+    AnalyticalOrbitVectors = AnalyticalOrbitInstance.Loop()
+    AnalyticalOrbitRadii = np.zeros((9,AnalyticalOrbitInstance.NSteps))
+    for i in range(Orbit.NumPlanets):
+        for j in range(AnalyticalOrbitInstance.NSteps):
+            AnalyticalOrbitRadii[i][j] = np.linalg.norm(np.array([AnalyticalOrbitVectors[i][0][j],AnalyticalOrbitVectors[i][1][j]]))
 
     for i in range(Orbit.NumPlanets):
-        # First testing if final position is correct for all planets
-
-        LastOrbitTime = (TotalTime % OrbitTimes[i])
-        OrbitRatio = LastOrbitTime/OrbitTimes[i]
-        Angle = 2*np.pi*OrbitRatio
-
         # Getting the angle of the final position
         theta = np.arctan(r[1][i][-1]/r[0][i][-1])
         #Because arctan is limited between -pi/2 and pi/2 we have to when adjust to make sure we still get the correct angle:
@@ -337,16 +335,12 @@ if __name__ == "__main__":
 
         # Getting the analytical radius for this angle
         r_N = np.linalg.norm(np.array([r[0][i][-1],r[1][i][-1]]))
-        #r_A = r_As[int(np.floor(len(o_A.Angles)*OrbitRatio))]
         r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (np.pi + system.aphelion_angles[i]))) #Here we subtract on the angle of the perphileon to adjust for the rotation of the orbits
         # Checking if this matches the numerical radius
         relative_error = abs(r_N - r_A)/r_A
 
-        #print(r_N,r_A,Angle,np.linalg.norm(np.array([r[0][i][0],r[1][i][0]])))
-
         if not (relative_error < relative_eps):
             raise ValueError(f"Final radius for planet {i + 1} not correct!\nValue is {r_N} AU, but should be {r_A} AU, ratio is {relative_error}")
-        TestCount += 1
 
         r_0   = np.linalg.norm(np.array([r[0][i][0],r[1][i][0]]))
         r_max = r_0
@@ -369,6 +363,23 @@ if __name__ == "__main__":
         t_A = (2*np.pi*(system.semi_major_axes[i]**3/(const.G_sol*system.star_mass + system.masses[i])))
 
         if not (t_o - t_A < eps):
-            raise ValueError(f"Final orbit time for planet {i + 1} not correct!\nValue is {t_o} AU, but should be {t_A} AU")
+            raise ValueError(f"Final orbit time for planet {i + 1} not correct!\nValue is {t_o} Y, but should be {t_A} Y")
+
+
+        AnalyticalMax = max(AnalyticalOrbitRadii[i])
+        AnalyticalMin = min(AnalyticalOrbitRadii[i])
+        
+        relative_error = (r_max - AnalyticalMax)/AnalyticalMax
+        if not (relative_error < relative_eps):
+            raise ValueError(f"Maximum radius for planet {i + 1} not correct!\nValue is {r_max} AU, but should be {AnalyticalMax} AU")
+
+        relative_error = (r_min - AnalyticalMin)/AnalyticalMin
+        if not (relative_error < relative_eps):
+            raise ValueError(f"Minimum radius for planet {i + 1} not correct!\nValue is {r_min} AU, but should be {AnalyticalMin} AU")
+        
+        TestCount += 4
+        
+
+    print(f"All {TestCount} tests were performed, with 0 errors.")
         
 
