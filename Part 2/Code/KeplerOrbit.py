@@ -52,11 +52,11 @@ if __name__ == "__main__":
 
     # Initializing Area Function
     AreaFunction = KeplerArea("NumericalOrbitData.npz",0)
-    TotalTime = AreaFunction.r.RotationTime
+    TotalTime = AreaFunction.r.OrbitTimes[0]
 
     # Finding radius at aphelion and perihelion COMMENT THIS!!!!!!!!!
-    t_aph = system.aphelion_angles[0]/(2*np.pi) * AreaFunction.r.RotationTime
-    t_per = (system.aphelion_angles[0] + np.pi)/(2*np.pi) * AreaFunction.r.RotationTime
+    t_aph = system.aphelion_angles[0]/(2*np.pi) * AreaFunction.r.OrbitTimes[0]
+    t_per = (system.aphelion_angles[0] + np.pi)/(2*np.pi) * AreaFunction.r.OrbitTimes[0]
 
     t_interval = 0.05
     

@@ -114,9 +114,9 @@ if __name__ == "__main__":
 
     '''
     There are three tests we want to perform:
-    The way we've designed the system, each planet begins in their Aphelion position. We test if this is true, by checking if the initial position has the largest radius.
-    Similarily, we test if the halwaypoint (time step 500) has the lowest radius (this would be the Perihelion position)
-    Lastly, we check if the sum of these radii is equal to 2*a, where a is the planet's semi-major axis (retrieved from ast2000tools).
+    1) The way we've designed the system, each planet begins in their Aphelion position. We test if this is true, by checking if the initial position has the largest radius.
+    2) Similarily, we test if the halwaypoint (time step 500) has the lowest radius (this would be the Perihelion position)
+    3) Lastly, we check if the sum of these radii is equal to 2*a, where a is the planet's semi-major axis (retrieved from ast2000tools).
     These two values should be equal, since the sum of the aphelion point and the perihelion point should equal the entire length of the ellipse (along it's longest axis)
     '''
 
@@ -132,10 +132,14 @@ if __name__ == "__main__":
         r_max = max(norms)
 
         # Performing tests
+
+        # Test 1
         if not (abs(r_0 - r_max) < eps):
             raise ValueError(f"Aphelion radius for planet {i+1} not correct!\nValue is {r_0} AU, but should be {r_max} AU")
+        # Test 2
         if not (abs(r_pi - r_min) < eps):
             raise ValueError(f"Perihelion radius for planet {i+1} not correct!\nValue is {r_pi} AU, but should be {r_min} AU")
+        # Test 3
         if not (abs(r_0 + r_pi - 2*Orbit.a[i]) < eps):
             raise ValueError(f"Total ellipse radius for planet {i+1} not correct!\nValue is {r_0 + r_pi} AU, but should be {2*Orbit.a[i]} AU")
         TestCount += 3

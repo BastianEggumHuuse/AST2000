@@ -1,0 +1,6 @@
+
+Legg til referanse til diagram i OrbitPlotNumerical
+Numerisk bane test 1 håndtegning
+Fikse Bendik pathing
+
+Lese AST-checklist
