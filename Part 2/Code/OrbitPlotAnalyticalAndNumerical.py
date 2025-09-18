@@ -31,15 +31,15 @@ r_N = OrbitN.range(0,OrbitN.TotalTime)
 # Initializing plotting
 fig, ax = plt.subplots()
 
-# Plotting Orbit data (Analytical)
-colors = OrbitA.GetColors()
-for i in range(OrbitA.NumPlanets):
-    ax.plot(r_A[i][0],r_A[i][1],color = OrbitA.primary)
-
 # Plotting the orbits of the planets
 colors = OrbitN.GetColors()
 for i in range(len(r_N[0])):
     ax.plot(r_N[0][i],r_N[1][i], color = OrbitN.primary)
+
+# Plotting Orbit data (Analytical)
+colors = OrbitA.GetColors()
+for i in range(OrbitA.NumPlanets):
+    ax.plot(r_A[i][0],r_A[i][1],"--",color = OrbitA.primary)
 
 # Adding the star (Not to scale)
 star = plt.Circle((0, 0), 0.75, color = 'gold')

@@ -79,6 +79,7 @@ if __name__ == "__main__":
     A_per = AreaFunction(t_per - t_interval,t_per + t_interval)
 
     print(f"Aphelion area : {A_aph:.5f} AU^2 | Perihelion area : {A_per:.5f} AU^2 | Ratio = {A_aph/A_per:.5f}")
+    
 
     # Making axes equal, and showing plot
     plt.axis('equal')
