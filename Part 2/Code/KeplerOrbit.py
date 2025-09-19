@@ -17,35 +17,80 @@ class KeplerArea:
 
     def __init__(self,Filename,PlanetIndex):
 
+        '''
+        Class that gets the area swept out by a portion of a planet's orbit.
+
+        Filename    : String | The name of the file storing the numerical orbits.
+        PlanetIndex : int    | The index representing the planet we're interested in
+
+        returns     : self
+        '''
+
+        # Storing the parameters
         self.Filename = Filename
         self.PlanetIndex = PlanetIndex
 
-        self.r = NumericalOrbitFunction(self.Filename)
-        self.dt = self.r.dt
+        # Instance of NumericalOrbitFunction, which we use to get the numerical positions of the planets.
+        self.PositionFunction = NumericalOrbitFunction(self.Filename)
+
+        # Grabbing Variables from PositionFunction (So we don't have to refer to the instance every time)
+        self.TotalTime  = self.PositionFunction.TotalTime
+        self.dt         = self.PositionFunction.dt
+        self.NumSteps   = self.PositionFunction.NumSteps
+        self.OrbitTimes = self.PositionFunction.OrbitTimes
 
     def __call__(self, t0 = 0, t1 = 1):
+
+        """
+        Method that runs through and gathers data from NumericalOrbitFunction
+        (for the one planet we're interested in)
+
+        t0 : float | Start time in years
+        t1 : float | End time in years
+
+        returns : 
+        float      | The area swept out by the orbit between t0 and t1
+        List       | List of all the position vectors collected from NumericalOrbitFunction
+        float      | The total distance traveled between t0 and t1
+        float      | The average velocity of the planet within the time interval
+        """
         
-        A = 0
-        S = 0
-        t = t0
+        # Initializing variables
+        R = [] # List of positions
+        A = 0  # Area
+        S = 0  # Distance
+        t = t0 # current time
 
         while t < t1:
-            r0 = self.r(t,self.PlanetIndex)
+            # Getting the position vector at current t
+            r0 = self.PositionFunction(t,self.PlanetIndex)
+            # Adding this position to list
+            R.append(r0)
+            # Updating t
             t += self.dt
-            r1 = self.r(t,self.PlanetIndex)
+            # Getting next position
+            r1 = self.PositionFunction(t,self.PlanetIndex)
 
             #Calculating the distance between each vector and summing them up,
             dS = np.linalg.norm(r1-r0)
             S += dS
 
-            # COMMENT CROSS PRODUCT
+            # Finding the area of this small segment of the orbit.
+            # Since the segment is so small, it's approximately equal to a triangle
+            # We can then use the cross product of the position vectors to get the area!
+            # (when using the cross product with vectors of dimention 2,
+            # np.cross assumes they are three-dimentional, with z value 0,
+            # and then it returns the z-coordinate of the resulting vector,
+            # since both x and y will be 0).
             dA = 0.5 * abs(np.cross(r0,r1))
+            # Adding to total area
             A += dA
 
         # Calculating average velocity for this period.
         V = S/(t1- t0)
         
-        return A, S, V
+        # Returning all values
+        return A, R, S, V
     
         
     
@@ -56,45 +101,45 @@ if __name__ == "__main__":
     Seed = utils.get_seed('bmthune')
     mission = SpaceMission(Seed)
     system = mission.system
+
+    # We are interested in our own planet, which is the first one
     Planet_index = 0
-    R0 = system.initial_positions
-    V0 = system.initial_velocities
 
     # Initializing Area Function
-    AreaFunction = KeplerArea("Git\\AST2000\\Part 2\\Code\\NumericalOrbitData.npz",Planet_index)
-    TotalTime = AreaFunction.r.OrbitTimes[Planet_index]
+    AreaFunction = KeplerArea("NumericalOrbitData.npz",Planet_index)
+    OrbitTime = AreaFunction.OrbitTimes[Planet_index]
 
-    # Finding radius at aphelion and perihelion COMMENT THIS!!!!!!!!!
-    t_aph = system.aphelion_angles[0]/(2*np.pi) * AreaFunction.r.OrbitTimes[Planet_index]
-    t_per = (system.aphelion_angles[0] + np.pi)/(2*np.pi) * AreaFunction.r.OrbitTimes[Planet_index]
-
+    # Finding time at aphelion and perihelion. We know that our planet begins it's orbit in the aphelion position,
+    # and therefore that it reaches the perihelion position after half a rotation.
+    t_aph = 0
+    t_per = 0.5 * OrbitTime
+    # We choose a small interval to check around
     t_interval = 0.05
 
+    # Finding the positions for the entire rotation
+    R = AreaFunction.PositionFunction.range(AreaFunction.dt,OrbitTime)   
 
+    # Getting area swept out by orbit, positional vectors, total distance traveled, and average velocity
+    A_aph, R_aph, S_aph, V_aph = AreaFunction(t_aph - t_interval,t_aph + t_interval)
+    A_per, R_per, S_per, V_per= AreaFunction(t_per - t_interval,t_per + t_interval)
 
-
-
-    # Finding the positions at 
-    r = AreaFunction.r.range(AreaFunction.dt,TotalTime)   
-    r_aph = AreaFunction.r.range(t_aph - t_interval,t_aph + t_interval)
-    r_per = AreaFunction.r.range(t_per - t_interval,t_per + t_interval)
-
-    r_aph_polygon = np.concatenate((np.zeros((2,7,1)),r_aph,np.zeros((2,7,1))),2)
-    r_per_polygon = np.concatenate((np.zeros((2,7,1)),r_per,np.zeros((2,7,1))),2)
+    # Adding the origin to both ends of this array, turning it into a polygon that we can draw.
+    Origin = np.zeros((1,2))
+    R_aph_polygon = np.concatenate((Origin,R_aph,np.array([[3,0]])),0)
+    R_per_polygon = np.concatenate((Origin,R_per,Origin),0)
+    
+    # Printing info
+    print(f"Aphelion area : {A_aph:.5f} AU^2 | Perihelion area : {A_per:.5f} AU^2 | Ratio = {A_aph/A_per:.5f}")
+    print(f"Aphelion Distance : {S_aph:.5f} AU | Perihelion Distance : {S_per:.5f} AU")
+    print(f"Aphelion Avreage vel : {V_aph:.5f} AU/Y | Perihelion Avreage vel : {V_per:.5f} AU/Y ")
 
     # Initializing plotting
     fig, ax = plt.subplots()
 
-    ax.plot(r[0][0],r[1][0],color = "gold")
-    ax.fill(r_aph_polygon[0][0],r_aph_polygon[1][0],color = "royalblue")
-    ax.fill(r_per_polygon[0][0],r_per_polygon[1][0],color = "red")
-
-    A_aph, S_aph, V_aph = AreaFunction(t_aph - t_interval,t_aph + t_interval)
-    A_per, S_per, V_per= AreaFunction(t_per - t_interval,t_per + t_interval)
-
-    print(f"Aphelion area : {A_aph:.5f} AU^2 | Perihelion area : {A_per:.5f} AU^2 | Ratio = {A_aph/A_per:.5f}")
-    print(f"Aphelion Distance : {S_aph:.5f} AU | Perihelion Distance : {S_per:.5f} AU")
-    print(f"Aphelion Avreage vel : {V_aph:.5f} AU/Y | Perihelion Avreage vel : {V_per:.5f} AU/Y ")
+    # Plotting orbit
+    ax.plot(R[0][0],R[1][0],color = "green")
+    ax.plot(R_aph_polygon[:,0],R_aph_polygon[:,1],color = "royalblue")
+    ax.fill(R_per_polygon[:,0],R_per_polygon[:,1],color = "red")
     
     # Making axes equal, and showing plot
     plt.axis('equal')

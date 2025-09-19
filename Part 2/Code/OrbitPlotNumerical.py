@@ -206,11 +206,19 @@ class NumericalOrbitFunction:
         returns : Array(float) | the position of the given planet at the given time
         """
 
+        # Wrapping the t-value
+        # if t is less than zero, we make it wrap around to the end of the simulation
+        # This stops index-issues.
         if(t < 0):
             t = self.OrbitTimes[p] - t
 
         # Finding the index of the given time
-        # This deserves an explanation
+        # This deserves an explanation. Since the positions are stored in an array with a length of NumSteps,
+        # we can't just insert t into this array to get the value (since t is a floating number)
+        # t/self.TotalTime gives us the percentage of the simulation the time t is at.
+        # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
+        # We multiply this number with the total amount of steps, to get the closes time index to our current time.
+        # We then floor that index (round down) and turn it into an integer.
         Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
 
         # Finding x and y positions at this index
@@ -308,7 +316,8 @@ if __name__ == "__main__":
     plt.axis('equal')
     plt.show()
 
-    # Saving the array r, along with the total time, delta time, and number of timesteps.
+    # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
+    # We use this file later, to circumvent having to run the simulation again.
     config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
     np.savez("NumericalOrbitData",r = r,config = config,OrbitTimes = OrbitTimes)
 
