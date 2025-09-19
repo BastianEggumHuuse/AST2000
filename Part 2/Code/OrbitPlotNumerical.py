@@ -210,6 +210,7 @@ class NumericalOrbitFunction:
             t = self.OrbitTimes[p] - t
 
         # Finding the index of the given time
+        # This deserves an explanation
         Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
 
         # Finding x and y positions at this index
@@ -225,10 +226,10 @@ class NumericalOrbitFunction:
         Method that returns the positions of the planets along the x and y axes between
         two given points in time.
 
-        t0       : float       | the desired starting time
-        t1       : float       | the desired ending time
+        t0       : float        | the desired starting time
+        t1       : float        | the desired ending time
 
-        returns : Array(float) | the positions of all planets between t0 and t1.
+        returns  : Array(float) | the positions of all planets between t0 and t1.
         """
 
         if(t0 < 0):
