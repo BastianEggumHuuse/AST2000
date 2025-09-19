@@ -28,18 +28,21 @@ class KeplerArea:
         A = 0
         S = 0
         t = t0
+
         while t < t1:
             r0 = self.r(t,self.PlanetIndex)
             t += self.dt
             r1 = self.r(t,self.PlanetIndex)
+
             #Calculating the distance between each vector and summing them up,
-            #
             dS = np.linalg.norm(r1-r0)
             S += dS
 
             # COMMENT CROSS PRODUCT
             dA = 0.5 * abs(np.cross(r0,r1))
             A += dA
+
+        # Calculating average velocity for this period.
         V = S/(t1- t0)
         
         return A, S, V
