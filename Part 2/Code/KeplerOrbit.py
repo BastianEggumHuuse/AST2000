@@ -136,7 +136,7 @@ if __name__ == "__main__":
     # Initializing plotting
     fig, ax = plt.subplots()
 
-    # Plotting orbit
+    # Plotting orbits
     ax.plot(R[0][0],R[1][0],color = "green")
     ax.plot(R_aph_polygon[:,0],R_aph_polygon[:,1],color = "royalblue")
     ax.fill(R_per_polygon[:,0],R_per_polygon[:,1],color = "red")
