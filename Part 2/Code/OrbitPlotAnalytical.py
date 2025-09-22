@@ -123,6 +123,7 @@ if __name__ == "__main__":
     for i in range(Orbit.NumPlanets):
         
         # Retrieving the positions for time step 0 (aphelion) and 500 (perihelion)
+        # Remember that the indexes are [planet][axis][step]
         r_0 = np.linalg.norm(np.array([r[i][0][0],r[i][1][0]]))
         r_pi = np.linalg.norm(np.array([r[i][0][500],r[i][1][500]]))
 

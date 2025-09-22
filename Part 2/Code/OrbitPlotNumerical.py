@@ -355,6 +355,7 @@ if __name__ == "__main__":
         
         # Test 1) Comparing the final positions:
         # First we get the angle of the final position
+        # Remember that indexing is [axis][planet][step]
         theta = np.arctan(r[1][i][-1]/r[0][i][-1])
         # Because arctan is limited between -pi/2 and pi/2 we have to adjust to make sure we still get the correct angle:
         if(r[0][i][-1] < 0):
@@ -391,7 +392,7 @@ if __name__ == "__main__":
                 if(abs(r_0 - r_t) < eps):
                     t_o = Orbit.dt * t
 
-        t_A = (2*np.pi*(system.semi_major_axes[i]**3/(const.G_sol*system.star_mass + system.masses[i])))
+        t_A = (2*np.pi*(system.semi_major_axes[i]**3/(const.G_sol*(system.star_mass + system.masses[i]))))
 
         if not (t_o - t_A < eps):
             raise ValueError(f"Final orbit time for planet {i + 1} not correct!\nValue is {t_o} Y, but should be {t_A} Y")

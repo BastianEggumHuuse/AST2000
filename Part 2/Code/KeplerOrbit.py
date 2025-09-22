@@ -67,7 +67,6 @@ class KeplerArea:
             r0 = self.PositionFunction(t,self.PlanetIndex)
             # Adding this position to list
             R.append(r0)
-
             # Updating t
             t += self.dt
             # Getting next position
@@ -176,7 +175,7 @@ if __name__ == "__main__":
 
     # Printing info about K
     print(f"\nThe array of constants: {K}")
-    print(f"Difference between max and min: {max(K) - min(K):.6f}\n")
+    print(f"Relative difference between max and min: {abs((max(K) - min(K))/min(K)):.6f}\n")
 
     # Comparing to the constant from Newtons formula:
     diff = []
