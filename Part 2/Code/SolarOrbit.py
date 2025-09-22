@@ -7,9 +7,6 @@ import numpy             as np
 import matplotlib.pyplot as plt
 from sys import exit
 
-# Orbit imports
-from OrbitPlotNumerical import NumericalOrbitFunction
-
 # AST imports
 import ast2000tools.constants as const
 import ast2000tools.utils     as utils
