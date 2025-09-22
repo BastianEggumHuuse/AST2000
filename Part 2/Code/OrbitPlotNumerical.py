@@ -288,7 +288,7 @@ if __name__ == "__main__":
     V0 = system.initial_velocities
     # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
     # To make sure we pass the 20 rotations mark, we multiply the time with 2
-    OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*system.star_mass + system.masses))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
+    OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
     TotalTime = OrbitTimes[0] * 20 * 2
 
     # Instantiating the Numerical Orbit class (and running the loop)
