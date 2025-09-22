@@ -183,7 +183,7 @@ class NumericalOrbitFunction:
         self.config       = npz["config"]
         self.TotalTime    = self.config[0]
         self.dt           = self.config[1]
-        self.NumSteps     = self.config[2]
+        self.NumSteps     = int(self.config[2])
 
         self.OrbitTimes   = npz["OrbitTimes"]
 

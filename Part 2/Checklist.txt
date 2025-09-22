@@ -2,5 +2,6 @@
 Legg til referanse til diagram i OrbitPlotNumerical
 Numerisk bane test 1 håndtegning
 Fikse Bendik pathing
+Legge ved kjøretidseksempel
 
 Lese AST-checklist
