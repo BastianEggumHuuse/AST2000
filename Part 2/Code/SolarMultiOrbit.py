@@ -207,7 +207,7 @@ if __name__ == "__main__":
     v_noise = v_rad
 
     time = np.array([T])
-    np.savez("SolarOrbitData",v_noise = v_noise,v_rad = v_rad,time = time)
+    np.savez("SolarOrbitData",v_noise = v_noise,v_raw = v_raw,time = time)
 
     plt.title("Radiell hastighetskurve for vår stjerne")
     plt.xlabel("Tid [Y]")
