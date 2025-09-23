@@ -44,10 +44,10 @@ if __name__ == "__main__":
     
     # Plotting the noise graph and the no-noise graph
     plt.plot(np.linspace(0,T,len(v_rad)),v_rad)
-    plt.plot(np.linspace(0,T,len(v_rad)),v_raw,color = "red")
+    #plt.plot(np.linspace(0,T,len(v_rad)),v_raw,color = "red")
 
-    plt.title("Radiell hastighetskurve for vår stjerne")
-    plt.xlabel("Tid [AU]")
+    plt.title("Radiell hastighetskurve for stjernen")
+    plt.xlabel("Tid [Y]")
     plt.ylabel("Radiell hastighet [AU/Y]")
 
     plt.show()
