@@ -4,11 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import  ast2000tools.constants as const
 
+from scipy.ndimage import gaussian_filter
+
+
 seed = utils.get_seed('bmthune')
 system = SolarSystem(seed)
 
-def ditfft(X, N):
 
+def ditfft(X, N):
       if N == 1:
             return X
             
@@ -27,31 +30,41 @@ def ditfft(X, N):
       return X
 
 FileName = "SolarOrbitData.npz"
-Data = np.load(FileName)
+RawData = np.load(FileName)
 
-NoiseData = Data["v_noise"]
-RawData   = Data["v_raw"]
-TotalTime = Data["time"][0]
+TotalTime = RawData['time'][0]
+N = 2**20
 
-v_pec = np.mean(RawData)
-RawData -= v_pec
-N = 2**15
+Data = RawData['v_noise'][:int(np.floor(430/TotalTime *len(RawData['v_raw'])))]
+TotalTime = 430
+v_pek = np.mean(Data)
 
-Plateau = np.ones(len(NoiseData))
-ratio = 0.05
-Indexes = np.arange(int(np.floor(ratio * len(Plateau))))
-LerpersIn = np.sin(np.linspace(0,np.pi/2,len(Indexes)))
-Plateau[Indexes] *= LerpersIn
-Plateau[len(Plateau) - Indexes - 1] = LerpersIn
 
-plt.plot(np.linspace(0,1,len(NoiseData)),Plateau)
 
-TimeSample = np.linspace(0,TotalTime,len(NoiseData))[:N]
-NoiseSample = RawData[:N].astype(np.complex128)
+NoiseData = Data -v_pek
+
+TimeSample = np.linspace(0,TotalTime,N)
+dt = TimeSample[1]- TimeSample[0]
+
+index = np.linspace(0, len(NoiseData)-1,N, dtype=int)
+NoiseSample = NoiseData[index] 
+
+
+plt.plot(TimeSample, NoiseSample ,'r')
+plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) + 3.848e-6*np.sin(2*np.pi*0.05582*TimeSample),'gold')
+plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) ,'orange')
+plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) + 3.848e-6*np.sin(2*np.pi*0.05582*TimeSample)+2.341e-7*np.sin(2*np.pi*0.2223*TimeSample),'limegreen')
+
+plt.show()
+
+
 f = ditfft(NoiseSample,N)
-
 f_range = np.arange(len(f))
-frequency = f_range/TimeSample[-1]
+frequency = f_range/TotalTime
 
-#plt.plot(frequency,abs(f))
+n_kappa = int(np.floor(len(f_range)*1/max(frequency)))
+fre_kappa = frequency[:n_kappa]
+f_kappa = f[:n_kappa]
+
+plt.plot(fre_kappa, 2*abs(f_kappa)/N)
 plt.show()
