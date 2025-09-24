@@ -173,9 +173,7 @@ if __name__ == "__main__":
     mission = SpaceMission(Seed)
     system = mission.system
     
-    print(system.star_mass)
-
-    r_s,r_p,v_s,v_p, T = SolarMultiOrbit(System= system,PlanetIndexes = [0,1,3,4,5],dt = 1/10000, NumOrbits = 1)
+    r_s,r_p,v_s,v_p, T = SolarMultiOrbit(System= system,PlanetIndexes = [0,1,3,4,5],dt = 1/10000, NumOrbits = 4)
     
     # Plotting the two orbit
     # Initializing plotting
