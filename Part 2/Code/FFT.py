@@ -4,30 +4,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 import  ast2000tools.constants as const
 
-from scipy.ndimage import gaussian_filter
-
-
 seed = utils.get_seed('bmthune')
 system = SolarSystem(seed)
-
 
 def ditfft(X, N):
       if N == 1:
             return X
-            
-      
-      e = ditfft(X[:N:2], int(N/2))
-      o = ditfft(X[1:N:2], int(N/2))
+
+
+      F = np.zeros(N, dtype=np.complex128)
+
+      even = ditfft(X[:N:2], int(N/2))
+      odd = ditfft(X[1:N:2], int(N/2))
 
       for k in range (0, N//2):
-            p = e[k]
-            q = np.exp(-1j *2 *np.pi/(N) *k)*o[k]
-            
-            X[k] = (p + q)
-            
-            X[k + int(N/2)] = (p -q)
-            
-      return X
+            p = even[k]
+            q = np.exp(-1j * 2*np.pi/(N) * k) * odd[k]
+
+            F[k] = (p + q)
+
+            F[k + int(N/2)] = (p -q)
+
+      return F
 
 FileName = "SolarOrbitData.npz"
 RawData = np.load(FileName)

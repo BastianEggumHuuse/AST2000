@@ -73,7 +73,7 @@ class NumericalOrbit:
         # Colors we display the different planets with
         self.colors = [[0,0,1], [0.3,0,1], [0.4,0,1], [0.5,0,1], [0.6,0,1], [0.7,0,1], [0.8,0,1]]
         # If we want to display the planets with just one color, we use this one instead
-        self.primary = [0.5,0,1]
+        self.primary = [0.0,0,1]
 
     def GetColors(self):
 

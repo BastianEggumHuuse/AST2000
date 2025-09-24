@@ -34,7 +34,7 @@ class AnalyticalOrbit:
         # Colors we display the different planets with
         self.colors = [[1,0.8,0], [1,0.7,0], [1,0.6,0], [1,0.5,0], [1,0.4,0], [1,0.2,0], [1,0.0,0]]
         # If we want to display the planets with just one color, we use this one instead
-        self.primary = [1,0.2,0]
+        self.primary = [1,0,0]
         #self.colors = ["red", 'darkorange', 'mediumblue', 'limegreen', 'purple', 'darkviolet', 'gold']
 
     def GetColors(self):
@@ -129,20 +129,25 @@ if __name__ == "__main__":
 
         # Retrieving the maximum and minimum radii from the orbits
         norms = np.linalg.norm(np.array([r[i][0],r[i][1]]).T,axis = 1, keepdims = True)
-        r_min = min(norms)
-        r_max = max(norms)
+        r_min = min(norms)[0]
+        r_max = max(norms)[0]
 
         # Performing tests
 
+        print(f"Planet : {i + 1}")
         # Test 1
-        if not (abs(r_0 - r_max) < eps):
+        if not (abs(r_0 - r_max) / abs(r_max) < eps):
             raise ValueError(f"Aphelion radius for planet {i+1} not correct!\nValue is {r_0} AU, but should be {r_max} AU")
+        print(f"Aphelion radius : {r_max}, First radius : {r_0}, Relative error {abs(r_0 - r_max) / abs(r_max)}")
         # Test 2
-        if not (abs(r_pi - r_min) < eps):
+        if not (abs(r_pi - r_min) / abs(r_min) < eps):
             raise ValueError(f"Perihelion radius for planet {i+1} not correct!\nValue is {r_pi} AU, but should be {r_min} AU")
+        print(f"Perihelion radius : {r_min}, Halfway radius : {r_pi}, Relative error {abs(r_pi - r_min) / abs(r_min) }")
         # Test 3
-        if not (abs(r_0 + r_pi - 2*Orbit.a[i]) < eps):
+        if not (abs((r_0 + r_pi) - 2*Orbit.a[i]) / abs(2*Orbit.a[i]) < eps):
             raise ValueError(f"Total ellipse radius for planet {i+1} not correct!\nValue is {r_0 + r_pi} AU, but should be {2*Orbit.a[i]} AU")
+        print(f"Sum of Aphelion and Perihelion radii : {r_0 + r_pi}, 2a: {2*Orbit.a[i]}, Relative error {abs(r_0 + r_pi - 2*Orbit.a[i]) / abs(2*Orbit.a[i]) }")
+        print("")
         TestCount += 3
 
     # All is good :)
