@@ -4,10 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import  ast2000tools.constants as const
 
+from scipy.ndimage import gaussian_filter
+
+
 seed = utils.get_seed('bmthune')
 system = SolarSystem(seed)
 
-def ditfft(X, N ):
+
+def ditfft(X, N):
       if N == 1:
             return X
             
@@ -28,21 +32,41 @@ def ditfft(X, N ):
       return F
 
 FileName = "SolarOrbitData.npz"
-Data = np.load(FileName)
+RawData = np.load(FileName)
 
-NoiseData = Data["v_noise"]
-RawData   = Data["v_raw"]
-TotalTime = Data["time"][0]
-N = 2
-while N*2 < len(NoiseData):
-      N *= 2
-      
-TimeSample = np.linspace(0,TotalTime,len(NoiseData))[:N]
-NoiseSample = RawData[:N]
+TotalTime = RawData['time'][0]
+N = 2**20
+
+Data = RawData['v_noise'][:int(np.floor(430/TotalTime *len(RawData['v_raw'])))]
+TotalTime = 430
+v_pek = np.mean(Data)
+
+
+
+NoiseData = Data -v_pek
+
+TimeSample = np.linspace(0,TotalTime,N)
+dt = TimeSample[1]- TimeSample[0]
+
+index = np.linspace(0, len(NoiseData)-1,N, dtype=int)
+NoiseSample = NoiseData[index] 
+
+
+plt.plot(TimeSample, NoiseSample ,'r')
+plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) + 3.848e-6*np.sin(2*np.pi*0.05582*TimeSample),'gold')
+plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) ,'orange')
+plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) + 3.848e-6*np.sin(2*np.pi*0.05582*TimeSample)+2.341e-7*np.sin(2*np.pi*0.2223*TimeSample),'limegreen')
+
+plt.show()
+
+
 f = ditfft(NoiseSample,N)
-
 f_range = np.arange(len(f))
-frequency = f_range/TimeSample[-1]
+frequency = f_range/TotalTime
 
-plt.plot(frequency,abs(f))
+n_kappa = int(np.floor(len(f_range)*1/max(frequency)))
+fre_kappa = frequency[:n_kappa]
+f_kappa = f[:n_kappa]
+
+plt.plot(fre_kappa, 2*abs(f_kappa)/N)
 plt.show()
