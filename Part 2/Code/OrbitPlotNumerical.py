@@ -61,6 +61,12 @@ class NumericalOrbit:
         self.v = np.copy(self.r)
         self.a = np.copy(self.r)
 
+        # NB!!!! This was not mentioned in the flowchart, as we came up with it later, but
+        # we also want to measure the energy to make sure it's conserved.
+        self.E = np.zeros((self.NSteps, self.NumPlanets))
+        # For this we also need the masses
+        self.masses = system.masses
+
         # We create a time array with linearly spaced values between 0 and T, with NSteps elements.
         self.t = np.linspace(0,self.T,self.NSteps) 
 
@@ -69,6 +75,8 @@ class NumericalOrbit:
         self.r[0] = self.r0
         self.v[0] = self.v0
         self.a[0] = ((-self.G*self.SM)/self.norm(self.r[0])**2)*self.hat(self.r[0])
+        # Initializing Energy array:
+        self.E[0] = (0.5 * self.masses * np.linalg.norm(self.v[0])**2) - (const.G_sol * self.masses)/np.linalg.norm(self.r[0])
 
         # Colors we display the different planets with
         self.colors = [[0,0,1], [0.3,0,1], [0.4,0,1], [0.5,0,1], [0.6,0,1], [0.7,0,1], [0.8,0,1]]
@@ -135,14 +143,13 @@ class NumericalOrbit:
         returns : void
         """
 
-        #self.r[i] = self.r[i-1] + self.v[i-1]*self.dt + 0.5 * self.a[i-1]*self.dt**2 
-        #self.a[i] = ((-self.G*self.SM)/self.norm(self.r[i])**2)*self.hat(self.r[i])
-        #self.v[i] = self.v[i-1] + 0.5*(self.a[i-1] + self.a[i]) *self.dt
-
         # Performing leapfrog integration. Note that because of our vectorization, every operation that happens here happens for all planets at once.
         self.r[i+1] = self.r[i] + self.v[i]*self.dt + 0.5 * self.a[i]*self.dt**2 
         self.a[i+1] = ((-self.G*self.SM)/self.norm(self.r[i+1])**2)*self.hat(self.r[i+1])
         self.v[i+1] = self.v[i] + 0.5*(self.a[i] + self.a[i+1]) *self.dt
+
+        self.E[i+1] = (0.5 * self.masses * np.linalg.norm(self.v[i+1])**2) - (const.G_sol * self.masses)/np.linalg.norm(self.r[i+1])
+
     
     def loop(self):
 
@@ -161,7 +168,7 @@ class NumericalOrbit:
 
         # Returning our arrays for plotting. We transpose the arrays again before returning,
         # which gives us the arrays with dimentions (2,NumPlanets,NSteps), letting us plot for all timesteps.
-        return(self.r.T,self.v.T,self.a.T,self.t)
+        return(self.r.T,self.v.T,self.a.T,self.t,self.E)
     
 class NumericalOrbitFunction:
 
@@ -293,7 +300,7 @@ if __name__ == "__main__":
 
     # Instantiating the Numerical Orbit class (and running the loop)
     Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
-    r,v,a,t = Orbit.loop()
+    r,v,a,t,E = Orbit.loop()
 
     # Initializing plotting
     fig, ax = plt.subplots()
@@ -321,7 +328,7 @@ if __name__ == "__main__":
     config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
     np.savez("NumericalOrbitData",r = r,config = config,OrbitTimes = OrbitTimes)
 
-    
+
 
     # TESTING ZONE!!
 
@@ -332,12 +339,21 @@ if __name__ == "__main__":
 
     '''
     There are four tests we want to perform:
-    1) Firstly, we want to compare the final position of the simulation, to the point the analytical orbit is when at the same angle.
-    2) Then, we keep track of how long one rotation for each planet takes, and comparing it to the analytically calculated orbit time.
-    3) At the same time, we track the largest and smallest radii in the simulation, and compare the largest to the analytical orbit's largest radius
-    4) And then the smallest to the analytical orbit's smallest radius.
+    1) Firstly, we check if the energy is conserved
+    2) secondly, we want to compare the final position of the simulation, to the point the analytical orbit is when at the same angle.
+    3) Then, we keep track of how long one rotation for each planet takes, and comparing it to the analytically calculated orbit time.
+    4) At the same time, we track the largest and smallest radii in the simulation, and compare the largest to the analytical orbit's largest radius
+    5) And then the smallest to the analytical orbit's smallest radius.
 
     '''
+
+    for i in range(len(E[0])):
+        relative_error = abs((max(E.T[i]) - min(E.T[i]))/min(E.T[i]))
+        if not (relative_error < eps):
+            raise ValueError(f"max and min not equal!, ratio is {relative_error}")
+        
+        print(f"Planet {i}")
+        print(f"max(E) : {max(E.T[i])}, min(E) : {min(E.T[i])}, Relative difference : ")
 
 
     # Calclulating the Analytical Radii for all planets, for use in a test later
