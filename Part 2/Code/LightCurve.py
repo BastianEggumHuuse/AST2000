@@ -56,21 +56,24 @@ if __name__ == "__main__":
         #finding the angle between the x axies the planet center and where the star crosses the planet, assumes the star is a straight line
         theta = np.arccos(r_o/Radius_p)
         
-        
+        #finding the slice of the sircle between the slicing points
         dA = (Radius_p**2 * theta)
+        #Fidning the area of the part inside the star, doing this by subtracting the triangle on the otherside of the line from the pie (se float chart)
         dA_s = dA - Radius_p * np.sin(theta) * r_o
 
+        #Seting the relative flux equal to the the 1 - the relation between the area crossing the sun and the total are of the sun 
         F[i] = (Area_Circle(Radius_s) - dA_s)/Area_Circle(Radius_s)
         
-
+        #Adding some gausian noise
     for i in range(len(F)):
          F[i] += np.random.normal(0,1e-4)
 
     # Plotting the noise graph
+    #making arrays for plotting
     t_0 = int(np.floor(18.882/dt))
     t_1 = int(np.floor(18.892/dt))
     plt.plot(np.linspace(t_0,t_1,len(F[t_0:t_1])),F[t_0:t_1])
-
+    #adding title and lables
     plt.title("Lyskurve for vår stjerne")
     plt.xlabel("Tid [Y]")
     plt.ylabel("Radiell hastighet [AU/Y]")
