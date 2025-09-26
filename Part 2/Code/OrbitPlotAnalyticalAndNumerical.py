@@ -39,7 +39,7 @@ for i in range(len(r_N[0])):
 # Plotting Orbit data (Analytical)
 colors = OrbitA.GetColors()
 for i in range(OrbitA.NumPlanets):
-    ax.plot(r_A[i][0],r_A[i][1],"--",color = OrbitA.primary)
+    ax.plot(r_A[i][0],r_A[i][1],":",color = OrbitA.primary)
 
 # Adding the star (Not to scale)
 star = plt.Circle((0, 0), 0.75, color = 'gold')

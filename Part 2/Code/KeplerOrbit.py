@@ -131,7 +131,7 @@ if __name__ == "__main__":
     R_per_polygon = np.concatenate((Origin,R_per,Origin),0)
     
     # Printing info (The end of B.1.a, B.1.b, B.1.c)
-    print(f"Aphelion area : {A_aph:.5f} AU^2 | Perihelion area : {A_per:.5f} AU^2 | Ratio = {A_aph/A_per:.5f}")
+    print(f"Aphelion area : {A_aph} AU^2 | Perihelion area : {A_per} AU^2 | Relative error = {abs((A_aph - A_per)/A_per)}")
     print(f"Aphelion Distance : {S_aph:.5f} AU | Perihelion Distance : {S_per:.5f} AU")
     print(f"Aphelion Average vel : {V_aph:.5f} AU/Y | Perihelion Average vel : {V_per:.5f} AU/Y ")
 
@@ -143,6 +143,10 @@ if __name__ == "__main__":
     ax.fill(R_aph_polygon[:,0],R_aph_polygon[:,1],color = "royalblue")
     ax.fill(R_per_polygon[:,0],R_per_polygon[:,1],color = "red")
     
+    plt.title("Arealene tegnet av posisjonsvektorene, tegnet over banen")
+    plt.xlabel("Posisjon langs x-aksen [AU]")
+    plt.ylabel("Posisjon langs y-aksen [AU]")
+
     # Making axes equal, and showing plot
     plt.axis('equal')
     plt.show()
@@ -174,7 +178,7 @@ if __name__ == "__main__":
                 break
 
     # Printing info about K
-    print(f"\nThe array of constants: {K}")
+    print(f"\nmax(K) {max(K)}, min(K) {min(K)}")
     print(f"Relative difference between max and min: {abs((max(K) - min(K))/min(K)):.6f}\n")
 
     # Comparing to the constant from Newtons formula:

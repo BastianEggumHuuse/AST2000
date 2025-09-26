@@ -31,7 +31,7 @@ if __name__ == "__main__":
     Radius_s = (system.star_radius * 1000) / const.AU;Radius_p = (system.radii[2] * 1000) / const.AU
 
     F = np.ones(len(r_s))
-    for i in range(len(r_s)):
+    for i in range(len(r_s)):   
 
         r_s_x = r_s[i][0]
         r_p_x = r_p[i][0]

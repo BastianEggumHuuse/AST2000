@@ -47,7 +47,7 @@ def Orbit(r_1_0,r_2_0,v_1_0,v_2_0,m_1,m_2,T,dt):
     E = np.zeros(NumSteps)
 
     # We also initialize a center of mass array, which we use to adjust the cm every timestep
-    # (technically this could just be a value, but we keep track for debugging purposes)
+    # (technically this could just be a value, but we keep track for debugging purposes)        
     cm = np.zeros((NumSteps,2))
 
     # Setting initial values for position and velocity
@@ -97,7 +97,7 @@ def Orbit(r_1_0,r_2_0,v_1_0,v_2_0,m_1,m_2,T,dt):
         v_2[i+1] = v_2[i] + 0.5*(a_2[i] + a_2[i+1]) *dt
 
         # Updating CM and Energy
-        cm[i+1] = (m_1 *  r_1[i] + m_2 *  r_2[i])/(m_1 + m_2)
+        cm[i+1] = (m_1 *  r_1[i+1] + m_2 *  r_2[i+1])/(m_1 + m_2)
         E[i+1] = (0.5 * mu * np.linalg.norm(v_2[i+1] - v_1[i+1])**2) - (const.G_sol * m_1 * m_2)/np.linalg.norm(r_2[i+1] - r_1[i+1])
 
     # Returning all values
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     mission = SpaceMission(Seed)
     system = mission.system
     
-    r_s,r_p,v_s,v_p,E = SolarOrbit(System= system,PlanetIndex = 2,dt = 1/10000, NumOrbits = 2)
+    r_s,r_p,v_s,v_p,E = SolarOrbit(System = system,PlanetIndex = 2,dt = 1/10000, NumOrbits = 2)
 
     # Output for C.1.2.b
     E_diff = (max(E)-min(E))/abs(min(E))

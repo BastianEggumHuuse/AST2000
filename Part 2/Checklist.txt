@@ -1,7 +1,9 @@
 
 Legg til referanse til diagram i OrbitPlotNumerical
-Numerisk bane test 1 håndtegning (Flowchart)
+OrbitPlotNumerical bane test 1 håndtegning (Flowchart)
+LightCurve Trig beskrivelse (Flowchart)
 Fikse Bendik pathing
 Legge ved kjøretidseksempel
+ENergi er ikke bevart?????
 
 Lese AST-checklist

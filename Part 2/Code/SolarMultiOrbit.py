@@ -173,7 +173,7 @@ if __name__ == "__main__":
     mission = SpaceMission(Seed)
     system = mission.system
     
-    r_s,r_p,v_s,v_p, T = SolarMultiOrbit(System= system,PlanetIndexes = [0,1,3,4,5],dt = 1/10000, NumOrbits = 4)
+    r_s,r_p,v_s,v_p, T = SolarMultiOrbit(System= system,PlanetIndexes = [2,4],dt = 1/10000, NumOrbits = 4)
     
     # Plotting the two orbit
     # Initializing plotting
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     
     # Plotting the noise graph and the no-noise graph
     plt.plot(np.linspace(0,T,len(v_rad)),v_rad)
-    #plt.plot(np.linspace(0,T,len(v_rad)),v_raw,color = "red")
+    plt.plot(np.linspace(0,T,len(v_rad)),v_raw,color = "red")
 
     v_noise = v_rad
 
