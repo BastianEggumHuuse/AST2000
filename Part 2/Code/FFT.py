@@ -7,25 +7,24 @@ import  ast2000tools.constants as const
 seed = utils.get_seed('bmthune')
 system = SolarSystem(seed)
 
-
 def ditfft(X, N):
       if N == 1:
             return X
-            
-      
+
+
       F = np.zeros(N, dtype=np.complex128)
-      
+
       even = ditfft(X[:N:2], int(N/2))
       odd = ditfft(X[1:N:2], int(N/2))
-      
+
       for k in range (0, N//2):
             p = even[k]
-            q = np.exp(-1j *2 *np.pi/(N) *k)*odd[k]
-            
+            q = np.exp(-1j * 2*np.pi/(N) * k) * odd[k]
+
             F[k] = (p + q)
-            
+
             F[k + int(N/2)] = (p -q)
-            
+
       return F
 
 FileName = "SolarOrbitData.npz"
