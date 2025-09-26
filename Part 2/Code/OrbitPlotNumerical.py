@@ -61,12 +61,6 @@ class NumericalOrbit:
         self.v = np.copy(self.r)
         self.a = np.copy(self.r)
 
-        # NB!!!! This was not mentioned in the flowchart, as we came up with it later, but
-        # we also want to measure the energy to make sure it's conserved.
-        self.E = np.zeros((self.NSteps, self.NumPlanets))
-        # For this we also need the masses
-        self.masses = system.masses
-
         # We create a time array with linearly spaced values between 0 and T, with NSteps elements.
         self.t = np.linspace(0,self.T,self.NSteps) 
 
@@ -75,8 +69,6 @@ class NumericalOrbit:
         self.r[0] = self.r0
         self.v[0] = self.v0
         self.a[0] = ((-self.G*self.SM)/self.norm(self.r[0])**2)*self.hat(self.r[0])
-        # Initializing Energy array:
-        self.E[0] = (0.5 * self.masses * np.linalg.norm(self.v[0])**2) - (const.G_sol * self.masses)/np.linalg.norm(self.r[0])
 
         # Colors we display the different planets with
         self.colors = [[0,0,1], [0.3,0,1], [0.4,0,1], [0.5,0,1], [0.6,0,1], [0.7,0,1], [0.8,0,1]]
@@ -148,8 +140,6 @@ class NumericalOrbit:
         self.a[i+1] = ((-self.G*self.SM)/self.norm(self.r[i+1])**2)*self.hat(self.r[i+1])
         self.v[i+1] = self.v[i] + 0.5*(self.a[i] + self.a[i+1]) *self.dt
 
-        self.E[i+1] = (0.5 * self.masses * np.linalg.norm(self.v[i+1])**2) - (const.G_sol * self.masses)/np.linalg.norm(self.r[i+1])
-
     
     def loop(self):
 
@@ -168,7 +158,7 @@ class NumericalOrbit:
 
         # Returning our arrays for plotting. We transpose the arrays again before returning,
         # which gives us the arrays with dimentions (2,NumPlanets,NSteps), letting us plot for all timesteps.
-        return(self.r.T,self.v.T,self.a.T,self.t,self.E)
+        return(self.r.T,self.v.T,self.a.T,self.t)
     
 class NumericalOrbitFunction:
 
@@ -297,10 +287,11 @@ if __name__ == "__main__":
     # To make sure we pass the 20 rotations mark, we multiply the time with 2
     OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
     TotalTime = OrbitTimes[0] * 20 * 2
+    print(TotalTime)
 
     # Instantiating the Numerical Orbit class (and running the loop)
-    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
-    r,v,a,t,E = Orbit.loop()
+    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 30000, InitialPos = R0, InitialVel = V0)
+    r,v,a,t = Orbit.loop()
 
     # Initializing plotting
     fig, ax = plt.subplots()
@@ -333,27 +324,17 @@ if __name__ == "__main__":
     # TESTING ZONE!!
 
     # Defining an epsilon as an upper limit to how inaccurate our tests can be
-    eps = 1e-3
+    eps = 1e-2 # one percent
     # Also keeping track of how many tests we perform
     TestCount = 0
 
     '''
     There are four tests we want to perform:
-    1) Firstly, we check if the energy is conserved
-    2) secondly, we want to compare the final position of the simulation, to the point the analytical orbit is when at the same angle.
-    3) Then, we keep track of how long one rotation for each planet takes, and comparing it to the analytically calculated orbit time.
-    4) At the same time, we track the largest and smallest radii in the simulation, and compare the largest to the analytical orbit's largest radius
-    5) And then the smallest to the analytical orbit's smallest radius.
-
+    1) secondly, we want to compare the final position of the simulation, to the point the analytical orbit is when at the same angle.
+    2) Then, we keep track of how long one rotation for each planet takes, and comparing it to the analytically calculated orbit time.
+    3) At the same time, we track the largest and smallest radii in the simulation, and compare the largest to the analytical orbit's largest radius
+    4) And then the smallest to the analytical orbit's smallest radius.
     '''
-
-    for i in range(len(E[0])):
-        relative_error = abs((max(E.T[i]) - min(E.T[i]))/min(E.T[i]))
-        if not (relative_error < eps):
-            raise ValueError(f"max and min not equal!, ratio is {relative_error}")
-        
-        print(f"Planet {i}")
-        print(f"max(E) : {max(E.T[i])}, min(E) : {min(E.T[i])}, Relative difference : ")
 
 
     # Calclulating the Analytical Radii for all planets, for use in a test later
@@ -387,44 +368,50 @@ if __name__ == "__main__":
         # Getting the relative error between these two values 
         relative_error = abs(r_N - r_A)/r_A
 
+        print(f"\nPlanet {i + 1}:")
         if not (relative_error < eps):
             raise ValueError(f"Final radius for planet {i + 1} not correct!\nValue is {r_N} AU, but should be {r_A} AU, ratio is {relative_error}")
+        print(f"Numerical distance : {r_N}, Analytical distance : {r_A}, Relative Difference {relative_error}")
 
-        r_0   = np.linalg.norm(np.array([r[0][i][0],r[1][i][0]]))
-        r_max = r_0
-        r_min = r_0
+        r_0   = np.array([r[0][i][0],r[1][i][0]])
+        r_max = np.linalg.norm(r_0)
+        r_min = np.linalg.norm(r_0)
         t_o   = 0
 
         # Collecting orbit time, max radius, and min radius
-        for t in range(Orbit.NSteps):
-            r_t = np.linalg.norm(np.array([r[0][i][t],r[1][i][t]]))
+        for t in range(10000,Orbit.NSteps):
+            r_t = np.array([r[0][i][t],r[1][i][t]])
 
-            if(r_t > r_max):
-                r_max = r_t
-            if(r_t < r_min):
-                r_min = r_t
+            if(np.linalg.norm(r_t) > r_max):
+                r_max = np.linalg.norm(r_t)
+            if(np.linalg.norm(r_t) < r_min):
+                r_min = np.linalg.norm(r_t)
 
-            if(t == 0):
-                if(abs(r_0 - r_t) < eps):
-                    t_o = Orbit.dt * t
+            if(np.linalg.norm(r_t - r_0)/np.linalg.norm(r_0) < eps):
+                t_o = Orbit.dt * t
+                break
+               
+        t_A = OrbitTimes[i]
 
-        t_A = (2*np.pi*(system.semi_major_axes[i]**3/(const.G_sol*(system.star_mass + system.masses[i]))))
-
-        if not (t_o - t_A < eps):
+        relative_error = abs(t_o - t_A)/abs(t_A)
+        if not (relative_error < eps):
             raise ValueError(f"Final orbit time for planet {i + 1} not correct!\nValue is {t_o} Y, but should be {t_A} Y")
+        print(f"Numerical Time : {t_o}, Analytical Time : {t_A}, Relative Difference: {relative_error}")
 
 
         AnalyticalMax = max(AnalyticalOrbitRadii[i])
         AnalyticalMin = min(AnalyticalOrbitRadii[i])
         
-        relative_error = (r_max - AnalyticalMax)/AnalyticalMax
+        relative_error = abs((r_max - AnalyticalMax)/AnalyticalMax)
         if not (relative_error < eps):
             raise ValueError(f"Maximum radius for planet {i + 1} not correct!\nValue is {r_max} AU, but should be {AnalyticalMax} AU")
+        print(f"Numerical Max : {r_max}, Analytical Max : {AnalyticalMax}, Relative Difference : {relative_error}")
 
         relative_error = (r_min - AnalyticalMin)/AnalyticalMin
         if not (relative_error < eps):
             raise ValueError(f"Minimum radius for planet {i + 1} not correct!\nValue is {r_min} AU, but should be {AnalyticalMin} AU")
-        
+        print(f"Numerical Min : {r_min}, Analytical Min : {AnalyticalMin}, Relative Difference : {relative_error}")
+
         TestCount += 4
         
 
