@@ -1,0 +1,1 @@
+Difference between maximum and minimum of E : 1.455708827560514e-06

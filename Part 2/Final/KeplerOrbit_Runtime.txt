@@ -1,0 +1,8 @@
+Aphelion area : 0.8025711333172176 AU^2 | Perihelion area : 0.8033737044505376 AU^2 | Relative error = 0.0009990009990043847
+Aphelion Distance : 0.57039 AU | Perihelion Distance : 0.58964 AU
+Aphelion Average vel : 5.70389 AU/Y | Perihelion Average vel : 5.89641 AU/Y
+
+max(K) 0.42417175109063293, min(K) 0.4241221290243561
+Relative difference between max and min: 0.000117
+
+Mean difference between calculated constant and constant aquired from Newtons variant: 0.0005239
