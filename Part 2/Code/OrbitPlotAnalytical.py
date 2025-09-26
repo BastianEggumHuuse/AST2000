@@ -61,11 +61,9 @@ class AnalyticalOrbit:
         for i in range(self.NumPlanets):
 
             # We find the distance from the star at for all the angles (vectorized)
-            # COMMENT THAT THIS WAS INCORRECT!!!!!!!!!!!
             r = ((self.a[i]*(1-self.e[i]**2))/(1+self.e[i]*np.cos(self.Angles + np.pi)))
 
             # Setting first all the x-axis positions, and then all the y-axis-positions.
-            # COMMENT THAT THIS WAS INCORRECT!!!!!!!!!!!
             self.r[i][0] = r * np.cos(self.Angles + self.AphAngles[i])
             self.r[i][1] = r * np.sin(self.Angles + self.AphAngles[i])
         # Returning all our positions
