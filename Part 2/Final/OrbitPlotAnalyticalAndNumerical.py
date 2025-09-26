@@ -1,6 +1,3 @@
-# BRUKER IKKE KODEMAL
-# Skrevet av Bastian Eggum Huuse og Bendik Thune
-
 # Regular imports
 import numpy             as np
 import matplotlib.pyplot as plt

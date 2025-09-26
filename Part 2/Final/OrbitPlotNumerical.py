@@ -1,0 +1,421 @@
+# BRUKER IKKE KODEMAL
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
+
+
+# Regular imports
+import numpy             as np
+import matplotlib.pyplot as plt
+
+from OrbitPlotAnalytical import AnalyticalOrbit
+
+# AST imports
+import ast2000tools.constants as const
+import ast2000tools.utils     as utils
+
+from ast2000tools.space_mission import SpaceMission
+
+class NumericalOrbit:
+    def __init__ (self,mission, const, TotalTime, StepsPerYear, InitialPos, InitialVel):
+        
+        """
+        Class representing a numerical orbit. The class itself simulates the orbit, when the method loop is called.
+
+        mission      : instance of the SpaceMission class
+        const        : instance of the const package
+        TotalTime    : float            | the total time the simulation will run for
+        StepsPerYear : int              | how many timesteps the simulation will run per year
+        InitialPos   : Array(float)     | Array containing initial positions for all planets in the system
+        InitialVel   : Array(float)     | Array containing initial positions for all planets in the system
+
+        returns      : self
+        """
+
+        # Storing mission, system, and constants
+        self.mission = mission
+        self.system = mission.system 
+        self.const = const
+
+        # Storing gravitational constant and mass of out star
+        self.G = const.G_sol
+        self.SM = self.system.star_mass
+
+        # Storing TotalTime and StepsPerYear (Time is measured in years)
+        self.T = TotalTime
+        self.YSteps = StepsPerYear
+
+        # Setting deltatime and N timesteps
+        self.dt = 1/StepsPerYear
+        self.NSteps = int(TotalTime/self.dt)
+
+        # Setting initial positions and velocities. These are input with dimentions (2,Num_planets), meaning the first dimention contains two elements, 
+        # which each contain all x-values, and all y-values.
+        # Since we want to be able to operate on all the planets simultaneously, we want the dimentions (7,Num_planets), 
+        # meaning the first dimention contains Num_planets elements, which contain a single x and y element.
+        self.r0 = InitialPos.T
+        self.v0 = InitialVel.T
+        
+        # Creating our arrays. Again, we want the dimentions (Num_planets,2) to operate on all planets at the same time.
+        # Since we now want to go through time as well, we add this dimention at the beginning, giving us the dimentions (N_timesteps,Num_planets,2)
+        self.NumPlanets = len(self.r0)
+        self.r = np.zeros((self.NSteps, self.NumPlanets, 2))
+        self.v = np.copy(self.r)
+        self.a = np.copy(self.r)
+
+        # We create a time array with linearly spaced values between 0 and T, with NSteps elements.
+        self.t = np.linspace(0,self.T,self.NSteps) 
+
+        # Setting the initial values for the arrays. r0 and v0 are already defined, but accelerations has to be calculated.
+        # We use Newtons law of gravitation to get the accelerations.
+        self.r[0] = self.r0
+        self.v[0] = self.v0
+        self.a[0] = ((-self.G*self.SM)/self.norm(self.r[0])**2)*self.hat(self.r[0])
+
+        # Colors we display the different planets with
+        self.colors = [[0,0,1], [0.3,0,1], [0.4,0,1], [0.5,0,1], [0.6,0,1], [0.7,0,1], [0.8,0,1]]
+        # If we want to display the planets with just one color, we use this one instead
+        self.primary = [0.0,0,1]
+
+    def GetColors(self):
+
+        """
+        Method that returns the colors of the planet orbits in the correct order.
+        
+        returns : list | list of planet colors in correct order
+        """
+
+        # Color index | Star index
+        # 0           | 0
+        # 1           | 1
+        # 2           | 4
+        # 3           | 3
+        # 4           | 5
+        # 5           | 6
+        # 6           | 2
+
+        # The planets aren't listed by distance from the sun, so we have to move the colors around a bit so that they match.
+        # See above table for detailed indexes.
+        return([self.colors[0],self.colors[1],self.colors[4],self.colors[3],self.colors[5],self.colors[6],self.colors[2]])
+
+    def norm(self, v):
+
+        """
+        Support method that gets the norms of an array of vectors.
+        Used by us mainly to get |r| for all the planets at once.
+
+        v       : Vector we wish to get the norm of
+
+        returns : float | norm of v
+        """
+
+        return np.linalg.norm(v, axis=1, keepdims=True)
+    
+    def hat(self, v):
+        
+        """
+        Support method that returns the unit vector for a given vector
+        Used by us mainly to get r_hat for the gravitational acceleration.
+        (Compatible with vectorized code).
+
+        v       : Array(float) | Vector we wish to get the unit vector for.
+
+        returns : Array(float) | unit vector of v
+        """
+
+        return v/self.norm(v)
+
+    def timestep(self,i):
+        
+        """
+        Performs one time step within the orbit simulation. 
+        The parameter [i] refers to which timestep we are currently at,
+        meaning that 0 <= i < NSteps - 1.
+
+        i       : int | Index of current step
+
+        returns : void
+        """
+
+        # Performing leapfrog integration. Note that because of our vectorization, every operation that happens here happens for all planets at once.
+        self.r[i+1] = self.r[i] + self.v[i]*self.dt + 0.5 * self.a[i]*self.dt**2 
+        self.a[i+1] = ((-self.G*self.SM)/self.norm(self.r[i+1])**2)*self.hat(self.r[i+1])
+        self.v[i+1] = self.v[i] + 0.5*(self.a[i] + self.a[i+1]) *self.dt
+
+    
+    def loop(self):
+
+        """
+        Performs the entire loop of the orbit simulation. Since the timestep refers to i+1, we want to skip the final step, to avoid an indexing error.
+        Therefore, we loop from 0 (included) to (NSteps - 1) (Excluded).
+        The method also returns the arrays r, v, a, and t.
+
+        returns : void
+        """
+
+        # Loop
+        for i in range(0,self.NSteps-1):
+            # Performing the step
+            self.timestep(i)     
+
+        # Returning our arrays for plotting. We transpose the arrays again before returning,
+        # which gives us the arrays with dimentions (2,NumPlanets,NSteps), letting us plot for all timesteps.
+        return(self.r.T,self.v.T,self.a.T,self.t)
+    
+class NumericalOrbitFunction:
+
+    def __init__(self,Filepath):
+
+        """
+        This class is a representation of the data stored from the numerical data.
+        Objects of this class can be called to get the position of a given planet at a given time.
+
+        Filepath : String | The path to the .npz file the class reads from.
+
+        returns  : self
+        """
+
+        # Loading the config and r arrays from file
+        npz = np.load(Filepath)
+
+        # Setting total time, delta time, and number of time steps, from the read file
+        self.config       = npz["config"]
+        self.TotalTime    = self.config[0]
+        self.dt           = self.config[1]
+        self.NumSteps     = int(self.config[2])
+
+        self.OrbitTimes   = npz["OrbitTimes"]
+
+        # Setting r from read file
+        self.r = npz["r"]
+
+        # Colors we display the different planets with
+        self.colors = [[0,0,1], [0.3,0,1], [0.4,0,1], [0.5,0,1], [0.6,0,1], [0.7,0,1], [0.8,0,1]]
+        self.primary = [0.5,0,1]
+
+
+    def __call__(self,t,p):
+
+        """
+        Method that returns the position of a given planet along the x and y axes at a given time.
+
+        t       : float        | the desired point in time
+        p       : int          | the desired planet index
+
+        returns : Array(float) | the position of the given planet at the given time
+        """
+
+        # Wrapping the t-value
+        # if t is less than zero, we make it wrap around to the end of the simulation
+        # This stops index-issues.
+        if(t < 0):
+            t = self.OrbitTimes[p] - t
+
+        # Finding the index of the given time
+        # This deserves an explanation. Since the positions are stored in an array with a length of NumSteps,
+        # we can't just insert t into this array to get the value (since t is a floating number)
+        # t/self.TotalTime gives us the percentage of the simulation the time t is at.
+        # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
+        # We multiply this number with the total amount of steps, to get the closes time index to our current time.
+        # We then floor that index (round down) and turn it into an integer.
+        Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
+
+        # Finding x and y positions at this index
+        x = (self.r[0][p][Index])
+        y = (self.r[1][p][Index])
+
+        # Returning vector
+        return(np.array([x,y]))
+    
+    def range(self,t0,t1):
+
+        """
+        Method that returns the positions of the planets along the x and y axes between
+        two given points in time.
+
+        t0       : float        | the desired starting time
+        t1       : float        | the desired ending time
+
+        returns  : Array(float) | the positions of all planets between t0 and t1.
+        """
+
+        if(t0 < 0):
+            t0 = self.OrbitTimes[0] + t0
+            t1 += self.OrbitTimes[0]
+        if(t1 < 0):
+            t1 = self.OrbitTimes[0] + t1
+            t0 += self.OrbitTimes[0]
+
+        # Finding the indexes in the array for t0 and t1
+        Index0 = int(np.floor((t0/self.TotalTime)*self.NumSteps))
+        Index1 = int(np.floor((t1/self.TotalTime)*self.NumSteps))
+
+        # Creating some empty lists
+        x = []
+        y = []
+
+        # Filling information for x and y axes
+        for p in range(len(self.r[0])):
+            
+            # Using list slicing to get all points at once [start:end]
+            x.append(self.r[0][p][Index0:Index1])
+            y.append(self.r[1][p][Index0:Index1])
+
+        # Returning array
+        return(np.array([x,y]))
+    
+    def GetColors(self):
+
+        """
+        Method that returns the colors of the planet orbits in the correct order.
+        
+        returns : list | list of planet colors in correct order
+        """
+
+        return([self.colors[0],self.colors[1],self.colors[4],self.colors[3],self.colors[5],self.colors[6],self.colors[2]])
+
+
+if __name__ == "__main__":
+
+    # Initializing AST
+    Seed = utils.get_seed('bmthune')
+    mission = SpaceMission(Seed)
+    system = mission.system
+
+    # Getting initial conditions
+    R0 = system.initial_positions
+    V0 = system.initial_velocities
+    # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
+    # To make sure we pass the 20 rotations mark, we multiply the time with 2
+    OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
+    TotalTime = OrbitTimes[0] * 20 * 2
+
+    # Instantiating the Numerical Orbit class (and running the loop)
+    # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
+    # Increasing the steps per year would then only reduce performance.
+    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
+    r,v,a,t = Orbit.loop()
+
+    # Initializing plotting
+    fig, ax = plt.subplots()
+
+    # Plotting the orbits of the planets
+    colors = Orbit.GetColors()
+    for i in range(Orbit.NumPlanets):
+        ax.plot(r[0][i],r[1][i], color = colors[i])
+
+    # Adding the star (not to scale)
+    star = plt.Circle((0, 0), 0.75, color = 'gold')
+    ax.add_patch(star)
+
+    # Adding title, and axis labels
+    plt.title("Plott av planetenes baner, beregnet numerisk")
+    plt.xlabel("Posisjon langs x-aksen [AU]")
+    plt.ylabel("Posisjon langs y-aksen [AU]")
+
+    # Making axes equal, and showing plot
+    plt.axis('equal')
+    plt.show()
+
+    # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
+    # We use this file later, to circumvent having to run the simulation again.
+    config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
+    np.savez("NumericalOrbitData",r = r,config = config,OrbitTimes = OrbitTimes)
+
+
+
+    # TESTING ZONE!!
+
+    # Defining an epsilon as an upper limit to how inaccurate our tests can be
+    eps = 1e-2 # one percent
+    # Also keeping track of how many tests we perform
+    TestCount = 0
+
+    '''
+    There are four tests we want to perform:
+    1) secondly, we want to compare the final position of the simulation, to the point the analytical orbit is when at the same angle.
+    2) Then, we keep track of how long one rotation for each planet takes, and comparing it to the analytically calculated orbit time.
+    3) At the same time, we track the largest and smallest radii in the simulation, and compare the largest to the analytical orbit's largest radius
+    4) And then the smallest to the analytical orbit's smallest radius.
+    '''
+
+
+    # Calclulating the Analytical Radii for all planets, for use in a test later
+    # Getting an analyticalorbit instance and running it's loop
+    AnalyticalOrbitInstance = AnalyticalOrbit(SemiMajors = system.semi_major_axes,Eccentricities = system.eccentricities,AphelionAngles=system.aphelion_angles)
+    AnalyticalOrbitVectors = AnalyticalOrbitInstance.Loop()
+    # Creating an array to store the norms of all the vectors
+    AnalyticalOrbitRadii = np.zeros((9,AnalyticalOrbitInstance.NSteps))
+    for i in range(Orbit.NumPlanets):
+        for j in range(AnalyticalOrbitInstance.NSteps):
+            # Taking the norm of every position within the analytical orbits, and storing them for later
+            AnalyticalOrbitRadii[i][j] = np.linalg.norm(np.array([AnalyticalOrbitVectors[i][0][j],AnalyticalOrbitVectors[i][1][j]]))
+
+    for i in range(Orbit.NumPlanets):
+        
+        # Test 1) Comparing the final positions:
+        # First we get the angle of the final position
+        # Remember that indexing is [axis][planet][step]
+        theta = np.arctan(r[1][i][-1]/r[0][i][-1])
+        # Because arctan is limited between -pi/2 and pi/2 we have to adjust to make sure we still get the correct angle:
+        if(r[0][i][-1] < 0):
+            theta += np.pi
+
+        # Getting the numerical radius for this angle
+        r_N = np.linalg.norm(np.array([r[0][i][-1],r[1][i][-1]]))
+        # Getting the analytical radius for this angle
+        # This one also needs some explaining. The formula is the same as the one used in OrbitPlotAnalytical: Newton's corrected version of Kepler's third law.
+        # The angle used in the cosine is a bit strange however: After some testing, we found out that the analytical orbits and the numeric orbits have different starting positions, as the analytical orbits begin in their aphelion points
+        # Within the cosine, we subtract (pi + the aphelion angle) for each planet (Se additional diagram for details on why this works)
+        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (system.aphelion_angles[i] + np.pi))) 
+        # Getting the relative error between these two values 
+        relative_error = abs(r_N - r_A)/r_A
+
+        print(f"\nPlanet {i + 1}:")
+        if not (relative_error < eps):
+            raise ValueError(f"Final radius for planet {i + 1} not correct!\nValue is {r_N} AU, but should be {r_A} AU, ratio is {relative_error}")
+        print(f"Numerical distance : {r_N}, Analytical distance : {r_A}, Relative Difference {relative_error}")
+
+        r_0   = np.array([r[0][i][0],r[1][i][0]])
+        r_max = np.linalg.norm(r_0)
+        r_min = np.linalg.norm(r_0)
+        t_o   = 0
+
+        # Collecting orbit time, max radius, and min radius
+        for t in range(10000,Orbit.NSteps):
+            r_t = np.array([r[0][i][t],r[1][i][t]])
+
+            if(np.linalg.norm(r_t) > r_max):
+                r_max = np.linalg.norm(r_t)
+            if(np.linalg.norm(r_t) < r_min):
+                r_min = np.linalg.norm(r_t)
+
+            if(np.linalg.norm(r_t - r_0)/np.linalg.norm(r_0) < eps):
+                t_o = Orbit.dt * t
+                break
+               
+        t_A = OrbitTimes[i]
+
+        relative_error = abs(t_o - t_A)/abs(t_A)
+        if not (relative_error < eps):
+            raise ValueError(f"Final orbit time for planet {i + 1} not correct!\nValue is {t_o} Y, but should be {t_A} Y")
+        print(f"Numerical Time : {t_o}, Analytical Time : {t_A}, Relative Difference: {relative_error}")
+
+
+        AnalyticalMax = max(AnalyticalOrbitRadii[i])
+        AnalyticalMin = min(AnalyticalOrbitRadii[i])
+        
+        relative_error = abs((r_max - AnalyticalMax)/AnalyticalMax)
+        if not (relative_error < eps):
+            raise ValueError(f"Maximum radius for planet {i + 1} not correct!\nValue is {r_max} AU, but should be {AnalyticalMax} AU")
+        print(f"Numerical Max : {r_max}, Analytical Max : {AnalyticalMax}, Relative Difference : {relative_error}")
+
+        relative_error = (r_min - AnalyticalMin)/AnalyticalMin
+        if not (relative_error < eps):
+            raise ValueError(f"Minimum radius for planet {i + 1} not correct!\nValue is {r_min} AU, but should be {AnalyticalMin} AU")
+        print(f"Numerical Min : {r_min}, Analytical Min : {AnalyticalMin}, Relative Difference : {relative_error}")
+
+        TestCount += 4
+        
+
+    print(f"All {TestCount} tests were performed, with 0 errors.")
+        
+
