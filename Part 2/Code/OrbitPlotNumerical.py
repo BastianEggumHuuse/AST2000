@@ -287,10 +287,11 @@ if __name__ == "__main__":
     # To make sure we pass the 20 rotations mark, we multiply the time with 2
     OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
     TotalTime = OrbitTimes[0] * 20 * 2
-    print(TotalTime)
 
     # Instantiating the Numerical Orbit class (and running the loop)
-    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 30000, InitialPos = R0, InitialVel = V0)
+    # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
+    # Increasing the steps per year would then only reduce performance.
+    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
     r,v,a,t = Orbit.loop()
 
     # Initializing plotting
@@ -364,7 +365,7 @@ if __name__ == "__main__":
         # This one also needs some explaining. The formula is the same as the one used in OrbitPlotAnalytical: Newton's corrected version of Kepler's third law.
         # The angle used in the cosine is a bit strange however: After some testing, we found out that the analytical orbits and the numeric orbits have different starting positions, as the analytical orbits begin in their aphelion points
         # Within the cosine, we subtract (pi + the aphelion angle) for each planet (Se additional diagram for details on why this works)
-        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (np.pi + system.aphelion_angles[i]))) 
+        r_A = (system.semi_major_axes[i]*(1-system.eccentricities[i]**2))/(1+system.eccentricities[i]*np.cos(theta - (system.aphelion_angles[i] + np.pi))) 
         # Getting the relative error between these two values 
         relative_error = abs(r_N - r_A)/r_A
 

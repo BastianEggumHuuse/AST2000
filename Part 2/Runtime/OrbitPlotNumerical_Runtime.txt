@@ -1,0 +1,43 @@
+
+Planet 1:
+Numerical distance : 2.8141984710638757, Analytical distance : 2.814198470990587, Relative Difference 2.6042401467501478e-11
+Numerical Time : 2.9972000000000003, Analytical Time : 3.002092119659008, Relative Difference: 0.0016295701344311707
+Numerical Max : 2.814198478717244, Analytical Max : 2.814198478717244, Relative Difference : 0.0
+Numerical Min : 2.7248766425036, Analytical Min : 2.7248767972832066, Relative Difference : -5.680242373499164e-08
+
+Planet 2:
+Numerical distance : 3.9069252788767765, Analytical distance : 3.90692521610975, Relative Difference 1.606558181059369e-08
+Numerical Time : 4.9188, Analytical Time : 4.9262612626115825, Relative Difference: 0.0015145893028878752
+Numerical Max : 3.929988426384652, Analytical Max : 3.929988393709666, Relative Difference : 8.314270311955929e-09
+Numerical Min : 3.776115373842395, Analytical Min : 3.7760764346861424, Relative Difference : 1.0312067810667899e-05
+
+Planet 3:
+Numerical distance : 13.939123779330497, Analytical distance : 13.939123777286902, Relative Difference 1.4660860665885172e-10
+Numerical Time : 32.6699, Analytical Time : 32.68198456869135, Relative Difference: 0.0003697623889990614
+Numerical Max : 13.960169682470267, Analytical Max : 13.960169681130642, Relative Difference : 9.59605312956688e-11
+Numerical Min : 13.269637929928331, Analytical Min : 13.269639551535876, Relative Difference : -1.2220434012805033e-07
+
+Planet 4:
+Numerical distance : 9.37964408939828, Analytical distance : 9.379644088448972, Relative Difference 1.0120940396698834e-10
+Numerical Time : 17.8388, Analytical Time : 17.86587749950657, Relative Difference: 0.0015155986324947822
+Numerical Max : 9.426134222100432, Analytical Max : 9.426134217347233, Relative Difference : 5.042574839172808e-10
+Numerical Min : 8.764063246964517, Analytical Min : 8.764064767655686, Relative Difference : -1.735143691594226e-07
+
+Planet 5:
+Numerical distance : 20.658839226710832, Analytical distance : 20.65883922667765, Relative Difference 1.606205721236597e-12
+Numerical Time : 61.274100000000004, Analytical Time : 61.36950666864774, Relative Difference: 0.0015546266187678895
+Numerical Max : 20.757450059913687, Analytical Max : 20.75745005893847, Relative Difference : 4.6981510221536864e-11
+Numerical Min : 20.6550332093908, Analytical Min : 20.65503346123233, Relative Difference : -1.2192743607054383e-08
+
+Planet 6:
+Numerical distance : 30.742433616567375, Analytical distance : 30.742433616444366, Relative Difference 4.0012823951904054e-12
+Numerical Time : 110.3168, Analytical Time : 110.48240985905453, Relative Difference: 0.0014989703724402831
+Numerical Max : 32.523350802981, Analytical Max : 32.52335080261749, Relative Difference : 1.1176786807534435e-11
+Numerical Min : 28.76102423696533, Analytical Min : 28.761032462527844, Relative Difference : -2.859967744378808e-07
+
+Planet 7:
+Numerical distance : 5.182808885251919, Analytical distance : 5.182808865233625, Relative Difference 3.8624412163494284e-09
+Numerical Time : 8.7119, Analytical Time : 8.726244978527898, Relative Difference: 0.0016438890454251434
+Numerical Max : 6.112175677546726, Analytical Max : 6.112175673435086, Relative Difference : 6.726966201733728e-10
+Numerical Min : 5.169474173066412, Analytical Min : 5.169476134432538, Relative Difference : -3.794129376742049e-07
+All 28 tests were performed, with 0 errors.

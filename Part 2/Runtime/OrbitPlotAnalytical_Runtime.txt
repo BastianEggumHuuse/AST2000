@@ -1,0 +1,36 @@
+Planet : 1
+Aphelion radius : 2.814198478717244, First radius : 2.814198478717244, Relative error 0.0
+Perihelion radius : 2.7248767972832066, Halfway radius : 2.7248767972832066, Relative error 0.0
+Sum of Aphelion and Perihelion radii : 5.5390752760004505, 2a: 5.539075062175442, Relative error 3.860301692357059e-08
+
+Planet : 2
+Aphelion radius : 3.929988393709666, First radius : 3.9299883937096656, Relative error 1.1300013266219085e-16
+Perihelion radius : 3.7760764346861424, Halfway radius : 3.7760764346861424, Relative error 0.0
+Sum of Aphelion and Perihelion radii : 7.706064828395808, 2a: 7.706064462774646, Relative error 4.7445899842287847e-08
+
+Planet : 3
+Aphelion radius : 13.960169681130642, First radius : 13.96016968113064, Relative error 1.272446452997828e-16
+Perihelion radius : 13.269639551535876, Halfway radius : 13.269639551535878, Relative error 1.338662465171971e-16
+Sum of Aphelion and Perihelion radii : 27.22980923266652, 2a: 27.22980760988332, Relative error 5.959583783089097e-08
+
+Planet : 4
+Aphelion radius : 9.426134217347233, First radius : 9.426134217347233, Relative error 0.0
+Perihelion radius : 8.764064767655686, Halfway radius : 8.764064767655686, Relative error 0.0
+Sum of Aphelion and Perihelion radii : 18.19019898500292, 2a: 18.190197463107094, Relative error 8.36657121754359e-08
+
+Planet : 5
+Aphelion radius : 20.75745005893847, First radius : 20.75745005893847, Relative error 0.0
+Perihelion radius : 20.65503346123233, Halfway radius : 20.65503346123233, Relative error 0.0
+Sum of Aphelion and Perihelion radii : 41.412483520170795, 2a: 41.412483268210714, Relative error 6.084157755321267e-09
+
+Planet : 6
+Aphelion radius : 32.52335080261749, First radius : 32.52335080261749, Relative error 0.0
+Perihelion radius : 28.761032462527844, Halfway radius : 28.761032462527844, Relative error 0.0
+Sum of Aphelion and Perihelion radii : 61.28438326514534, 2a: 61.284375039422024, Relative error 1.34222194611084e-07
+
+Planet : 7
+Aphelion radius : 6.112175673435086, First radius : 6.112175673435086, Relative error 0.0
+Perihelion radius : 5.169476134432538, Halfway radius : 5.169476134432538, Relative error 0.0
+Sum of Aphelion and Perihelion radii : 11.281651807867625, 2a: 11.281649836655646, Relative error 1.7472727907391467e-07
+
+All 21 tests performed, none failed.

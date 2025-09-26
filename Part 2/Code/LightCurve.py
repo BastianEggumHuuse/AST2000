@@ -47,8 +47,6 @@ if __name__ == "__main__":
         # Case 2
         if (r_s_x - Radius_s + Radius_p < r_p_x) and (r_p_x < r_s_x + Radius_s - Radius_p ):
             F[i] = (Area_Circle(Radius_s) - Area_Circle(Radius_p))/Area_Circle(Radius_s)
-            if(F[i] > 1):
-                print(f"Inner : {F[i]}")
             continue
 
         # Case 3
@@ -58,8 +56,6 @@ if __name__ == "__main__":
         dA_s = dA - Radius_p * np.sin(theta) * r_o
 
         F[i] = (Area_Circle(Radius_s) - dA_s)/Area_Circle(Radius_s)
-        if(F[i] > 1):
-                print(f"Transition : {dA,Radius_p * np.sin(theta) * r_o}")
 
     for i in range(len(F)):
          F[i] += np.random.normal(0,1e-4)
