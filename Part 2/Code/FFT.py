@@ -4,9 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import  ast2000tools.constants as const
 
-from scipy.ndimage import gaussian_filter
-
-
 seed = utils.get_seed('bmthune')
 system = SolarSystem(seed)
 
@@ -37,7 +34,7 @@ RawData = np.load(FileName)
 TotalTime = RawData['time'][0]
 N = 2**20
 
-Data = RawData['v_noise'][:int(np.floor(430/TotalTime *len(RawData['v_raw'])))]
+Data = RawData['v_raw'][:int(np.floor(430/TotalTime *len(RawData['v_raw'])))]
 TotalTime = 430
 v_pek = np.mean(Data)
 
@@ -52,13 +49,6 @@ index = np.linspace(0, len(NoiseData)-1,N, dtype=int)
 NoiseSample = NoiseData[index] 
 
 
-plt.plot(TimeSample, NoiseSample ,'r')
-plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) + 3.848e-6*np.sin(2*np.pi*0.05582*TimeSample),'gold')
-plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) ,'orange')
-plt.plot(TimeSample, 0.00012*np.sin(2*np.pi*0.01627903*TimeSample) + 7.993e-6*np.sin(2*np.pi*0.3325*TimeSample) + 3.848e-6*np.sin(2*np.pi*0.05582*TimeSample)+2.341e-7*np.sin(2*np.pi*0.2223*TimeSample),'limegreen')
-
-plt.show()
-
 
 f = ditfft(NoiseSample,N)
 f_range = np.arange(len(f))
@@ -68,5 +58,25 @@ n_kappa = int(np.floor(len(f_range)*1/max(frequency)))
 fre_kappa = frequency[:n_kappa]
 f_kappa = f[:n_kappa]
 
+plt.xlabel('Frekvens [1/Y]')
+plt.ylabel('Ampeltude [AU/Y]')
+plt.grid()
 plt.plot(fre_kappa, 2*abs(f_kappa)/N)
+FrekI = []
+for i in range (len(f_kappa)):
+     if (2*abs(f_kappa[i])/N > 3e-6 ):
+           print(f'angle = {np.angle(f[i])}, frekvens = {fre_kappa[i]}, ampeltude = {2*abs(f_kappa[i])/N }')
+           FrekI.append(i)
+plt.show()
+
+
+plt.plot(TimeSample, NoiseSample ,'r')
+signal =np.zeros(len(TimeSample))
+for k in range(0,3):
+      i = FrekI[k]
+      signal += (2*abs(f_kappa[i])/N) *np.sin(2*np.pi*fre_kappa[i]*TimeSample + np.angle(f_kappa[i]) +np.pi/2)
+
+plt.plot(TimeSample, signal,'gold')
+plt.xlabel('Tid [Y]')
+plt.ylabel('Fart [AU/Y]')
 plt.show()

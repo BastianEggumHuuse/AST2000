@@ -158,7 +158,9 @@ if __name__ == "__main__":
     # Output for C.1.2.b
     E_diff = (max(E)-min(E))/abs(min(E))
     print(f"Difference between maximum and minimum of E : {E_diff}")
-
+    print(f'Numerisk snitt energi = {np.mean(E)}')
+    print(f'Max energi            = {max(E)}')
+    print(f'Min energi            = {min(E)}')
     # Plotting the two orvit
     # Initializing plotting
     fig, ax = plt.subplots()
