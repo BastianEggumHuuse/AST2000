@@ -115,7 +115,6 @@ class SimulationRocket(FuelRocket):
         # Setting our velocity in the solar system frame
         v = v_p + Vel
         
-        
         return r,v
 
 if __name__ == "__main__":
@@ -133,13 +132,13 @@ if __name__ == "__main__":
 
     print(f"\nThe rocket has reached the escape velocity of {TestRocket.SpeedBoost:.2f} m/s!!! (or crashed)\n")
     
-    print(f"Info time :)")
-    print(f"Position post launch : {f"[x : {TestRocket.Position[0]:.2f} m, y : {TestRocket.Position[1]:.2f} m]":>40}")
-    print(f"Velocity post launch : {f"[x : {TestRocket.Velocity[0]:.2f} m/s, y : {TestRocket.Velocity[1]:.2f} m/s]":>40}")
-    print(f"Total time of launch : {f"[Seconds : {TestRocket.t:.1f} s, Minutes : {TestRocket.t/60:.1f} min]":>40}")
-    print(f"Total Fuel Consumed  : {f"{Fuel - TestRocket.FuelMass:.2f} kg":>40}")
-    print(f"Total Fuel Remaining : {f"{TestRocket.FuelMass:.2f} kg":>40}")
-    print(f"Total Rocket Mass    : {f"{TestRocket.TotalMass:.2f} kg":>40}\n")
+    # print(f"Info time :)")
+    # print(f"Position post launch : {f"[x : {TestRocket.Position[0]:.2f} m, y : {TestRocket.Position[1]:.2f} m]":>40}")
+    # print(f"Velocity post launch : {f"[x : {TestRocket.Velocity[0]:.2f} m/s, y : {TestRocket.Velocity[1]:.2f} m/s]":>40}")
+    # print(f"Total time of launch : {f"[Seconds : {TestRocket.t:.1f} s, Minutes : {TestRocket.t/60:.1f} min]":>40}")
+    # print(f"Total Fuel Consumed  : {f"{Fuel - TestRocket.FuelMass:.2f} kg":>40}")
+    # print(f"Total Fuel Remaining : {f"{TestRocket.FuelMass:.2f} kg":>40}")
+    # print(f"Total Rocket Mass    : {f"{TestRocket.TotalMass:.2f} kg":>40}\n")
 
     # Plotting
     fig, ax = plt.subplots() # Plotting init
