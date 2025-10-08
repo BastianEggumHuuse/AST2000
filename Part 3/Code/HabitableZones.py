@@ -36,7 +36,7 @@ class HabitableZones:
         PosRange = (np.linalg.norm((self.R_planets.range(0,self.TotalTime)).T,axis = 2, keepdims= True)).T[0] * const.AU
         Radii = np.array([self.r_planets] * self.NumSteps).T
 
-        self.Temps = (self.r_star/(PosRange ))**(1/2) * self.T_star
+        self.Temps = (self.r_star/(PosRange * 2 ))**(1/2) * self.T_star
 
         return(self.Temps)
 
