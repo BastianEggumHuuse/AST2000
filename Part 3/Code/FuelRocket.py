@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import ast2000tools.constants as const
 import ast2000tools.utils as utils
 # From imports
-from .NozzleChamber import NozzleChamber
+from NozzleChamber import NozzleChamber
 from ast2000tools.solar_system import SolarSystem
 from ast2000tools.space_mission import SpaceMission
 

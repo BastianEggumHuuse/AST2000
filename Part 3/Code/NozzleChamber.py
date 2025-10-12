@@ -8,7 +8,7 @@ import  math         as     mt
 # AST imports
 import ast2000tools.constants as const
 
-from .FuelChamber import FuelChamber
+from FuelChamber import FuelChamber
 
 class NozzleChamber(FuelChamber):
     def __init__(self,Length,Temp,NumParticles, length_nozzle): #Nozzle is square with sides equal to length
