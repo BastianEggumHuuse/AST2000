@@ -8,7 +8,7 @@ import  matplotlib.pyplot as plt
 import ast2000tools.constants as const
 import ast2000tools.utils as utils
 # From imports
-from .FuelRocket import FuelRocket
+from FuelRocket import FuelRocket
 from ast2000tools.space_mission import SpaceMission
 
 # Ast init
