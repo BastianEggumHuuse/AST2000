@@ -3,3 +3,5 @@ Bilde feil:
     1 : Feil aspect (theta var 1. dim)
     2 : Brukte theta som begge vinkler i mission
     3 : Speilvending om x-akse (y må gå fra - til +!)
+
+SkyImageData har bare 359 bilder!!!

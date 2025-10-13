@@ -108,10 +108,9 @@ def GenerateImage(SkyData,AngleGrid):
 
     return ImageGrid.astype('uint8')
 
-@njit
 def GenerateImageRange(Skydata,CoordinateGrid,theta0):
 
-    phi0 = np.arange(0,359,90).astype("float32")
+    phi0 = np.arange(0,360,1).astype("float32")
 
     Images = np.zeros((len(phi0),CoordinateGrid.shape[1],CoordinateGrid.shape[0],3),dtype="uint8")
 
@@ -185,19 +184,12 @@ def Minecraft():
         (135,180)
     ]
 
-    Angles = [(45,0)]
-
-    #Angles = [(45,110)]
-
     for i in range(len(Angles)):
 
         phi = np.deg2rad(Angles[i][0])
         theta = np.deg2rad(Angles[i][1])
 
         AngleGrid = GenerateAngleGrid(CoordinateGrid,phi0 = phi,theta0 = theta,Wrap = False)
-
-        print(np.rad2deg(AngleGrid))
-        return
 
         ImageGrid = GenerateImage(SkyData,AngleGrid)
         # Reproducing sample2000.png
