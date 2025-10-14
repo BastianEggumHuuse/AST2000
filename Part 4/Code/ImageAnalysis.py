@@ -79,8 +79,6 @@ if __name__ == "__main__":
     OutputImageArray = SkyImageData[phi]
     OutputImage = Image.fromarray(OutputImageArray)
 
-    OutputImage.show()
-
     # Combining the two images
     buffX = 20
 
