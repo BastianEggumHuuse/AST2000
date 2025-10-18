@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     SkyImageData = np.load("SkyImageData.npy")
 
-    InputPath = "sample0200.png"
+    InputPath = "sample0435.png"
     if(len(sys.argv) > 1):
         InputPath = sys.argv[1]
 

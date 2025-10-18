@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, "../..")
+# Ikke brukt kodemal!
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
 
 import matplotlib.pyplot as plt
 import numpy as np
