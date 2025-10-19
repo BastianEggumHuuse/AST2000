@@ -5,8 +5,6 @@ import sys
 import numpy as np
 from numba import njit
 
-
-
 import ast2000tools.constants as const
 import ast2000tools.utils     as utils
 import GeneralizedLaunch as Lan 
@@ -26,8 +24,8 @@ def RelVel(dLambda_1, dLambda_2,Lambda_0):
 
 @njit
 def BasisShift(phi_1,phi_2, v):
-    v_x = np.cos(phi_1)*v[0] + np.cos(phi_2) *v[1]
-    v_y = np.sin(phi_1)*v[0] + np.sin(phi_2) *v[1]
+    v_x = np.cos(phi_1 + np.pi)*v[0] + np.cos(phi_2+np.pi) *v[1]
+    v_y = np.sin(phi_1 + np.pi)*v[0] + np.sin(phi_2 +np.pi) *v[1]
     return v_x, v_y
 
 @njit
@@ -41,10 +39,11 @@ def Main(dLambda, Lambda_0, phi_1, phi_2):
     v_s = RelVel(dLambda[0],dLambda[1],Lambda_0)
     v_r = RelVel(dLambda[2],dLambda[3],Lambda_0)
     
-    v_r = BasisShift(phi_1,phi_2, v_r)
-    v_s = BasisShift(phi_1,phi_2, v_s)
+    V = RockVel(v_r, v_s)
     
-    V_r = RockVel(v_r, v_s)
+    V_r = BasisShift(phi_1,phi_2, V)
+    
+    
     return V_r
  
 if __name__ == '__main__':
@@ -57,9 +56,11 @@ if __name__ == '__main__':
     lambda_1, lambda_2 = mission.star_doppler_shifts_at_sun
     lambda_3, lambda_4 = mission.measure_star_doppler_shifts()
     dlambda = (lambda_1,lambda_2,lambda_3,lambda_4)
-    print(dlambda)
+  
 
     phi_1, phi_2 = mission.star_direction_angles
-
+    phi_1, phi_2 = (np.deg2rad(phi_1), np.deg2rad(phi_2))
+    print(phi_1,phi_2)
+    print(mission._velocity_after_launch)
     V_r = Main(dlambda, lambda_0, phi_1, phi_2)
     print(V_r[0]*60*60*24*365/const.AU, V_r[1]*60*60*24*365/const.AU)
