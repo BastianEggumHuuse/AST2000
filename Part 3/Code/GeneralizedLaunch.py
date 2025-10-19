@@ -14,7 +14,7 @@ from OrbitPlotNumerical import NumericalOrbitFunction
 class GeneralizedRocket(SimulationRocket):
 
     def __init__(self,mission,FuelMass,SpeedBoost,NumMotors,NumParticles = 10**5,dt = 10**(-3)):
-
+        
         """
         Class that simulates a rocket launch from our planet, at a given time t and from a given angle theta
 
@@ -30,7 +30,7 @@ class GeneralizedRocket(SimulationRocket):
 
         self.FileName = "NumericalOrbitData.npz"
         self.R_planets = NumericalOrbitFunction(self.FileName)
-
+        
         # Getting Orbit- and Rotationtime (both in years)
         self.OrbitTime = (2*np.pi)*((self.system.semi_major_axes[0]**3)/(const.G_sol*(self.system.star_mass + self.system.masses[0])))**(1/2)
         self.RotationTime = self.system.rotational_periods[0] / 365
@@ -92,6 +92,8 @@ class GeneralizedRocket(SimulationRocket):
 
         # Now, we want to get the current planet position.
         r_p = self.R_planets(t_0,0)
+        self.r_p1 = self.R_planets(t_0+self.dt, 0)
+        
         # Note that we swap the x and y axes here (just like the original program)
         Pos[0], Pos[1] = Pos[1], Pos[0]
         # We rotate the local positional vector by the angle theta (Notice that this is just multiplying with the rotation matrix), and add the solar system position of the planet.
@@ -100,14 +102,14 @@ class GeneralizedRocket(SimulationRocket):
         SolarSystemPos += v_p * (self.t / (60 * 60 * 24 * 365))
 
         # Finally, we also get the launch position for plotting later
-        self.LaunchPos = r_p + ((self.system.radii[0] * 1000)/const.AU) * np.array([np.cos(theta),np.sin(theta)])
-
+        self.LaunchPos = r_p + ((self.system.radii[0] * 1000)/const.AU) * r_p/np.linalg.norm(r_p)
+        
         # Now we can return these values:
         return SolarSystemPos,SolarSystemVel
 
     
 if __name__ == "__main__":
-
+    
     # Ast init
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)
@@ -120,14 +122,18 @@ if __name__ == "__main__":
 
     # Creating a generalized rocket
     GenRocket = GeneralizedRocket(mission=mission,FuelMass=Fuel,SpeedBoost=EscapeVelocity,NumMotors=NumMotors,NumParticles=Particles)
+    t_0 = 1
+    
 
     # Looping rocket
     GenRocket.TimeLoop()
 
     Sim_Pos0, Sim_Vel0 = GenRocket.Position.copy(),GenRocket.Velocity.copy()
     Sim_Pos, Sim_Vel = GenRocket.StarPosition(Sim_Pos0,Sim_Vel0)
-    Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(0,0)
-
+    r_p = GenRocket.R_planets(t_0,0)
+    z = r_p[0] + 1j*r_p[1]
+    Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
+    print(Gen_Pos)
     print(f"\nGeneralized Position in solar system frame at t = 0: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
     print(f"Generalized Velocity in solar system frame at t = 0: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
 
@@ -140,8 +146,8 @@ if __name__ == "__main__":
         mass_loss_rate = GenRocket.FuelConsumption,
         initial_fuel_mass = Fuel,
         estimated_launch_duration = GenRocket.t + 1,
-        launch_position = mission.system.initial_positions[:,0] + np.array([(mission.system.radii[0]*1000)/const.AU,0]),
-        time_of_launch = 0
+        launch_position = GenRocket.LaunchPos,
+        time_of_launch = t_0 - GenRocket.R_planets.dt
         )
     
     mission.launch_rocket(10**(-3))
@@ -150,7 +156,7 @@ if __name__ == "__main__":
 
 
     # Plotting
-    t_0 = 1
+    
     theta = np.pi/2
 
     # Getting info about Rocket and about planet
