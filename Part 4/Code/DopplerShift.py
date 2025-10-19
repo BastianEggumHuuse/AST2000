@@ -44,7 +44,7 @@ def Main(dLambda, Lambda_0, phi_1, phi_2):
     V_r = BasisShift(phi_1,phi_2, V)
     
     
-    return V_r
+    return V_r[0]*60*60*24*365/const.AU, V_r[1]*60*60*24*365/const.AU
  
 if __name__ == '__main__':
     seed = utils.get_seed('bmthune')
@@ -63,4 +63,4 @@ if __name__ == '__main__':
     print(phi_1,phi_2)
     print(mission._velocity_after_launch)
     V_r = Main(dlambda, lambda_0, phi_1, phi_2)
-    print(V_r[0]*60*60*24*365/const.AU, V_r[1]*60*60*24*365/const.AU)
+    print(V_r)
