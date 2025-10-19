@@ -3,7 +3,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+import pickle as pckl
 import ast2000tools.constants as const
 import ast2000tools.utils     as utils
 from ast2000tools.space_mission import SpaceMission
@@ -462,7 +462,8 @@ if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
     main(mission, 1)
-
+    with open ("Mission.pkl", 'wb') as file:
+        pckl.dump(mission, file)
 
 
 """

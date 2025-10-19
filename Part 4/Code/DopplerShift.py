@@ -4,6 +4,8 @@
 import sys
 import numpy as np
 from numba import njit
+import pickle as pkl 
+
 
 import ast2000tools.constants as const
 import ast2000tools.utils     as utils
@@ -47,10 +49,8 @@ def Main(dLambda, Lambda_0, phi_1, phi_2):
     return V_r[0]*60*60*24*365/const.AU, V_r[1]*60*60*24*365/const.AU
  
 if __name__ == '__main__':
-    seed = utils.get_seed('bmthune')
-    mission = SpaceMission(seed)
-
-    Lan.main(mission, 1)
+    with open("Mission.pkl", 'rb') as file:
+        mission = pkl.load(file)
 
     lambda_0 = 656.3 #Hydrogen spectral line
     lambda_1, lambda_2 = mission.star_doppler_shifts_at_sun
