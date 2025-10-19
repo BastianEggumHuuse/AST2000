@@ -434,11 +434,11 @@ def main(mission, t_0):
     Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
 
 
-    print(f"\nGeneralized Position in solar system frame at t = 0: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
-    print(f"Generalized Velocity in solar system frame at t = 0: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
+    print(f"\nGeneralized Position in solar system frame at t = {t_0}: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
+    print(f"Generalized Velocity in solar system frame at t = {t_0}: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
 
-    print(f"\nSpecialized Position in solar system frame at t = 0: [x : {Sim_Pos[0]:.3f} AU, y : {Sim_Pos[1]:.2e} AU]")
-    print(f"Specialized Velocity in solar system frame at t = 0: [x : {Sim_Vel[0]:.3f} AU/Y, y : {Sim_Vel[1]:.3f} AU/Y]")
+    print(f"\nSpecialized Position in solar system frame at t = {t_0}: [x : {Sim_Pos[0]:.3f} AU, y : {Sim_Pos[1]:.2e} AU]")
+    print(f"Specialized Velocity in solar system frame at t = {t_0}: [x : {Sim_Vel[0]:.3f} AU/Y, y : {Sim_Vel[1]:.3f} AU/Y]")
 
     print()
 
@@ -454,6 +454,10 @@ def main(mission, t_0):
     mission.launch_rocket(10**(-3))
     
     mission.verify_launch_result(Gen_Pos)
+
+    TimeAfterLaunch = t_0 + (GenRocket.t/(60*60*24*365))
+    return TimeAfterLaunch
+
 if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
