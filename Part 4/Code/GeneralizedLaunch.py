@@ -139,11 +139,12 @@ class NumericalOrbitFunction:
     
 class FuelRocket:
 
-    def __init__(self,FuelMass,SpeedBoost,NumMotors,NumParticles = 10**5,dt = 10**(-3)):
+    def __init__(self,FuelMass,SpeedBoost,NumMotors,mission,NumParticles = 10**5,dt = 10**(-3) ):
 
         # Parameters
+        self.mission = mission
         self.FuelMass = FuelMass
-        self.RocketMass = mission.spacecraft_mass
+        self.RocketMass = self.mission.spacecraft_mass
         self.TotalMass = FuelMass + self.RocketMass
         self.SpeedBoost = SpeedBoost
         self.NumMotors = NumMotors
@@ -214,8 +215,8 @@ class FuelRocket:
 
 class SimulationRocket(FuelRocket):
 
-    def __init__(self,FuelMass,SpeedBoost,NumMotors,NumParticles = 10**5,dt = 10**(-3),Graph = False):
-        super().__init__(FuelMass,SpeedBoost,NumMotors,NumParticles,dt) #Using class from FuelRocket 
+    def __init__(self,FuelMass,SpeedBoost,NumMotors,mission,NumParticles = 10**5,dt = 10**(-3),Graph = False):
+        super().__init__(FuelMass,SpeedBoost,NumMotors,mission,NumParticles,dt) #Using class from FuelRocket 
         
         # Initializing variables
         self.Mission = mission
@@ -324,7 +325,7 @@ class GeneralizedRocket(SimulationRocket):
         Comments have only been added for new functionality
         """
 
-        super().__init__(FuelMass,SpeedBoost,NumMotors,NumParticles,dt)
+        super().__init__(FuelMass,SpeedBoost,NumMotors, mission,NumParticles,dt)
 
         # Tracking some stats about the planet
         self.mission = mission
@@ -403,16 +404,14 @@ class GeneralizedRocket(SimulationRocket):
         r_hat = r_p / np.linalg.norm(r_p)
         # Finally, we also get the launch position for plotting later
         self.LaunchPos = r_p + ((self.system.radii[0] * 1000)/const.AU) * r_hat#np.array([np.cos(theta),np.sin(theta)])#r_hat
-        print(r_hat)
 
         # Now we can return these values:
         return SolarSystemPos,SolarSystemVel    
     
-if __name__ == "__main__":
 
+def main(mission, t_0):
     # Ast init
-    seed = utils.get_seed('bmthune')
-    mission = SpaceMission(seed)  
+
 
     # Creating rocket instance
     NumMotors = int((1000000**3)/60) # 1/10 qube meter grid :)
@@ -426,10 +425,14 @@ if __name__ == "__main__":
     # Looping rocket
     GenRocket.TimeLoop()
 
-    t_0 = GenRocket.R_planets.dt * 10000
+    t_0 = t_0
     Sim_Pos0, Sim_Vel0 = GenRocket.Position.copy(),GenRocket.Velocity.copy()
     Sim_Pos, Sim_Vel = GenRocket.StarPosition(Sim_Pos0,Sim_Vel0)
-    Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0,0)
+
+    r_p = GenRocket.R_planets(t_0,0)
+    z = r_p[0] + 1j*r_p[1]
+    Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
+
 
     print(f"\nGeneralized Position in solar system frame at t = 0: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
     print(f"Generalized Velocity in solar system frame at t = 0: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
@@ -444,61 +447,19 @@ if __name__ == "__main__":
         mass_loss_rate = GenRocket.FuelConsumption,
         initial_fuel_mass = Fuel,
         estimated_launch_duration = GenRocket.t + 1,
-        launch_position = GenRocket.LaunchPos,#mission.system.initial_positions[:,0] + np.array([(mission.system.radii[0]*1000)/const.AU,0]),
-        time_of_launch =   t_0 - GenRocket.R_planets.dt * 10000
+        launch_position = GenRocket.LaunchPos,
+        time_of_launch =   t_0 - GenRocket.R_planets.dt
         )
     
     mission.launch_rocket(10**(-3))
     
     mission.verify_launch_result(Gen_Pos)
+if __name__ == "__main__":
+    seed = utils.get_seed('bmthune')
+    mission = SpaceMission(seed)  
+    main(mission, 1)
 
 
-    # Plotting
-    #t_0 = 1
-    theta = np.pi/2
-
-    # Getting info about Rocket and about planet
-    Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0,theta)
-    r_N = GenRocket.R_planets.range(0,t_0 + GenRocket.R_planets.dt)
-    
-    Planet_Pos_Pre = GenRocket.R_planets(t_0,0)
-    Planet_Pos_Post = Planet_Pos_Pre + GenRocket.R_planets.GetVelocity(t_0,0) * (GenRocket.t / (60 * 60 * 24 * 365))
-    Planet_Pos_Mid = (Planet_Pos_Pre + Planet_Pos_Post)/2
-    Planet_r = (mission.system.radii[0] * 1000)/const.AU
-    Radii = 2.5
-    xlim = [Planet_Pos_Mid[0] - Planet_r * Radii, Planet_Pos_Mid[0] + Planet_r * Radii]
-    ylim = [Planet_Pos_Mid[1] - Planet_r * Radii, Planet_Pos_Mid[1] + Planet_r * Radii]
-
-    # Initializing plotting
-    fig, ax = plt.subplots()
-
-    # Plotting the orbit of the planet
-    color = GenRocket.R_planets.primary
-    ax.plot(r_N[0][0],r_N[1][0], color = color)
-
-    # Plotting launch position and final position
-    ax.plot(Gen_Pos[0],Gen_Pos[1],".",color = "Red",label = "Etter oppskytning")
-    ax.plot(GenRocket.LaunchPos[0],GenRocket.LaunchPos[1],".",color = "Blue",label = "Før oppskytning")
-
-    # Adding patches
-    Planet_Pre = plt.Circle(Planet_Pos_Pre, Planet_r, color = 'Green',label = "Planet før oppskytning")
-    Planet_Post = plt.Circle(Planet_Pos_Post, Planet_r, color = 'Lime',label = "Planet etter oppskytning")
-    ax.add_patch(Planet_Pre)
-    ax.add_patch(Planet_Post)
-
-    # Defining limits
-    plt.axis('equal')
-    plt.xlim(xlim)
-    plt.ylim(ylim)
-
-    # Adding title, and axis labels
-    plt.title(f"Oppskytning langs y-aksen ved t_0 = {t_0}")
-    plt.xlabel("Posisjon langs x-aksen [AU]")
-    plt.ylabel("Posisjon langs y-aksen [AU]")
-    plt.legend(loc = "lower right")
-
-    # showing plot
-    plt.show()
 
 """
 String that runs code: python GeneralizedLaunch.py
