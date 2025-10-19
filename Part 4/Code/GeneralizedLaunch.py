@@ -336,7 +336,6 @@ class GeneralizedRocket(SimulationRocket):
         # Getting Orbit- and Rotationtime (both in years)
         self.OrbitTime = (2*np.pi)*((self.system.semi_major_axes[0]**3)/(const.G_sol*(self.system.star_mass + self.system.masses[0])))**(1/2)
         self.RotationTime = self.system.rotational_periods[0] / 365
-        
 
     def WrapTime(self, t):
 
@@ -427,7 +426,7 @@ if __name__ == "__main__":
     # Looping rocket
     GenRocket.TimeLoop()
 
-    t_0 = GenRocket.dt * 100
+    t_0 = GenRocket.R_planets.dt * 10000
     Sim_Pos0, Sim_Vel0 = GenRocket.Position.copy(),GenRocket.Velocity.copy()
     Sim_Pos, Sim_Vel = GenRocket.StarPosition(Sim_Pos0,Sim_Vel0)
     Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0,0)
@@ -445,8 +444,8 @@ if __name__ == "__main__":
         mass_loss_rate = GenRocket.FuelConsumption,
         initial_fuel_mass = Fuel,
         estimated_launch_duration = GenRocket.t + 1,
-        launch_position = GenRocket.LaunchPos, #mission.system.initial_positions[:,0] + np.array([(mission.system.radii[0]*1000)/const.AU,0]),
-        time_of_launch = t_0
+        launch_position = GenRocket.LaunchPos,#mission.system.initial_positions[:,0] + np.array([(mission.system.radii[0]*1000)/const.AU,0]),
+        time_of_launch =   t_0
         )
     
     mission.launch_rocket(10**(-3))
@@ -455,7 +454,7 @@ if __name__ == "__main__":
 
 
     # Plotting
-    t_0 = 1
+    #t_0 = 1
     theta = np.pi/2
 
     # Getting info about Rocket and about planet
