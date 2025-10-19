@@ -47,7 +47,21 @@ def Main(dLambda, Lambda_0, phi_1, phi_2):
     
     
     return V_r
- 
+
+def tests(mission):
+    epsilon = 1e-3
+    lambda_0 = 656.3
+    lambda_1, lambda_2 = mission.star_doppler_shifts_at_sun
+    dlambda = (lambda_1, lambda_2,lambda_1, lambda_2)
+
+    phi_1, phi_2 = mission.star_direction_angles
+    phi_1, phi_2 = (np.deg2rad(phi_1), np.deg2rad(phi_2))
+
+    V_r = Main(dlambda, lambda_0, phi_1, phi_2)
+    
+    if not(abs(V_r[0]) < epsilon and abs(V_r[1]) < epsilon):
+        raise 
+
 if __name__ == '__main__':
     with open("Mission.pkl", 'rb') as file:
         mission = pkl.load(file)
@@ -60,7 +74,7 @@ if __name__ == '__main__':
 
     phi_1, phi_2 = mission.star_direction_angles
     phi_1, phi_2 = (np.deg2rad(phi_1), np.deg2rad(phi_2))
-    print(phi_1,phi_2)
+    
     print(mission._velocity_after_launch)
     V_r = Main(dlambda, lambda_0, phi_1, phi_2)
     print(V_r[0]*60*60*24*365/const.AU, V_r[1]*60*60*24*365/const.AU)
