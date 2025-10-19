@@ -1,5 +1,5 @@
 # Ikke brukt kodemal!!
-# Skrevet av Bastian Eggum Huuse
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
 
 import sys
 import numpy as np
