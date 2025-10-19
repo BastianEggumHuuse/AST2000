@@ -21,19 +21,21 @@ def TupleNorm(Tuple):
 
     return (Tuple[0]**2 + Tuple[1]**2)**(1/2)
 
-def PlanetDifference(Pos,FirstPlanetPos,TrueFirstPlanetDist,SecondPlanetPos,TrueSecondPlanetDist):
+def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances):
 
-    FirstPlanetDeviation = TupleDiff(FirstPlanetPos,Pos)
-    SecondPlanetDeviation = TupleDiff(FirstPlanetPos,Pos)
+    PlanetDeviations = np.zeros((len(PlanetPositions,2)))
 
-    FirstPlanetDifference = abs(TupleNorm(FirstPlanetDeviation) - TrueFirstPlanetDist)
-    SecondPlanetDifference = abs(TupleNorm(SecondPlanetDeviation) - TrueSecondPlanetDist)
+    for i in range(len(PlanetDeviations)):
+        PlanetDeviations[i] = TupleDiff(PlanetPositions,Pos)
 
-    TotalDifference = FirstPlanetDifference + SecondPlanetDifference
+    TotalDifference = 0
+
+    for i in range(len(PlanetDeviations)):
+        TotalDifference += abs(TupleNorm(PlanetDeviations[i]) - TruePlanetDistances[i])
 
     return TotalDifference
 
-def BinaryLeastSquares(StarDistance,Range,FirstPlanetPos,SecondPlanetPos,TrueFirstPlanetDist,TrueSecondPlanetDist):
+def BinaryLeastSquares(StarDistance,Range,PlanetPositions,TruePlanetDistances):
 
     if len(Range) == 1:
         return Range[0]
@@ -54,13 +56,13 @@ def BinaryLeastSquares(StarDistance,Range,FirstPlanetPos,SecondPlanetPos,TrueFir
     Position1 = (StarDistance * np.cos(Range1[HalfLength/2]),StarDistance * np.sin(Range1[HalfLength/2]))
     Position2 = (StarDistance * np.cos(Range2[HalfLength/2]),StarDistance * np.sin(Range2[HalfLength/2]))
 
-    Diff1 = PlanetDifference(Position1,FirstPlanetPos,TrueFirstPlanetDist,SecondPlanetPos,TrueSecondPlanetDist)
-    Diff2 = PlanetDifference(Position2,FirstPlanetPos,TrueFirstPlanetDist,SecondPlanetPos,TrueSecondPlanetDist)
+    Diff1 = PlanetDifference(Position1,PlanetPositions,TruePlanetDistances)
+    Diff2 = PlanetDifference(Position2,PlanetPositions,TruePlanetDistances)
 
     if Diff1 <= Diff2:
-        Angle = BinaryLeastSquares(StarDistance,Range1,FirstPlanetPos,SecondPlanetPos,TrueFirstPlanetDist,TrueSecondPlanetDist)
+        Angle = BinaryLeastSquares(StarDistance,Range1,PlanetPositions,TruePlanetDistances)
     else:
-        Angle = BinaryLeastSquares(StarDistance,Range2,FirstPlanetPos,SecondPlanetPos,TrueFirstPlanetDist,TrueSecondPlanetDist)
+        Angle = BinaryLeastSquares(StarDistance,Range2,PlanetPositions,TruePlanetDistances)
 
     return Angle
 
@@ -69,16 +71,34 @@ def Main(t,Distances):
     FilePath = "NumericalOrbitData.npz"
     PlanetPositionFunction = NumericalOrbitFunction(FilePath)
 
+    # Defining star-distance and the range of angles
     StarDistance = Distances[-1]
-
-    FirstPlanetPos = PlanetPositionFunction(t,0)
-    SecondPlanetPos = PlanetPositionFunction(t,1)
-
-    TrueFirstPlanetDist = Distances[0]
-    TrueSecondPlanetDist = Distances[1]
-
     Range = np.linspace(0,2*np.pi,2**(10))
+    
+    # Defining an array of distances that doesn't include the sun
+    PlanetDistances = np.zeros((len(Distances)-1))
+    for i in range(len(Distances)):
+        PlanetDistances[i] = Distances[i]
 
-    Angle = BinaryLeastSquares(StarDistance,Range,FirstPlanetPos,SecondPlanetPos,TrueFirstPlanetDist,TrueSecondPlanetDist)
+    # Defining an array of positions, one for each planet.
+    PlanetPositions = np.zeros((len(PlanetDistances),2))
+    for p in range(len(PlanetPositions)):
+        PlanetPositions[i] = PlanetPositionFunction(t,p)
 
+    # Running the algorithm to find the angle from the sun at which our position is at.
+    Angle = BinaryLeastSquares(StarDistance,Range,Distances)
+
+    # We want to return the position, instead of just the angle
     return (StarDistance * np.cos(Angle),StarDistance * np.sin(Angle))
+
+if __name__ ==  "__main__":
+
+    # Ast init
+    seed = utils.get_seed('bmthune')
+    mission = SpaceMission(seed)
+
+    # Run Launch
+    
+    Distances = mission.measure_distances()
+
+    

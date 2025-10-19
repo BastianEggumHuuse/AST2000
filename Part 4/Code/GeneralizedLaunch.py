@@ -445,7 +445,7 @@ if __name__ == "__main__":
         initial_fuel_mass = Fuel,
         estimated_launch_duration = GenRocket.t + 1,
         launch_position = GenRocket.LaunchPos,#mission.system.initial_positions[:,0] + np.array([(mission.system.radii[0]*1000)/const.AU,0]),
-        time_of_launch =   t_0 - GenRocket.R_planets.dt * 10000
+        time_of_launch =   t_0 - GenRocket.R_planets.dt
         )
     
     mission.launch_rocket(10**(-3))
