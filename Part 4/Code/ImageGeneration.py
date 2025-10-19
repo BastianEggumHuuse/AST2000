@@ -128,7 +128,7 @@ def Main():
 
     SkyData = np.load("himmelkule.npy")
 
-    InputImage = Image.open("sample0000.png")
+    InputImage = Image.open(r"Git3\AST2000\Part 4\Code\sample0000.png")
     FOV_PHI = np.deg2rad(70)
     FOV_THETA = np.deg2rad(70)
 
