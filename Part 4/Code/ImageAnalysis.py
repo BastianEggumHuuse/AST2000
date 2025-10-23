@@ -89,7 +89,7 @@ if __name__ == "__main__":
     SkyImageData = np.load("SkyImageData.npy")
 
     # Collecting a sample image we want to find the angle of
-    InputPath = "sample0435.png"
+    InputPath = r"Git3\AST2000\Part 4\Code\sample0435.png"
     if(len(sys.argv) > 1): # Path can be input as command line argument
         InputPath = sys.argv[1]
 
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     OutputImageArray = SkyImageData[phi]
     OutputImage = Image.fromarray(OutputImageArray)
 
-
-
+    ImageOff = Image.fromarray(SkyImageData[phi-1])
+    ImageOff.show()
     # The rest of this program is not part of the task, but is just a way to check if the task was
     # performed correctly. We combine the two images (input and output), and show them side by side.
     buffX = 20

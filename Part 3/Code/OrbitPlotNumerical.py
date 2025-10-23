@@ -316,7 +316,7 @@ if __name__ == "__main__":
     # Instantiating the Numerical Orbit class (and running the loop)
     # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
     # Increasing the steps per year would then only reduce performance.
-    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 100000, InitialPos = R0, InitialVel = V0)
+    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
     r,v,a,t = Orbit.loop()
 
     # Initializing plotting
