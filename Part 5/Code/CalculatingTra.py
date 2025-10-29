@@ -81,15 +81,15 @@ def Lerp(R_0,R_1, I):
     
     return R_0[0] + I* dR_x, R_0[1] + I*dR_y
 
-
 @njit
 def GravitationalAks(R,K,N_k,dt, M,T_0, info):
     a_x = -G_sol *M[-1]*R[K][0]/ ((R[K][0])**2 + R[K][1]**2)**(3/2)
     a_y = -G_sol *M[-1]*R[K][1]/ ((R[K][0])**2 + R[K][1]**2)**(3/2)
     
-    for j in range(1, len(M)-1):
+    for j in range(len(M)-1):
         
         R_0 = FindR(T_0 + K*dt, j, info)
+        
         
         R_1 = FindR(T_0 + (K+1)*dt,j, info)
 
@@ -98,7 +98,7 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
         r_x = R[K][0] - R_p_x
         r_y = R[K][1] - R_p_y
 
-        gamma = -G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
+        gamma = G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
         
         a_x += r_x * gamma
         a_y += r_y * gamma
@@ -152,13 +152,12 @@ if __name__ == '__main__':
 
     N = 314000
     
-    R, v, a = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
+    R, v, a, T = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
    
     
     plt.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)] )
     R = R.T
     
-
     plt.plot(R[0], R[1])
     plt.show()
     
