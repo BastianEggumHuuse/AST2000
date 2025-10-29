@@ -89,16 +89,15 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
     for j in range(len(M)-1):
         
         R_0 = FindR(T_0 + K*dt, j, info)
-        
-        
-        R_1 = FindR(T_0 + (K+1)*dt,j, info)
+                
+        R_1 = FindR(T_0 + (K+N_k-1)*dt,j, info)
 
         R_p_x, R_p_y = Lerp(R_0, R_1, (K%N_k)/N_k) 
 
         r_x = R[K][0] - R_p_x
         r_y = R[K][1] - R_p_y
 
-        gamma = G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
+        gamma = -G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
         
         a_x += r_x * gamma
         a_y += r_y * gamma
@@ -146,11 +145,12 @@ if __name__ == '__main__':
     M = np.zeros(mission.system._number_of_planets + 1)
     M[:-1] = mission.system.masses
     M[-1] = mission.system.star_mass
-    T_0 = mission.time_after_launch
+    
     dT = PlanetPositionFunction.dt
-    dt = 1/100000
+    dt = 1/1000000
+    T_0 = mission.time_after_launch + dT
 
-    N = 314000
+    N = 3140000
     
     R, v, a, T = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
    
