@@ -37,13 +37,14 @@ R_p = Numericalsim.range(0,10)
 plt.plot(R_p[0][0],R_p[1][0])
 plt.plot(R_p[0][1],R_p[1][1])
 
+
 for t in t:
     R_0 = Numericalsim(t, 0)
     R_1 = Numericalsim(t, 1)
     plt.plot((R_0[0],R_1[0]),(R_0[1],R_1[1]))
     plt.plot(R_0[0], R_0[1], 'o')
     plt.plot(R_1[0], R_1[1], 'o')
-plt.show()    
+ 
 """
 t = 2.8
 
@@ -60,11 +61,14 @@ M[-1] = mission.system.star_mass
 R = np.array([mission._position_after_launch])
 V = np.array([mission._velocity_after_launch])
 t = mission.time_after_launch
+R_0_s = Numericalsim(t, 0)
+R_1_s = Numericalsim(t, 1)
 
 DV = [
     (t, np.array([0,0])),
-    (3.05, np.array([0,-2])),
-    (3.38, np.array([0,0]))
+    (t + 0.24, np.array([0.14,0.29])),
+    (t + 0.47, np.array([-0.1,0])),
+    (t + 0.479, np.array([0,0]))
       ]
 
 for i in range(len(DV)-1):
@@ -79,10 +83,14 @@ R_1 = Numericalsim(t, 1)
 l = np.linalg.norm(R[-1])*(M[1]/(M[-1]*10))**0.5
 fig, ax = plt.subplots()
 
+
+
 ax.plot(R_p[0][0],R_p[1][0])
 ax.plot(R_p[0][1],R_p[1][1])
 ax.plot(R_0[0], R_0[1], 'o')
 ax.plot(R_1[0], R_1[1], 'o')
+ax.plot(R_0_s[0], R_0_s[1], 'o')
+ax.plot(R_1_s[0], R_1_s[1], 'o')
 
 OrbitRadi = plt.Circle(R_1, l, color = 'Lime', fill = False, ls = '-')
 ax.add_patch(OrbitRadi)
