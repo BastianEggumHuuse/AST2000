@@ -58,14 +58,17 @@ boost_v_sim = np.array([
 # List of boost times (launch)
 boost_t_launch = np.array([
     t,
+    t + 0.0001,
     t + 0.24,
     t + 0.47,
-    t + 0.479,
+    #t + 0.479,
+    t + 1,
     ])
 
 # List of boost dvs (launch)
 boost_v_launch = np.array([
     #(0.4,-0.7),
+    (0.0,0.0),
     (0.0,0.0),
     (0.14,0.29),
     (-0.1,0),
