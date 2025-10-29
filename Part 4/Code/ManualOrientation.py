@@ -45,7 +45,7 @@ if __name__ ==  "__main__":
     Distances = mission.measure_distances()
 
     # Performing computations
-    Orientation_Rotation = CompareImageRange(InputImageArray,SkyImageData,N = 359)
+    Orientation_Rotation = CompareImageRange(InputImageArray,SkyImageData,N = 360)
     Orientation_Velocity = DopplerVelocity(dlambda, lambda_0, phi_1, phi_2)
     Orientation_Position = TrilaterationAlgorithm(t_1,Distances)
 
