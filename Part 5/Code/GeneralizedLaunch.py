@@ -502,7 +502,7 @@ def main(mission, t_0):
 if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
-    main(mission, 1)
+    main(mission, t_0=14*0.2)
     with open ("Mission.pkl", 'wb') as file:
         pckl.dump(mission, file)
 

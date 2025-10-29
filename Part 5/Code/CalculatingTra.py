@@ -72,9 +72,8 @@ def FindR(t,p, info):
     # Returning vector
     return(np.array([x,y]))
 AU = const.AU
-
-
 G_sol = const.G_sol
+
 @njit
 def Lerp(R_0,R_1, I):
     dR_x = R_0[0] - R_1[0]
@@ -115,7 +114,6 @@ def timestep(R,v,a,dt, N_k, K, M, T_0, info):
     a[K+1] = GravitationalAks(R,K+1,N_k,dt, M, T_0, info)
     
     v[K+1][0] = v[K][0] + 0.5*(a[K][0] + a[K+1][0])*dt
-    
     v[K+1][1] = v[K][1] + 0.5*(a[K][1] + a[K+1][1])*dt
         
     
@@ -135,8 +133,8 @@ def Main(R_0, v_0, dt,dT, N, M,T_0, info):
 
     for K in range(N-1):
         timestep(R,v,a,dt,N_k, K, M,T_0, info)
-    
-    return R,v,a
+    T = dt*N
+    return R,v,a, T
 
 if __name__ == '__main__':
     with open("Mission.pkl", 'rb') as file:
@@ -151,16 +149,16 @@ if __name__ == '__main__':
     T_0 = mission.time_after_launch
     dT = PlanetPositionFunction.dt
     dt = 1/100000
-    print(dt, dT)
-    N = 9000000
-    if (np.linalg.norm(v_0) > np.sqrt(2*G_sol*M[-1]/np.linalg.norm(R_0))):
-        print('ESCAPE')
+
+    N = 314000
+    
     R, v, a = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
    
     
     plt.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)] )
     R = R.T
     
+
     plt.plot(R[0], R[1])
     plt.show()
     
