@@ -58,21 +58,18 @@ boost_v_sim = np.array([
 # List of boost times (launch)
 boost_t_launch = np.array([
     t,
-    t + 0.0001,
     t + 0.24,
     t + 0.47,
-    #t + 0.479,
-    t + 1,
+    t + 0.479,
     ])
 
 # List of boost dvs (launch)
 boost_v_launch = np.array([
     #(0.4,-0.7),
     (0.0,0.0),
-    (0.0,0.0),
     (0.14,0.29),
     (-0.1,0),
-    (0,0),
+    (0,0)
     ])
 
 # Beginning travel
@@ -124,4 +121,7 @@ ax.plot(R_planets[0][1],R_planets[1][1])
 ax.plot(R_sim[:,0],R_sim[:,1],ls = "-")
 ax.plot(R_launch[:,0],R_launch[:,1])
 
+plt.xlabel("Distanse langs x-aksen [AU]")
+plt.ylabel("Distanse langs y-aksen [AU]")
+plt.title("Rakettbaner simulert (grønn)\nog gjennomført (rød)")
 plt.show()
