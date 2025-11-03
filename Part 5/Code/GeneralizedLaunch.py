@@ -638,7 +638,7 @@ def TupleNorm(Tuple):
     return (Tuple[0]**2 + Tuple[1]**2)**(1/2)
 
 @njit
-def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances):
+def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances,printer = False):
 
     """
     Method that computes the difference between the distances from the planets to a given point, and what those distances should be.
@@ -663,7 +663,11 @@ def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances):
 
     # Computing the sum of the difference between each computed distance, and each expected distance
     for i in range(len(PlanetDeviations)):
+
         TotalDifference += abs(TupleNorm(PlanetDeviations[i]) - TruePlanetDistances[i])
+
+    if(printer):
+        print("Total: ",TotalDifference)
 
     return TotalDifference
 
@@ -750,7 +754,7 @@ def TrilaterationAlgorithm(t,Distances):
     # Defining an array of positions, one for each planet.
     PlanetPositions = np.zeros((len(PlanetDistances),2))
     for p in range(len(PlanetPositions)):
-        PlanetPositions[i] = PlanetPositionFunction(t,p)
+        PlanetPositions[p] = PlanetPositionFunction(t,p)
 
     # Running the algorithm to find the angle from the sun at which our position is at.
     Angle = BinaryLeastSquares(StarDistance,Range,PlanetPositions,PlanetDistances)
@@ -912,25 +916,25 @@ def main(mission, t_0):
 
     First, it creates the file containing the planet positions
     """
-    system = mission.system
-    # Getting initial conditions
-    R0 = system.initial_positions
-    V0 = system.initial_velocities
-    # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
-    # To make sure we pass the 20 rotations mark, we multiply the time with 2
-    OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
-    TotalTime = OrbitTimes[0] * 20 * 2
+    # system = mission.system
+    # # Getting initial conditions
+    # R0 = system.initial_positions
+    # V0 = system.initial_velocities
+    # # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
+    # # To make sure we pass the 20 rotations mark, we multiply the time with 2
+    # OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
+    # TotalTime = OrbitTimes[0] * 20 * 2
 
-    # Instantiating the Numerical Orbit class (and running the loop)
-    # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
-    # Increasing the steps per year would then only reduce performance.
-    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
-    r,v,a,t = Orbit.loop()
+    # # Instantiating the Numerical Orbit class (and running the loop)
+    # # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
+    # # Increasing the steps per year would then only reduce performance.
+    # Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
+    # r,v,a,t = Orbit.loop()
 
-    # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
-    # We use this file later, to circumvent having to run the simulation again.
-    config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
-    np.savez("NumericalOrbitData",r = r, v = v, a = a,config = config,OrbitTimes = OrbitTimes)
+    # # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
+    # # We use this file later, to circumvent having to run the simulation again.
+    # config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
+    # np.savez("NumericalOrbitData",r = r, v = v, a = a,config = config,OrbitTimes = OrbitTimes)
 
     """
     Then, it simulates the launch of the rocket
@@ -1007,6 +1011,8 @@ def main(mission, t_0):
     Orientation_Rotation = CompareImageRange(InputImageArray,SkyImageData,N = 360)
     Orientation_Velocity = DopplerVelocity(dlambda, lambda_0, phi_1, phi_2)
     Orientation_Position = TrilaterationAlgorithm(t_1,Distances)
+    print(f"Distances {Distances}")
+    print(Orientation_Position)
 
     # Verifying results
     mission.verify_manual_orientation(Orientation_Position,Orientation_Velocity,Orientation_Rotation)
@@ -1015,7 +1021,7 @@ if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
 
-    main(mission, t_0=0.2*12)
+    main(mission, t_0= 0.0001)
 
     with open ("Mission.pkl", 'wb') as file:
         pckl.dump(mission, file)
