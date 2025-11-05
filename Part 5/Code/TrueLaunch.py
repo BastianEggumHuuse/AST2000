@@ -5,7 +5,6 @@ from numba import njit
 import pickle as pkl 
 
 from CalculatingTra import Main as Coast
-from GeneralizedLaunch import FuelRocket
 
 # AST imports
 import ast2000tools.constants as const
@@ -50,7 +49,7 @@ boost_t_sim = np.array([
     ])
 
 # List of boost dvs (simulation)
-boost_v_sim = np.array([(0.5,-0.3   ),(0,0),(0,0)])#np.zeros((len(boost_t_sim),2))
+boost_v_sim = np.zeros((len(boost_t_sim),2))
 # List of boost times (launch)
 boost_t_launch = np.array([
     0,
@@ -105,12 +104,6 @@ for i in range(len(boost_t_launch)-1):
     # Boosting sim
     if(i < len(boost_t_sim) - 1):
         V_sim[-1] += boost_v_sim[i]
-    # Boosting Fuel:
-    df = FuelEstimate(fuelMass,mission,boost_v_sim[i])
-    print("BOOOST ", boost_v_sim[i])
-    print(f"USING {df} kg of fuel")
-    fuelMass -= df
-    print(f"{fuelMass} Kg REMAINING")
 
     # Coasting
     travel.coast(boost_t_launch[i+1])
@@ -121,8 +114,6 @@ for i in range(len(boost_t_launch)-1):
         R_sim = np.concatenate((R_sim,R_c))
         V_sim = np.concatenate((V_sim,V_c))
         t += t_c
-
-    
 
     
 

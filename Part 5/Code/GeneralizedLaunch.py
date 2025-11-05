@@ -659,9 +659,6 @@ def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances,printer = True):
         PlanetDeviations[i][0] = Deviation[0]
         PlanetDeviations[i][1] = Deviation[1]
 
-        if(printer):
-            print("DeviatioN: " ,Deviation)
-
     TotalDifference = 0
 
     # Computing the sum of the difference between each computed distance, and each expected distance

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from numba import njit
 import pickle as pkl 
 
-from GeneralizedLaunch import NumericalOrbitFunction
+from GeneralizedLaunch import NumericalOrbitFunction,FuelRocket
 from CalculatingTra import Main as Coast
 # AST imports
 import ast2000tools.constants as const

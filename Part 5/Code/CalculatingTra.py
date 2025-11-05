@@ -105,9 +105,6 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
         a_x += r_x * gamma
         a_y += r_y * gamma
 
-    if(K == 0):
-        print(a_x,a_y)
-
     return a_x, a_y
 
 @njit
@@ -137,6 +134,7 @@ def Main(R_0, v_0, dt,dT, n, M,T_0, info):
 
     a = np.zeros((N,2))
     a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
+    print(a[0])
 
 
     for K in range(N-1):
