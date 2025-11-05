@@ -33,7 +33,7 @@ t = np.arange(0,5, 0.2)
 
 Numericalsim = NumericalOrbitFunction(FilePath)
 R_p = Numericalsim.range(0,10)
-"""
+
 plt.plot(R_p[0][0],R_p[1][0])
 plt.plot(R_p[0][1],R_p[1][1])
 
@@ -45,7 +45,7 @@ for t in t:
     plt.plot(R_0[0], R_0[1], 'o')
     plt.plot(R_1[0], R_1[1], 'o')
  
-"""
+
 t = 2.8
 
 R_0 = Numericalsim(t, 0)
