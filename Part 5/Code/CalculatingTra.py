@@ -76,15 +76,17 @@ G_sol = const.G_sol
 
 @njit
 def Lerp(R_0,R_1, I):
-    dR_x = R_0[0] - R_1[0]
-    dR_y = R_0[1] - R_1[1]
+    dR_x = -R_0[0] + R_1[0]
+    dR_y = -R_0[1] + R_1[1]
     
     return R_0[0] + I* dR_x, R_0[1] + I*dR_y
 
 @njit
 def GravitationalAks(R,K,N_k,dt, M,T_0, info):
-    a_x = -G_sol *M[-1]*R[K][0]/ ((R[K][0])**2 + R[K][1]**2)**(3/2)
-    a_y = -G_sol *M[-1]*R[K][1]/ ((R[K][0])**2 + R[K][1]**2)**(3/2)
+    
+    a_x = G_sol *M[-1]*R[K][0]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
+    a_y = G_sol *M[-1]*R[K][1]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
+
     
     for j in range(len(M)-1):
         
@@ -94,15 +96,15 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
 
         R_p_x, R_p_y = Lerp(R_0, R_1, (K%N_k)/N_k) 
 
-        r_x = R[K][0] - R_p_x
-        r_y = R[K][1] - R_p_y
+        r_x = -R[K][0] + R_p_x
+        r_y = -R[K][1] + R_p_y
 
-        gamma = -G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
-        
+        gamma = G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
+
+            
         a_x += r_x * gamma
         a_y += r_y * gamma
-        
-    
+
     return a_x, a_y
 
 @njit
@@ -114,25 +116,31 @@ def timestep(R,v,a,dt, N_k, K, M, T_0, info):
     
     v[K+1][0] = v[K][0] + 0.5*(a[K][0] + a[K+1][0])*dt
     v[K+1][1] = v[K][1] + 0.5*(a[K][1] + a[K+1][1])*dt
-        
+ 
     
 
 @njit
-def Main(R_0, v_0, dt,dT, N, M,T_0, info):
+def Main(R_0, v_0, dt,dT, n, M,T_0, info):
+    N = n+1
+
     
     N_k = np.floor(dT/dt)
     R = np.zeros((N,2))
     R[0] = R_0
+    
 
     v = np.zeros((N,2))
     v[0] = v_0
 
     a = np.zeros((N,2))
     a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
+    print(a[0])
+
 
     for K in range(N-1):
         timestep(R,v,a,dt,N_k, K, M,T_0, info)
-    T = dt*N
+        
+    T = N*dt
     return R,v,a, T
 
 if __name__ == '__main__':
@@ -140,17 +148,16 @@ if __name__ == '__main__':
         mission = pkl.load(file)
     R_0 = mission._position_after_launch
     
-    v_0 = mission._velocity_after_launch
-    
+    v_0 =mission._velocity_after_launch
     M = np.zeros(mission.system._number_of_planets + 1)
     M[:-1] = mission.system.masses
     M[-1] = mission.system.star_mass
-    
+    T_0 = mission.time_after_launch
     dT = PlanetPositionFunction.dt
     dt = 1/1000000
-    T_0 = mission.time_after_launch + dT
+    
 
-    N = 3140000
+    N = 1
     
     R, v, a, T = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
    
@@ -158,7 +165,13 @@ if __name__ == '__main__':
     plt.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)] )
     R = R.T
     
-    plt.plot(R[0], R[1])
+    plt.plot(R[0], R[1], 'o')
+    print(mission.system.radii[0]*1000/AU)
+
+    ranged = PlanetPositionFunction.range(0,6)
+    plt.plot(ranged[0][1],ranged[1][1],color = "red")
+
     plt.show()
+
     
 
