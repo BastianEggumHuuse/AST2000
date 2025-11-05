@@ -5,6 +5,7 @@ from numba import njit
 import pickle as pkl 
 
 from GeneralizedLaunch import NumericalOrbitFunction,FuelRocket
+from GeneralizedLaunch import NumericalOrbitFunction
 from CalculatingTra import Main as Coast
 # AST imports
 import ast2000tools.constants as const
