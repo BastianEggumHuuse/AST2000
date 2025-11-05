@@ -64,7 +64,7 @@ def FindR(t,p, info):
     # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
     # We multiply this number with the total amount of steps, to get the closes time index to our current time.
     # We then floor that index (round down) and turn it into an integer.
-    Index = int(np.floor((t/TotalTime)*NumSteps))
+    Index = int(np.floor((t/TotalTime)*NumSteps)) 
 
     # Finding x and y positions at this index
     x = (r[0][p][Index])
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     T_0 = mission.time_after_launch
     dT = PlanetPositionFunction.dt
     dt = 1/1000000
-    T_0 = mission.time_after_launch # + dT
+    T_0 = mission.time_after_launch# + dT
 
     N = 3140000 * 2
     

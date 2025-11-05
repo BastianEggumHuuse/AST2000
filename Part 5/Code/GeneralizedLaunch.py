@@ -638,7 +638,7 @@ def TupleNorm(Tuple):
     return (Tuple[0]**2 + Tuple[1]**2)**(1/2)
 
 @njit
-def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances,printer = False):
+def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances,printer = True):
 
     """
     Method that computes the difference between the distances from the planets to a given point, and what those distances should be.
@@ -1023,7 +1023,7 @@ if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
 
-    main(mission, t_0= 0.2 * 13)
+    main(mission, t_0= 0.2*11)
 
     with open ("Mission.pkl", 'wb') as file:
         pckl.dump(mission, file)
