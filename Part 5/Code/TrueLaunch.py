@@ -47,10 +47,21 @@ boost_t_sim = np.arange(t,t+0.01, dt)
 # List of boost dvs (simulation)
 boost_v_sim = np.zeros((len(boost_t_sim),2))
 # List of boost times (launch)
-boost_t_launch = np.ones(len(boost_t_sim))*dt
+boost_t_launch = np.array([
+    t,
+    t + 0.24,
+    t + 0.47,
+    t + 0.479,
+    ])
 
 # List of boost dvs (launch)
-boost_v_launch = np.zeros((len(boost_t_sim),2))
+boost_v_launch = np.array([
+    #(0.4,-0.7),
+    (0.0,0.0),
+    (0.14,0.29),
+    (-0.1,0),
+    (0,0)
+    ])
 
 # Beginning travel
 travel = mission.begin_interplanetary_travel()
@@ -121,4 +132,7 @@ ax.plot(R_sim[:,0],R_sim[:,1],'.', color = 'red')
 print(R_sim)
 ax.plot(R_launch[:,0],R_launch[:,1], '.', color = 'green')
 
+plt.xlabel("Distanse langs x-aksen [AU]")
+plt.ylabel("Distanse langs y-aksen [AU]")
+plt.title("Rakettbaner simulert (grønn)\nog gjennomført (rød)")
 plt.show()

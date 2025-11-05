@@ -155,9 +155,9 @@ if __name__ == '__main__':
     T_0 = mission.time_after_launch
     dT = PlanetPositionFunction.dt
     dt = 1/1000000
-    
+    T_0 = mission.time_after_launch + dT
 
-    N = 1
+    N = 3140000 * 2
     
     R, v, a, T = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
    
@@ -165,8 +165,7 @@ if __name__ == '__main__':
     plt.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)] )
     R = R.T
     
-    plt.plot(R[0], R[1], 'o')
-    print(mission.system.radii[0]*1000/AU)
+    plt.plot(R[0], R[1])
 
     ranged = PlanetPositionFunction.range(0,6)
     plt.plot(ranged[0][1],ranged[1][1],color = "red")
