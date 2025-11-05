@@ -750,7 +750,7 @@ def TrilaterationAlgorithm(t,Distances):
     # Defining an array of positions, one for each planet.
     PlanetPositions = np.zeros((len(PlanetDistances),2))
     for p in range(len(PlanetPositions)):
-        PlanetPositions[i] = PlanetPositionFunction(t,p)
+        PlanetPositions[p] = PlanetPositionFunction(t,p)
 
     # Running the algorithm to find the angle from the sun at which our position is at.
     Angle = BinaryLeastSquares(StarDistance,Range,PlanetPositions,PlanetDistances)
@@ -1013,9 +1013,9 @@ def main(mission, t_0):
 
 if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
-    mission = SpaceMission(seed)  
-
-    main(mission, t_0=0.2*12)
+    mission = SpaceMission(seed, has_moons= False)  
+    system = mission.system
+    main(mission, t_0=0.2*12)#(2*np.pi)*((system.semi_major_axes[0]**3)/(const.G_sol*(system.star_mass + system.masses[0])))**(1/2))
 
     with open ("Mission.pkl", 'wb') as file:
         pckl.dump(mission, file)

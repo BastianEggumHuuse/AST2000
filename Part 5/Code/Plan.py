@@ -52,7 +52,7 @@ R_0 = Numericalsim(t, 0)
 R_1 = Numericalsim(t, 1)
 
 
-dt = 1/100000
+dt = 1/1000000
 dT = Numericalsim.dt
 M = np.zeros(mission.system._number_of_planets + 1)
 M[:-1] = mission.system.masses

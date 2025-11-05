@@ -11,4 +11,4 @@ Seed = utils.get_seed('bmthune')
 
 Expreiment = RelativityExperiments(Seed)
 
-Expreiment.cosmic_pingpong(1)
+Expreiment.twin_paradox(1)
