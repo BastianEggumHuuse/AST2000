@@ -20,11 +20,21 @@ OrbitTimes   = npz["OrbitTimes"]
 r = npz["r"]
 Info = (TotalTime, NumSteps, OrbitTimes, r)
 
-
 #Unpickling launch
 with open("Mission.pkl", 'rb') as file:
     mission = pkl.load(file)
 
+def FuelEstimate(fuel_mass, mission, dV):
+
+    NumMotors = int((1000000**3)/60) # 1/10 qube meter grid :)
+    NumParticles = 10**5
+
+    dv = np.linalg.norm(dV) * (const.AU / (60*60*24*365))
+
+    f = FuelRocket(fuel_mass,dv,NumMotors,mission,NumParticles)
+    f.TimeLoop()
+
+    return fuel_mass - f.FuelMass
 
 
 #First find a good starting time:

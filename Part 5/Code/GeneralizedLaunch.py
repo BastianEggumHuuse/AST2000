@@ -659,6 +659,9 @@ def PlanetDifference(Pos,PlanetPositions,TruePlanetDistances,printer = False):
         PlanetDeviations[i][0] = Deviation[0]
         PlanetDeviations[i][1] = Deviation[1]
 
+        if(printer):
+            print("DeviatioN: " ,Deviation)
+
     TotalDifference = 0
 
     # Computing the sum of the difference between each computed distance, and each expected distance
@@ -743,7 +746,7 @@ def TrilaterationAlgorithm(t,Distances):
 
     # Defining star-distance and the range of angles
     StarDistance = Distances[-1]
-    Grain = 10
+    Grain = 15
     Range = np.linspace(0,2*np.pi,2**(Grain))
     
     # Defining an array of distances that doesn't include the sun
@@ -962,7 +965,6 @@ def main(mission, t_0):
     z = r_p[0] + 1j*r_p[1]
     Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
 
-
     print(f"\nGeneralized Position in solar system frame at t = {t_0}: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
     print(f"Generalized Velocity in solar system frame at t = {t_0}: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
 
@@ -1021,7 +1023,7 @@ if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
 
-    main(mission, t_0= 0.0001)
+    main(mission, t_0= 0.2 * 13)
 
     with open ("Mission.pkl", 'wb') as file:
         pckl.dump(mission, file)

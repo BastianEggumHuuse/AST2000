@@ -84,8 +84,8 @@ def Lerp(R_0,R_1, I):
 @njit
 def GravitationalAks(R,K,N_k,dt, M,T_0, info):
     
-    a_x = G_sol *M[-1]*R[K][0]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
-    a_y = G_sol *M[-1]*R[K][1]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
+    a_x = -G_sol *M[-1]*R[K][0]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
+    a_y = -G_sol *M[-1]*R[K][1]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
 
     
     for j in range(len(M)-1):
@@ -104,6 +104,9 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
             
         a_x += r_x * gamma
         a_y += r_y * gamma
+
+    if(K == 0):
+        print(a_x,a_y)
 
     return a_x, a_y
 
@@ -134,7 +137,6 @@ def Main(R_0, v_0, dt,dT, n, M,T_0, info):
 
     a = np.zeros((N,2))
     a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
-    print(a[0])
 
 
     for K in range(N-1):
@@ -155,7 +157,7 @@ if __name__ == '__main__':
     T_0 = mission.time_after_launch
     dT = PlanetPositionFunction.dt
     dt = 1/1000000
-    T_0 = mission.time_after_launch + dT
+    T_0 = mission.time_after_launch # + dT
 
     N = 3140000 * 2
     
