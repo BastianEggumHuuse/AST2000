@@ -53,21 +53,18 @@ boost_v_sim = np.zeros((len(boost_t_sim),2))
 # List of boost times (launch)
 boost_t_launch = np.array([
     0,
-    0.24,
-    0.15,
-    0.40,
-    0.20,
-    0.00536,
+    0.001,
+    0.001,
+    0.001,
+    #0.1,
     ])
 
 # List of boost dvs (launch)
 boost_v_launch = np.array([
-    (0.5,-0.2),
     (0,0),
     (0,0),
-    (0.1,-0.09),
-    (0,-0.03),
-    (0,0)
+    (0,0),
+    (0,0),
      ])
 
 # Beginning travel
@@ -104,6 +101,8 @@ for i in range(len(boost_t_launch)-1):
     # Boosting sim
     if(i < len(boost_t_sim) - 1):
         V_sim[-1] += boost_v_sim[i]
+    print(f"REMAINING FUEL : {travel.remaining_fuel_mass}")
+
 
     # Coasting
     travel.coast(boost_t_launch[i+1])
@@ -127,7 +126,6 @@ V_launch = np.concatenate((V_launch,np.array([V_o])))
 # Plotting
 
 a_launch_0 = (V_launch[2] - V_launch[1])/dt
-print("acc_0", a_launch_0)
 
 
 fig, ax = plt.subplots()
@@ -136,9 +134,8 @@ ax.plot(R_planets[0][0],R_planets[1][0])
 ax.plot(R_planets[0][1],R_planets[1][1])
 R_p = FindR(t_o, 1)
 ax.plot(R_p[0], R_p[1], 'o', color = 'blue' )
-ax.plot(R_sim[:,0],R_sim[:,1], color = 'red')
-print(R_sim)
-ax.plot(R_launch[:,0],R_launch[:,1], '.', color = 'green')
+ax.plot(R_sim[:,0],R_sim[:,1], color = 'green')
+ax.plot(R_launch[:,0],R_launch[:,1], color = 'red')
 
 l = np.linalg.norm(R_launch[-1][-1])*(M[1]/(M[-1]*10))**0.5
 OrbitRadi = plt.Circle(R_p, l, color = 'blue', fill = False, ls = '-')
@@ -150,16 +147,11 @@ r = R_o - R_p
 r_hat = r/np.linalg.norm(r)
 e = np.array([r_hat[1],-r_hat[0]])
 
-print(f'fuel{((const.G_sol * mission.system.masses[1]/(np.linalg.norm(r)))**0.5) * e + FindR.GetVelocity(t_o, 1)}')
-
-
 v_stable = ((const.G_sol * mission.system.masses[1]/(np.linalg.norm(r)))**0.5) * e + FindR.GetVelocity(t_o, 1)
 dV = -(v_stable - V_o) 
-print(dV)
 travel.boost(dV)
 t_o,R_o,V_o = travel.orient()
-
-print(f'possisjonen er {R_o} og farten er {V_o} og tider er {t_o}')
+print(f"REMAINING FUEL : {travel.remaining_fuel_mass}")
 
 plt.xlabel("Distanse langs x-aksen [AU]")
 plt.ylabel("Distanse langs y-aksen [AU]")

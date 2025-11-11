@@ -129,6 +129,7 @@ def OrbitAnalysis(R,THETA):
     semi_minor_angle = peri_angle + np.pi/2
     #semi_minor_index = np.where()
 
+    i = 0
     for i in range(peri_index,len(THETA)-1):
         if(THETA[i] % semi_minor_angle < THETA[i+1] % semi_minor_angle):
             break
@@ -174,10 +175,10 @@ if __name__ == "__main__":
     Filepath = "NumericalOrbitData.npz"
     planet_positions = NumericalOrbitFunction(Filepath)
 
-    r_0 = np.array((3.875769667,-0.44854012)) * const.AU
-    v_0 = np.array((0.52327867,5.41215448)) * (const.AU / (60*60*24*365))
-    t_0 = 3.195272019348075
-    m_0 = mission.spacecraft_mass + 500
+    r_0 = np.array((2.91050526,2.50762015)) * const.AU
+    v_0 = np.array((-3.44042026,3.54089592)) * (const.AU / (60*60*24*365))
+    t_0 = 3.8499120193480745
+    m_0 = mission.spacecraft_mass + 37.4
 
     r_p = planet_positions(t_0,1) * const.AU
     v_p = planet_positions.GetVelocity(t_0,1) * (const.AU / (60*60*24*365))

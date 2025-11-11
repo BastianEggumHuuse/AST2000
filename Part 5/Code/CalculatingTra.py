@@ -134,8 +134,6 @@ def Main(R_0, v_0, dt,dT, n, M,T_0, info):
 
     a = np.zeros((N,2))
     a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
-    print(a[0])
-
 
     for K in range(N-1):
         timestep(R,v,a,dt,N_k, K, M,T_0, info)
@@ -148,6 +146,29 @@ if __name__ == '__main__':
         mission = pkl.load(file)
     R_0 = mission._position_after_launch
     
+    # Interpolation Tests
+    print("---  Interpolation  Tests  ---")
+
+    Interpolations = [
+        [np.array([0,0]),np.array([1,0]),0.4,np.array([0.4,0])],
+        [np.array([2,0]),np.array([3,0]),0.4,np.array([2.4,0])],
+        [np.array([2,5]),np.array([3,4]),0.7,np.array([2.7,4.3])],
+        [np.array([2313.023,5283.382]),np.array([1000.2,1392.2321]),0.5,np.array([1656.6115,3337.80705])],
+        ]
+
+    for i in Interpolations:
+        print(f"Start : {i[0]}, End : {i[1]}, Interpolator : {i[2]}, Expected Value : {i[3]}, Output : {Lerp(i[0],i[1],i[2])}")
+
+    print("")
+
+    for i in Interpolations:
+        Lerped = np.array(Lerp(i[0],i[1],i[2])) - i[0]
+        Lerped = np.linalg.norm(Lerped) / np.linalg.norm(i[1] - i[0])
+        Lerped = np.linalg.norm(Lerped)
+        print(f"Start : {i[0]}, End : {i[1]}, Interpolator : {i[2]}, Percent of diff : {Lerped:.5f}")
+
+    print("--- Finished Interpolation ---")
+
     v_0 =mission._velocity_after_launch
     M = np.zeros(mission.system._number_of_planets + 1)
     M[:-1] = mission.system.masses
@@ -172,5 +193,10 @@ if __name__ == '__main__':
 
     plt.show()
 
-    
 
+"""
+Output:
+
+
+
+"""
