@@ -154,11 +154,3 @@ travel.record_destination(1)
 
 with open ("Mission.pkl", 'wb') as file:
     pkl.dump(mission, file)
-
-print(f'fuel{travel.remaining_fuel_mass}')
-print(f'possisjonen er {R_o} og farten er {V_o} og tider er {t_o}')
-
-plt.xlabel("Distanse langs x-aksen [AU]")
-plt.ylabel("Distanse langs y-aksen [AU]")
-plt.title("Rakettbaner simulert (grønn)\nog gjennomført (rød)")
-plt.show()
