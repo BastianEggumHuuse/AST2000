@@ -743,7 +743,7 @@ def TrilaterationAlgorithm(t,Distances):
 
     # Defining star-distance and the range of angles
     StarDistance = Distances[-1]
-    Grain = 10
+    Grain = 15
     Range = np.linspace(0,2*np.pi,2**(Grain))
     
     # Defining an array of distances that doesn't include the sun
@@ -961,7 +961,6 @@ def main(mission, t_0):
     r_p = GenRocket.R_planets(t_0,0)
     z = r_p[0] + 1j*r_p[1]
     Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
-
 
     print(f"\nGeneralized Position in solar system frame at t = {t_0}: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
     print(f"Generalized Velocity in solar system frame at t = {t_0}: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
