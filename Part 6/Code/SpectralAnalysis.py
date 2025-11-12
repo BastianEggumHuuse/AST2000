@@ -59,7 +59,7 @@ def ChiRange(fluxes, noises, L_0,M):
 
     for i in range(len(L_0)):
 
-        i_l_min,i_l_max = FindLambda(L_0[0]) # Note that these are indexes
+        i_l_min,i_l_max = FindLambda(L_0[i]) # Note that these are indexes
 
         flux_range = fluxes[i_l_min:i_l_max]
         noise_range = noises[i_l_min:i_l_max]
@@ -77,8 +77,8 @@ def FindLambda(l_0):
     l_max = l_0 + d_l
     l_min = l_0 - d_l
 
-    i_max = l_max // 0.0005
-    i_min = l_min // 0.0005
+    i_max = l_max // 0.00024
+    i_min = l_min // 0.00024
 
     return int(i_min),int(i_max)
 
