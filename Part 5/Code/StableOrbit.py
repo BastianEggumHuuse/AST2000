@@ -271,18 +271,27 @@ if __name__ == "__main__":
     Filepath = "NumericalOrbitData.npz"
     planet_positions = NumericalOrbitFunction(Filepath)
 
-    t_0 = 3
+    r_0 = np.array((2.91050526,2.50762015)) * const.AU
+    v_0 = np.array((-3.44042026,3.54089592)) * (const.AU / (60*60*24*365))
+    t_0 = 3.8499120193480745
+    m_0 = mission.spacecraft_mass + 37.4
 
-    # Planet info
-    planet_position = planet_positions(3,1) * const.AU
-    planet_radius = mission.system.radii[1] * 1000
-    planet_mass = mission.system.masses[1] * const.m_sun
+    r_p = planet_positions(t_0,1) * const.AU
+    v_p = planet_positions.GetVelocity(t_0,1) * (const.AU / (60*60*24*365))
+    m_p = mission.system.masses[1] * const.m_sun
 
-    # Spacecraft info
-    spacecraft_direction = np.array([1,0])/np.linalg.norm(np.array([1,0]))
-    spacecraft_position = planet_position + spacecraft_direction * planet_radius * 3
-    spacecraft_velocity = np.array([0.0001,1]) * ((G*planet_mass)/np.linalg.norm(spacecraft_position - planet_position))**0.5
-    spacecraft_mass = mission.spacecraft_mass
+    v_0 = v_0 - v_p
 
-    OrbitSimulation(spacecraft_position,spacecraft_velocity,spacecraft_mass,planet_position,np.zeros(2),planet_mass)
+    # # Planet info
+    # planet_position = planet_positions(3,1) * const.AU
+    # planet_radius = mission.system.radii[1] * 1000
+    # planet_mass = mission.system.masses[1] * const.m_sun
+
+    # # Spacecraft info
+    # spacecraft_direction = np.array([1,0])/np.linalg.norm(np.array([1,0]))
+    # spacecraft_position = planet_position + spacecraft_direction * planet_radius * 3
+    # spacecraft_velocity = np.array([0.1,1]) * ((G*planet_mass)/np.linalg.norm(spacecraft_position - planet_position))**0.5
+    # spacecraft_mass = mission.spacecraft_mass
+
+    OrbitSimulation(r_0,v_0,m_0,r_p,m_p)
 

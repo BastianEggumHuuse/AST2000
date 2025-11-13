@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from numba import njit
 import pickle as pkl 
 
+from GeneralizedLaunch import NumericalOrbitFunction,FuelRocket
 from GeneralizedLaunch import NumericalOrbitFunction
 from CalculatingTra import Main as Coast
 # AST imports
@@ -20,11 +21,21 @@ OrbitTimes   = npz["OrbitTimes"]
 r = npz["r"]
 Info = (TotalTime, NumSteps, OrbitTimes, r)
 
-
 #Unpickling launch
 with open("Mission.pkl", 'rb') as file:
     mission = pkl.load(file)
 
+def FuelEstimate(fuel_mass, mission, dV):
+
+    NumMotors = int((1000000**3)/60) # 1/10 qube meter grid :)
+    NumParticles = 10**5
+
+    dv = np.linalg.norm(dV) * (const.AU / (60*60*24*365))
+
+    f = FuelRocket(fuel_mass,dv,NumMotors,mission,NumParticles)
+    f.TimeLoop()
+
+    return fuel_mass - f.FuelMass
 
 
 #First find a good starting time:
@@ -33,7 +44,7 @@ t = np.arange(0,5, 0.2)
 
 Numericalsim = NumericalOrbitFunction(FilePath)
 R_p = Numericalsim.range(0,10)
-"""
+
 plt.plot(R_p[0][0],R_p[1][0])
 plt.plot(R_p[0][1],R_p[1][1])
 
@@ -45,14 +56,14 @@ for t in t:
     plt.plot(R_0[0], R_0[1], 'o')
     plt.plot(R_1[0], R_1[1], 'o')
  
-"""
+
 t = 2.8
 
 R_0 = Numericalsim(t, 0)
 R_1 = Numericalsim(t, 1)
 
 
-dt = 1/100000
+dt = 1/1000000
 dT = Numericalsim.dt
 M = np.zeros(mission.system._number_of_planets + 1)
 M[:-1] = mission.system.masses

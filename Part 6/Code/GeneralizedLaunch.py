@@ -743,7 +743,7 @@ def TrilaterationAlgorithm(t,Distances):
 
     # Defining star-distance and the range of angles
     StarDistance = Distances[-1]
-    Grain = 15
+    Grain = 10
     Range = np.linspace(0,2*np.pi,2**(Grain))
     
     # Defining an array of distances that doesn't include the sun
@@ -916,29 +916,6 @@ def main(mission, t_0):
 
     First, it creates the file containing the planet positions
     """
-<<<<<<< HEAD
-
-    if(False):
-        system = mission.system
-        # Getting initial conditions
-        R0 = system.initial_positions
-        V0 = system.initial_velocities
-        # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
-        # To make sure we pass the 20 rotations mark, we multiply the time with 2
-        OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
-        TotalTime = OrbitTimes[0] * 20 * 2
-
-        # Instantiating the Numerical Orbit class (and running the loop)
-        # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
-        # Increasing the steps per year would then only reduce performance.
-        Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
-        r,v,a,t = Orbit.loop()
-
-        # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
-        # We use this file later, to circumvent having to run the simulation again.
-        config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
-        np.savez("NumericalOrbitData",r = r, v = v, a = a,config = config,OrbitTimes = OrbitTimes)
-=======
     # system = mission.system
     # # Getting initial conditions
     # R0 = system.initial_positions
@@ -958,7 +935,6 @@ def main(mission, t_0):
     # # We use this file later, to circumvent having to run the simulation again.
     # config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
     # np.savez("NumericalOrbitData",r = r, v = v, a = a,config = config,OrbitTimes = OrbitTimes)
->>>>>>> 67183f461ebed095d6c227c4b8a655588ffe42cf
 
     """
     Then, it simulates the launch of the rocket
@@ -985,6 +961,7 @@ def main(mission, t_0):
     r_p = GenRocket.R_planets(t_0,0)
     z = r_p[0] + 1j*r_p[1]
     Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
+
 
     print(f"\nGeneralized Position in solar system frame at t = {t_0}: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
     print(f"Generalized Velocity in solar system frame at t = {t_0}: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
