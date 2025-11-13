@@ -1,12 +1,12 @@
 # BRUKER IKKE KODEMAL
 # Skrevet av Bastian Eggum Huuse og Bendik Thune
 
-
 # Regular imports
 import numpy             as np
 import matplotlib.pyplot as plt
 from numba import njit
 import pickle as pkl 
+import sys
 
 from GeneralizedLaunch import NumericalOrbitFunction
 # AST imports
@@ -25,8 +25,6 @@ NumSteps     = int(config[2])
 OrbitTimes   = npz["OrbitTimes"]
 r = npz["r"]
 Info = (TotalTime, NumSteps, OrbitTimes, r)
-
-
 
 @njit
 def FindR(t,p, info):
@@ -71,21 +69,32 @@ def FindR(t,p, info):
     y = (r[1][p][Index])
     # Returning vector
     return(np.array([x,y]))
+
 AU = const.AU
 G_sol = const.G_sol
 
 @njit
 def Lerp(R_0,R_1, I):
-    dR_x = R_0[0] - R_1[0]
-    dR_y = R_0[1] - R_1[1]
+    dR_x = R_1[0] - R_0[0]
+    dR_y = R_1[1] - R_0[1]
     
-    return R_0[0] + I* dR_x, R_0[1] + I*dR_y
+    R_x = R_0[0] + dR_x * I
+    R_y = R_0[1] + dR_y * I
+
+    return R_x,R_y
 
 @njit
 def GravitationalAks(R,K,N_k,dt, M,T_0, info):
+    
+    if(K == 1):
+        print(R[K])
+
     a_x = -G_sol *M[-1]*R[K][0]/ ((R[K][0])**2 + R[K][1]**2)**(3/2)
     a_y = -G_sol *M[-1]*R[K][1]/ ((R[K][0])**2 + R[K][1]**2)**(3/2)
-    
+
+    if(K == 1):
+        print(a_x,a_y)
+
     for j in range(len(M)-1):
         
         R_0 = FindR(T_0 + K*dt, j, info)
@@ -98,48 +107,101 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
         r_y = R[K][1] - R_p_y
 
         gamma = -G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
-        
+
         a_x += r_x * gamma
         a_y += r_y * gamma
-        
-    
+
     return a_x, a_y
 
 @njit
-def timestep(R,v,a,dt, N_k, K, M, T_0, info):
-    R[K+1][0] = R[K][0] + v[K][0] * dt + 1/2*a[K][0]*dt**2
-    R[K+1][1] = R[K][1] + v[K][1] * dt + 1/2*a[K][1]*dt**2
+def GravitationalAcceleration(R,M,dt,N_k,k,t_0,Info):
+    
+    # Calculating the acceleration from the sun
+    r = R[k]
+    r_len = (r[0]**2 + r[1]**2)**0.5
+    r_hat_x = r[0]/r_len
+    r_hat_y = r[1]/r_len
+    
+    a = -((G_sol * M[-1])/(r_len**2))
+    a_x = a * r_hat_x
+    a_y = a * r_hat_y
 
-    a[K+1] = GravitationalAks(R,K+1,N_k,dt, M, T_0, info)
-    
-    v[K+1][0] = v[K][0] + 0.5*(a[K][0] + a[K+1][0])*dt
-    v[K+1][1] = v[K][1] + 0.5*(a[K][1] + a[K+1][1])*dt
-        
-    
+    t = t_0 + k*dt
+    t_1 = t_0 + k*dt + (N_k-1) * dt
+    interpolator = ((k)%N_k)/N_k
+
+    for i in range(len(M) - 1):
+
+        r_p_0 = FindR(t,i,Info)
+        r_p_1 = FindR(t_1,i,Info)
+        r_p = Lerp(r_p_0,r_p_1,interpolator)
+
+        r_x = R[k][0] - r_p[0]
+        r_y = R[k][1] - r_p[1]
+
+        r = np.zeros(2); r[0] = r_x; r[1] = r_y
+        r_len = (r[0]**2 + r[1]**2)**0.5
+        r_hat_x = r[0]/r_len
+        r_hat_y = r[1]/r_len
+
+        a = -((G_sol * M[i])/(r_len**2))
+        a_x += a * r_hat_x
+        a_y += a * r_hat_y
+
+    return a_x,a_y
 
 @njit
+def timestep(R,v,a,dt, N_k, K, M, T_0, info):
+    R[K+1][0] = R[K][0] + v[K][0] * dt + 0.5*a[K][0]*dt**2
+    R[K+1][1] = R[K][1] + v[K][1] * dt + 0.5*a[K][1]*dt**2
+
+    #a[K+1] = GravitationalAks(R,K+1,N_k,dt, M, T_0, info)
+    a[K+1] = GravitationalAcceleration(R,M,dt,N_k,K+1, T_0, info)
+
+    if(K == 0):
+
+        print(a[K])
+        print(a[K+1])
+
+    v[K+1][0] = v[K][0] + 0.5*(a[K][0] + a[K+1][0])*dt
+    v[K+1][1] = v[K][1] + 0.5*(a[K][1] + a[K+1][1])*dt
+
+#@njit
 def Main(R_0, v_0, dt,dT, N, M,T_0, info):
     
     N_k = np.floor(dT/dt)
-    R = np.zeros((N,2))
+    R = np.zeros((N+1,2))
     R[0] = R_0
 
-    v = np.zeros((N,2))
+    v = np.zeros((N+1,2))
     v[0] = v_0
 
-    a = np.zeros((N,2))
-    a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
+    a = np.zeros((N+1,2))
+    #a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
+    #a[0] = np.array(GravitationalAcceleration(R,M,dt,N_k,0, T_0, info))
+    
 
-    for K in range(N-1):
+    r = R[0] - FindR(T_0,0,info)
+    r_hat = r/np.linalg.norm(r)
+    a[0] = -((G_sol*M[0])/np.linalg.norm(r)) * r_hat
+
+    r = R[0]
+    r_hat = r/np.linalg.norm(r)
+    a[0] += -((G_sol*M[-1])/np.linalg.norm(r)) * r_hat
+    
+
+
+    for K in range(N):
         timestep(R,v,a,dt,N_k, K, M,T_0, info)
     T = dt*N
     return R,v,a, T
 
 if __name__ == '__main__':
+
     with open("Mission.pkl", 'rb') as file:
         mission = pkl.load(file)
+
     R_0 = mission._position_after_launch
-    
     v_0 = mission._velocity_after_launch
     
     M = np.zeros(mission.system._number_of_planets + 1)
@@ -148,7 +210,7 @@ if __name__ == '__main__':
     
     dT = PlanetPositionFunction.dt
     dt = 1/1000000
-    T_0 = mission.time_after_launch + dT
+    T_0 = mission.time_after_launch# + dT
 
     N = 3140000
     
@@ -159,6 +221,12 @@ if __name__ == '__main__':
     R = R.T
     
     plt.plot(R[0], R[1])
+
+    # Rocket pos
+    plt.plot(R[0][:1000],R[1][:1000])
+
+    r_p_1 = PlanetPositionFunction.range(0,10)
+    plt.plot(r_p_1[0][1],r_p_1[1][1])
     plt.show()
     
 

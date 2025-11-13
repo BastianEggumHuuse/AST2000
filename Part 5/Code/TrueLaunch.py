@@ -1,3 +1,6 @@
+# BRUKER IKKE KODEMAL
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
+
 # Regular imports
 import numpy             as np
 import matplotlib.pyplot as plt
@@ -39,41 +42,33 @@ M = np.zeros(mission.system._number_of_planets + 1)
 M[:-1] = mission.system.masses
 M[-1] = mission.system.star_mass
 
+N_Steps = 100
+
 # List of boost times (simulation)
-boost_t_sim = np.array([
-    t,
-    t + 0.24,
-    t + 0.47,
-    t + 0.479
-    ])
+boost_t_sim = np.array(
+    [(t + i*dt) for i in range(0,N_Steps)]
+    )
 
 # List of boost dvs (simulation)
-boost_v_sim = np.array([
-    (0,0),
-    (0.14,0.29),
-    (-0.1,0),
-    (0,0)
-    ])
+boost_v_sim = np.array(
+    [(0,0)] * N_Steps
+    )
 
 # List of boost times (launch)
-boost_t_launch = np.array([
-    t,
-    t + 0.24,
-    t + 0.47,
-    t + 0.479,
-    ])
+boost_t_launch = np.array(
+    [(t + i*dt) for i in range(0,N_Steps)]
+    )
 
 # List of boost dvs (launch)
-boost_v_launch = np.array([
-    #(0.4,-0.7),
-    (0.0,0.0),
-    (0.14,0.29),
-    (-0.1,0),
-    (0,0)
-    ])
+boost_v_launch = np.array(
+    [(0,0)] * N_Steps
+    )
 
 # Beginning travel
 travel = mission.begin_interplanetary_travel()
+
+vs = []
+rs = []
 
 for i in range(len(boost_t_launch)-1):
 
@@ -81,6 +76,9 @@ for i in range(len(boost_t_launch)-1):
 
     # Orienting ourselves
     t_o,R_o,V_o = travel.orient()
+
+    vs.append([V_o,V_sim[-1]])
+    rs.append([R_o,R_sim[-1]])
 
     # Updating launch data
     R_launch = np.concatenate((R_launch,np.array([R_o])))
@@ -111,15 +109,21 @@ t_o,R_o,V_o = travel.orient()
 R_launch = np.concatenate((R_launch,np.array([R_o])))
 V_launch = np.concatenate((V_launch,np.array([V_o])))
 
-# Plotting
+for i in range(10):
+    print(f"Time-step {i}")
+    print("Position: ")
+    print(f"orientation : {rs[i][0]} | simulation : {rs[i][1]}")
+    print("Velocity: ")
+    print(f"orientation : {vs[i][0]} | simulation : {vs[i][1]}")
 
+# Plotting
 fig, ax = plt.subplots()
 
 ax.plot(R_planets[0][0],R_planets[1][0])
 ax.plot(R_planets[0][1],R_planets[1][1])
 
-ax.plot(R_sim[:,0],R_sim[:,1],ls = "-")
-ax.plot(R_launch[:,0],R_launch[:,1])
+ax.plot(R_sim[:,0],R_sim[:,1],".")
+ax.plot(R_launch[:,0],R_launch[:,1],".")
 
 plt.xlabel("Distanse langs x-aksen [AU]")
 plt.ylabel("Distanse langs y-aksen [AU]")
