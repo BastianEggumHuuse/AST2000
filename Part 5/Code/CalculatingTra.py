@@ -6,7 +6,6 @@ import numpy             as np
 import matplotlib.pyplot as plt
 from numba import njit
 import pickle as pkl 
-import sys
 
 from GeneralizedLaunch import NumericalOrbitFunction
 # AST imports
@@ -69,7 +68,6 @@ def FindR(t,p, info):
     y = (r[1][p][Index])
     # Returning vector
     return(np.array([x,y]))
-
 AU = const.AU
 G_sol = const.G_sol
 
@@ -78,10 +76,7 @@ def Lerp(R_0,R_1, I):
     dR_x = -R_0[0] + R_1[0]
     dR_y = -R_0[1] + R_1[1]
     
-    R_x = R_0[0] + dR_x * I
-    R_y = R_0[1] + dR_y * I
-
-    return R_x,R_y
+    return R_0[0] + I* dR_x, R_0[1] + I*dR_y
 
 @njit
 def GravitationalAks(R,K,N_k,dt, M,T_0, info):
@@ -110,17 +105,9 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
     return a_x, a_y
 
 @njit
-def GravitationalAcceleration(R,M,dt,N_k,k,t_0,Info):
-    
-    # Calculating the acceleration from the sun
-    r = R[k]
-    r_len = (r[0]**2 + r[1]**2)**0.5
-    r_hat_x = r[0]/r_len
-    r_hat_y = r[1]/r_len
-    
-    a = -((G_sol * M[-1])/(r_len**2))
-    a_x = a * r_hat_x
-    a_y = a * r_hat_y
+def timestep(R,v,a,dt, N_k, K, M, T_0, info):
+    R[K+1][0] = R[K][0] + v[K][0] * dt + 1/2*a[K][0]*dt**2
+    R[K+1][1] = R[K][1] + v[K][1] * dt + 1/2*a[K][1]*dt**2
 
     a[K+1] = GravitationalAks(R,K+1,N_k,dt, M, T_0, info)
     
@@ -135,39 +122,25 @@ def Main(R_0, v_0, dt,dT, n, M,T_0, info):
 
     
     N_k = np.floor(dT/dt)
-    R = np.zeros((N+1,2))
+    R = np.zeros((N,2))
     R[0] = R_0
     
 
-    v = np.zeros((N+1,2))
+    v = np.zeros((N,2))
     v[0] = v_0
 
-    a = np.zeros((N+1,2))
-    #a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
-    #a[0] = np.array(GravitationalAcceleration(R,M,dt,N_k,0, T_0, info))
-    
+    a = np.zeros((N,2))
+    a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
 
-    r = R[0] - FindR(T_0,0,info)
-    r_hat = r/np.linalg.norm(r)
-    a[0] = -((G_sol*M[0])/np.linalg.norm(r)) * r_hat
-
-    r = R[0]
-    r_hat = r/np.linalg.norm(r)
-    a[0] += -((G_sol*M[-1])/np.linalg.norm(r)) * r_hat
-    
-
-
-    for K in range(N):
+    for K in range(N-1):
         timestep(R,v,a,dt,N_k, K, M,T_0, info)
         
     T = N*dt
     return R,v,a, T
 
 if __name__ == '__main__':
-
     with open("Mission.pkl", 'rb') as file:
         mission = pkl.load(file)
-
     R_0 = mission._position_after_launch
     
     # Interpolation Tests
