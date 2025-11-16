@@ -104,6 +104,40 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
 
     return a_x, a_y
 
+def GravitationAccelerations(R,K,N_k,dt, M,T_0, info):
+
+    A = []
+    Names = []
+
+    a_x = -G_sol *M[-1]*R[K][0]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
+    a_y = -G_sol *M[-1]*R[K][1]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
+    a_sol = np.array([a_x,a_y])
+    Names.append("Sol")
+    A.append(np.linalg.norm(a_sol))
+
+    for j in range(len(M)-1):
+        
+        R_0 = FindR(T_0 + K*dt, j, info)
+                
+        R_1 = FindR(T_0 + (K+N_k-1)*dt,j, info)
+
+        R_p_x, R_p_y = Lerp(R_0, R_1, (K%N_k)/N_k) 
+
+        r_x = -R[K][0] + R_p_x
+        r_y = -R[K][1] + R_p_y
+
+        gamma = G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
+
+            
+        a_x += r_x * gamma
+        a_y += r_y * gamma
+        a = np.array([r_x * gamma,r_y * gamma])
+        A.append(np.linalg.norm(a))
+        Names.append(f"Planet {j + 1}")
+
+    return A,Names
+
+
 @njit
 def timestep(R,v,a,dt, N_k, K, M, T_0, info):
     R[K+1][0] = R[K][0] + v[K][0] * dt + 1/2*a[K][0]*dt**2
@@ -164,7 +198,7 @@ if __name__ == '__main__':
         Lerped = np.linalg.norm(Lerped)
         print(f"Start : {i[0]}, End : {i[1]}, Interpolator : {i[2]}, Percent of diff : {Lerped:.5f}")
 
-    print("--- Finished Interpolation ---")
+    print("--- Finished Interpolation --- \n\n")
 
     v_0 =mission._velocity_after_launch
     M = np.zeros(mission.system._number_of_planets + 1)
@@ -175,19 +209,63 @@ if __name__ == '__main__':
     dt = 1/1000000
     T_0 = mission.time_after_launch# + dT
 
-    N = 3140000 * 2
+    t = 3.14
+    N = int(t / dt)#3140000 * 2
     
     R, v, a, T = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
-   
-    
-    plt.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)] )
-    R = R.T
-    
-    plt.plot(R[0], R[1])
-
+    R_T = R.T
     ranged = PlanetPositionFunction.range(0,6)
-    plt.plot(ranged[0][1],ranged[1][1],color = "red")
 
+    print("---    Gravity    Tests    ---")
+
+    A_0,Names_0 = GravitationAccelerations(R,0,np.floor(dT/dt),dt, M, T_0, Info)
+    A_1,Names_1 = GravitationAccelerations(R,int(0.5 / dt),np.floor(dT/dt),dt, M, T_0, Info)
+
+    # Getting the first
+    A_0_first = max(A_0)
+    A_0_index = A_0.index(A_0_first)
+    Name_0_first = Names_0[A_0_index]
+    A_0.remove(A_0_first)
+    Names_0.remove(Name_0_first)
+
+    # Getting the second
+    A_0_second = max(A_0)
+    A_0_index = A_0.index(A_0_second)
+    Name_0_second = Names_0[A_0_index]
+
+    # Getting the first
+    A_1_first = max(A_1)
+    A_1_index = A_1.index(A_1_first)
+    Name_1_first = Names_1[A_1_index]
+    A_1.remove(A_1_first)
+    Names_1.remove(Name_1_first)
+
+    # Getting the second
+    A_1_second = max(A_1)
+    A_1_index = A_1.index(A_1_second)
+    Name_1_second = Names_1[A_1_index]
+
+    print("Strongest force at t = 0 and t = 0.5")
+    print(f"|t = 0 : [{Name_0_first:10} : {A_0_first:7.4e} AU/Y^2]|, |t = 0.5 : [{Name_1_first:10} : {A_1_first:7.4e} AU/Y^2]|")
+    print("Second strongest force at t = 0 and t = 0.5")
+    print(f"|t = 0 : [{Name_0_second:10} : {A_0_second:7.4e} AU/Y^2]|, |t = 0.5 : [{Name_1_second:10} : {A_1_second:7.4e} AU/Y^2]|")
+
+    print("--- Finished Gravity Tests ---\n\n")
+
+    ax = plt.axes()
+    ax.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],label = "Planet 1 bane")
+    ax.plot(ranged[0][1],ranged[1][1],label = "Planet 2 bane")
+    ax.plot(R_T[0], R_T[1],color = "limegreen", label = "Simulert rakettbane")
+        # Adding the star (not to scale)
+    star = plt.Circle((0, 0), 0.75, color = 'gold')
+    ax.add_patch(star)
+
+
+    plt.xlabel("Position langs x-aksen [AU]")
+    plt.ylabel("Position langs y-aksen [AU]")
+    plt.title(f"Simulert rakettbane for t_0 = 2.2 Y, og t = {t} Y")
+    plt.legend(loc = "upper right")
+    plt.axis("equal")
     plt.show()
 
 

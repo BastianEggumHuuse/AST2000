@@ -280,18 +280,30 @@ if __name__ == "__main__":
     v_p = planet_positions.GetVelocity(t_0,1) * (const.AU / (60*60*24*365))
     m_p = mission.system.masses[1] * const.m_sun
 
-    v_0 = v_0 - v_p
+    #v_0 = v_0 - v_p
 
-    # # Planet info
-    # planet_position = planet_positions(3,1) * const.AU
-    # planet_radius = mission.system.radii[1] * 1000
-    # planet_mass = mission.system.masses[1] * const.m_sun
+    # Printing initial conditions
+    print("Printing inital conditions: ")
+    print(f"Time of simulation: {t_0:7.4e}")
+    print(f"Rocket : |r_0 : [{r_0[0]:7.5e},{r_0[1]:7.5e}], v_0 : [{v_0[0]:7.5e},{v_0[1]:7.5e}], m_0 : {m_0:7.5e}|")
+    print(f"Planet : |r_p : [{r_p[0]:7.5e},{r_p[1]:7.5e}], v_p : [{v_p[0]:7.5e},{v_p[1]:7.5e}], m_p : {m_p:7.5e}|\n\n")
 
-    # # Spacecraft info
-    # spacecraft_direction = np.array([1,0])/np.linalg.norm(np.array([1,0]))
-    # spacecraft_position = planet_position + spacecraft_direction * planet_radius * 3
-    # spacecraft_velocity = np.array([0.1,1]) * ((G*planet_mass)/np.linalg.norm(spacecraft_position - planet_position))**0.5
-    # spacecraft_mass = mission.spacecraft_mass
+    # Displaying initial conditions
+    r_l = r_0 - r_p
+    v_l = v_0 - v_p
+    ax = plt.axes()
+    # Adding the rocket velocity
+    ax.quiver(r_l[0],r_l[1],v_l[0],v_l[1])
+    # Adding the rocket
+    ax.scatter(r_l[0],r_l[1],color = "firebrick")
+    # Adding the planet
+    planet = plt.Circle((0, 0), r_l[0]/10, color = 'royalblue')
+    ax.add_patch(planet)
+    # Showing plot
+    plt.xlabel("Posisjon langs x-aksen [m]") 
+    plt.ylabel("Posisjon langs y-aksen [m]") 
+    plt.axis("equal")
+    plt.show()
 
-    OrbitSimulation(r_0,v_0,m_0,r_p,m_p)
+    OrbitSimulation(r_0,v_0,m_0,r_p,v_p,m_p)
 
