@@ -51,7 +51,7 @@ def AngleAtZero(coordinate_at_time,elapsed_time,p_theta):
     float | the angle phi of the point given with coordinate_at_time, but at time = 0
     """
 
-    theta = coordinate_at_time[0]
+    theta = coordinate_at_time[1]
     
     theta_0 = theta - p_theta * elapsed_time
 
@@ -71,16 +71,21 @@ def FindAngle(landing_sequence):
     if(r[0] < 0):
         theta += (r[1]/abs(r[1]))*np.pi 
 
-    return theta,t
+    while(theta < 0):
+        theta += np.pi * 2
+
+    return r,theta,t
 
 if __name__ == "__main__":
 
     #Unpickling launch
     with open("Mission.pkl", 'rb') as file:
         mission = pkl.load(file)
+    
+    with open("Landing.pkl", 'rb') as file:
+        landing = pkl.load(file)
 
     # Beginning landing sequence
-    landing = mission.begin_landing_sequence()
     landing.look_in_direction_of_planet(1)
 
     # Getting initial conditions
@@ -89,36 +94,57 @@ if __name__ == "__main__":
     # Getting planet spin
     p_theta = (2*np.pi)/(mission.system.rotational_periods[1]*24*60*60)
 
-    d_t = (60*60*24)*0.03
+    d_t = 1400#(60*60*24)*0.01
     coords_list = []
 
     thetas = []
 
-    N = 10
-    for n in range(N):
+    # N = 10
+    # for n in range(N):
 
-        # Finding the position at the current time
-        r = mission.system.radii[1] * 1000
-        theta,t = FindAngle(landing)
+    #     # Finding the position at the current time
+    #     r = mission.system.radii[1] * 1000
+    #     theta,t = FindAngle(landing)
 
-        # Defining our coordinate vector
-        coord_vector = np.array((r,theta,0))
+    #     # Defining our coordinate vector
+    #     coord_vector = np.array((r,theta,0))
 
-        # Finding the vector at time = 0
-        theta_0 = AngleAtZero(coord_vector,t,p_theta)
-        coord_vector_0 = np.array((r,theta_0,0))
+    #     # Finding the vector at time = 0
+    #     theta_0 = AngleAtZero(coord_vector,t,p_theta)
+    #     coord_vector_0 = np.array((r,theta_0,0))
 
-        # saving data
-        coord_info = (coord_vector,coord_vector_0,t)
-        coords_list.append(coord_info)
+    #     # saving data
+    #     coord_info = (coord_vector,coord_vector_0,t)
+    #     coords_list.append(coord_info)
 
-        # Taking photo
-        landing.take_picture(f"Preparation_image_at_{t}_time")
+    #     # Taking photo
+    #     landing.take_picture(f"Preparation_image_at_{int(t)}_time.xml")
 
-        # Updating position
-        landing.fall(d_t)
+    #     # Updating position
+    #     landing.fall(d_t)
 
-        thetas.append(theta)
+    #     thetas.append(theta)
+    _,_,t_0 = FindAngle(landing)
+    print("Initial angle: ", np.rad2deg(FindAngle(landing)[1]))
+
+    boost = np.array([0,0,-1000])
+    landing.boost(boost)
+    landing.fall(100)
+    landing.take_picture(f"Target.xml")
+    boost = np.array([0,0,-10])
+
+    r           = mission.system.radii[1] * 1000
+    r_vec,phi,t = FindAngle(landing)
+    theta       = np.arccos((-1000 * (t-t_0))/np.linalg.norm(r_vec))
+
+    r_0     = r
+    phi_0   = AngleAtZero(np.array((r,phi,theta)),t-t_0,p_theta)
+    theta_0 = theta
+
+    print("Our landing position at time t = 0:")
+    print(f"[{r_0},{np.rad2deg(phi_0)},{theta_0}]")
+    print(f"Our landing position at time t = {t-t_0}:")
+    print(f"[{r},{np.rad2deg(phi)},{theta}]")
 
     plt.plot(range(len(thetas)),np.sin(thetas))
     plt.show()

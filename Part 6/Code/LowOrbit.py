@@ -67,8 +67,8 @@ landing.finish_video()
 
 
 
-with open ("Mission.pkl", 'wb') as file:
-    pkl.dump(mission, file)
+with open ("Landing.pkl", 'wb') as file:
+    pkl.dump(landing, file)
 
 plt.plot(np.arange(len(r_mean)),np.ones(len(r_mean))*np.linalg.norm(r_0))
 plt.plot(np.arange(len(r_mean)),r_mean)
