@@ -14,7 +14,9 @@ import ast2000tools.constants as const
 import ast2000tools.utils     as utils
 from ast2000tools.space_mission import SpaceMission
 
-# Constants
+# Ast init
+seed = utils.get_seed('bmthune')
+mission = SpaceMission(seed)
 G = const.G
 
 def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,planet_vel, planet_mass):
@@ -35,14 +37,20 @@ def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,
     Part 1, finding the initial conditions
     """
 
+    print("Printing initial conditions in two-body-system: ")
+
     # Finding distance from planet
     r_vec = spacecraft_pos - planet_pos
     r = np.linalg.norm(r_vec)
+    print(f"r   : {r / 1000:10.5e} km")
+    print(f"h   : {(r - mission.system.radii[1] * 1000)/1000:10.5e} km")
 
     # Finding radial velocity
     r_hat = r_vec / np.linalg.norm(r_vec)
     relative_vel = spacecraft_vel - planet_vel
     v_r = np.dot(relative_vel,r_hat)
+
+    print(f"v_r : {v_r:10.5e} m/s")
 
     # Finding angle
     if(r_vec[0] == 0):
@@ -57,6 +65,8 @@ def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,
     # Finding angular velocity
     v_theta_vec = relative_vel - (v_r * r_hat) # v_theta is orthogonal to v_r, so we simply remove the part of Spacecraft_vel that corresponds to the component v_r
     v_theta = np.linalg.norm(v_theta_vec)/r
+    print(f"v_t : {v_theta:10.5e} r/s")
+    print(f"t_p : {((2*np.pi)/v_theta)/(60*60*24):10.5e} days")
 
     # Finding the direction of the angular velocity
     dir = np.cross(r_hat,v_theta_vec)/np.linalg.norm(np.cross(v_theta_vec,r_hat))
@@ -65,6 +75,8 @@ def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,
     # Finding the angular momentum (using v_theta and r)
     # The angular momentum is conserved through the entire movement.
     l = ReducedMass(spacecraft_mass,planet_mass)*(r**2)*v_theta
+
+    print("\n")
 
     """
     Part 2, simulating the two-body-problem
@@ -109,10 +121,14 @@ def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,
     DiffAnalysis((a_0,a),(b_0,b),(e_0,e),(t_0,t),(apo_0,apo),(peri_0,peri))
 
     # Plotting final orbit
-    plt.plot((planet_pos[0] + R*np.cos(THETA)),(planet_pos[1] + R*np.sin(THETA)))
-    plt.plot(planet_pos[0],planet_pos[1],"o")
-    plt.axis("equal")
+    ax = plt.axes()
+    ax.plot((planet_pos[0] + R*np.cos(THETA)),(planet_pos[1] + R*np.sin(THETA)),color = "firebrick")
+    planet = plt.Circle((planet_pos[0],planet_pos[1]), R[0]/10, color = 'royalblue')
+    ax.add_patch(planet)
 
+    plt.xlabel("Posisjon langs x-aksen [m]") 
+    plt.ylabel("Posisjon langs y-aksen [m]") 
+    plt.axis("equal")
     plt.show()
 
 @njit
@@ -214,12 +230,12 @@ def PrintAnalysis(a,b,e,p,apo,peri):
     and time intervals are converted from seconds to hours
     """
 
-    print(f"Semi-major axis : {a / 1000:10.3f} km")
-    print(f"Semi-minor axis : {b / 1000:10.3f} km")
-    print(f"Eccentricity    : {e:10.3f}")
-    print(f"Orbital period  : {p/60/60:10.3f} hours")
-    print(f"Apoapsis        : {apo/1000:10.3f} km")
-    print(f"Periapsis       : {peri/1000:10.3f} km\n")
+    print(f"Semi-major axis : {a / 1000:15.3f} km")
+    print(f"Semi-minor axis : {b / 1000:15.3f} km")
+    print(f"Eccentricity    : {e:15.10f}")
+    print(f"Orbital period  : {p/(60*60*24):15.3f} days")
+    print(f"Apoapsis        : {apo/1000:15.3f} km")
+    print(f"Periapsis       : {peri/1000:15.3f} km\n")
 
 def DiffAnalysis(a,b,e,p,apo,peri):
 
@@ -264,10 +280,6 @@ def AngularVelocity(r,m1,m2,l):
 
 if __name__ == "__main__":
 
-    # Ast init
-    seed = utils.get_seed('bmthune')
-    mission = SpaceMission(seed)
-
     Filepath = "NumericalOrbitData.npz"
     planet_positions = NumericalOrbitFunction(Filepath)
 
@@ -307,3 +319,67 @@ if __name__ == "__main__":
 
     OrbitSimulation(r_0,v_0,m_0,r_p,v_p,m_p)
 
+"""
+
+Output:
+
+Printing inital conditions:
+Time of simulation: 3.8499e+00
+Rocket : |r_0 : [4.35405e+11,3.75135e+11], v_0 : [-1.63204e+04,1.67970e+04], m_0 : 1.13740e+03|
+Planet : |r_p : [4.35419e+11,3.75119e+11], v_p : [-1.56074e+04,1.74085e+04], m_p : 2.75444e+23|
+
+
+Printing initial conditions in two-body-system:
+r   : 2.08647e+04 km
+h   : 1.85601e+04 km
+v_r : 8.33766e-03 m/s
+v_t : 4.50190e-05 r/s
+t_p : 1.61536e+00 days
+----------- Finished  initialization -----------
+
+Printing data from first analysis:
+
+Semi-major axis :       20892.900 km
+Semi-minor axis :       20892.881 km
+Eccentricity    :    0.0013525927
+Orbital period  :           1.620 days
+Apoapsis        :       20921.160 km
+Periapsis       :       20864.641 km
+
+Printing data from second analysis:
+
+Semi-major axis :       20892.900 km
+Semi-minor axis :       20892.881 km
+Eccentricity    :    0.0013541199
+Orbital period  :           1.620 days
+Apoapsis        :       20921.192 km
+Periapsis       :       20864.609 km
+
+Printing relative differences between first and second analyses:
+
+Semi-major axis : 0.0000000
+Semi-minor axis : 0.0000000
+Eccentricity    : 0.0011278
+Orbital period  : 0.0000000
+Apoapsis        : 0.0000015
+Periapsis       : 0.0000015
+
+Printing data from final analysis conducted after 1.9969463470319635 years.:
+
+Semi-major axis :       20892.925 km
+Semi-minor axis :       20892.893 km
+Eccentricity    :    0.0017454974
+Orbital period  :           1.620 days
+Apoapsis        :       20929.393 km
+Periapsis       :       20856.456 km
+
+Printing relative differences between first and final analyses:
+
+Semi-major axis : 0.0000012
+Semi-minor axis : 0.0000006
+Eccentricity    : 0.2250961
+Orbital period  : 0.0000000
+Apoapsis        : 0.0003934
+Periapsis       : 0.0003924
+
+"""

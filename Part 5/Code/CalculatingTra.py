@@ -272,6 +272,24 @@ if __name__ == '__main__':
 """
 Output:
 
+---  Interpolation  Tests  ---
+Start : [0 0], End : [1 0], Interpolator : 0.4, Expected Value : [0.4 0. ], Output : (0.4, 0.0)
+Start : [2 0], End : [3 0], Interpolator : 0.4, Expected Value : [2.4 0. ], Output : (2.4, 0.0)
+Start : [2 5], End : [3 4], Interpolator : 0.7, Expected Value : [2.7 4.3], Output : (2.7, 4.3)
+Start : [2313.023 5283.382], End : [1000.2    1392.2321], Interpolator : 0.5, Expected Value : [1656.6115  3337.80705], Output : (1656.6115, 3337.80705)
 
+Start : [0 0], End : [1 0], Interpolator : 0.4, Percent of diff : 0.40000
+Start : [2 0], End : [3 0], Interpolator : 0.4, Percent of diff : 0.40000
+Start : [2 5], End : [3 4], Interpolator : 0.7, Percent of diff : 0.70000
+Start : [2313.023 5283.382], End : [1000.2    1392.2321], Interpolator : 0.5, Percent of diff : 0.50000
+--- Finished Interpolation ---
+
+
+---    Gravity    Tests    ---
+Strongest force at t = 0 and t = 0.5
+|t = 0 : [Planet 1   : 2.0273e+04 AU/Y^2]|, |t = 0.5 : [Sol        : 7.8854e+00 AU/Y^2]|
+Second strongest force at t = 0 and t = 0.5
+|t = 0 : [Sol        : 1.2167e+01 AU/Y^2]|, |t = 0.5 : [Planet 3   : 8.8837e-04 AU/Y^2]|
+--- Finished Gravity Tests ---
 
 """
