@@ -113,7 +113,7 @@ if __name__ == "__main__":
         coords_list.append(coord_info)
 
         # Taking photo
-        landing.take_picture(f"Preparation_image_at_time_{t}")
+        landing.take_picture(f"Preparation_image_at_{t}_time")
 
         # Updating position
         landing.fall(d_t)
