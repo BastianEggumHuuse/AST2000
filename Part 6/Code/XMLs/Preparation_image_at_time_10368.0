@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SerializedWorld xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<sun_col_r>0.820</sun_col_r>
+<sun_col_g>0.873</sun_col_g>
+<sun_col_b>1.000</sun_col_b>
+<sun_intensity>0.100</sun_intensity>
+<screenshot_width>900</screenshot_width>
+<screenshot_height>900</screenshot_height>
+<global_radius_scale>0.985</global_radius_scale>
+<resolution>064</resolution>
+<uuid>5acbd644-37c7-11e6-ac61-9e71128cae77</uuid> 
+<skybox>000</skybox>
+<Objects>
+  <SerializedMCAstObject>
+    <category>star</category>
+    <pos_x>0</pos_x>
+    <pos_z>0</pos_z>
+    <pos_y>0</pos_y>
+    <rot_y>0</rot_y>
+    <radius>1173975.9292524066</radius>
+    <temperature>9040.995980259588</temperature>
+    <seed>29578990</seed>
+    <atmosphereDensity>10</atmosphereDensity>
+    <atmosphereHeight>1.025</atmosphereHeight>
+    <outerRadiusScale>1.0025</outerRadiusScale>
+    <name>The star</name>
+    <Objects>
+      <SerializedMCAstObject>
+        <pos_x>2.9094751706685575</pos_x>
+        <pos_z>2.508763957429426</pos_z>
+        <pos_y>0</pos_y>
+        <rot_y>-5740.724992669419</rot_y>
+        <radius>2304.5943015970597</radius>
+        <temperature>288.51397048441976</temperature>
+        <seed>29578001</seed>
+        <atmosphereDensity>0.5245346099343626</atmosphereDensity>
+        <atmosphereHeight>1.025</atmosphereHeight>
+        <outerRadiusScale>1.0025</outerRadiusScale>
+        <category>planet</category>
+        <name>planet 1</name>
+        <Frames>
+          <Frame>
+            <id>0</id>
+            <pos_x>2.9094751706685575</pos_x>
+            <pos_z>2.508763957429426</pos_z>
+            <pos_y>0</pos_y>
+            <rot_y>-5740.724992669419</rot_y>
+          </Frame>
+        </Frames>
+        <Objects/>
+      </SerializedMCAstObject>
+    </Objects>
+  </SerializedMCAstObject>
+</Objects>
+<Cameras>
+  <SerializedCamera>
+    <cam_x>2.9094165715993716</cam_x>
+    <cam_z>2.5087566444819025</cam_z>
+    <cam_y>0.0</cam_y>
+    <dir_x>0.9923027496983984</dir_x>
+    <dir_z>0.123835588345991</dir_z>
+    <dir_y>6.123233995736766e-17</dir_y>
+    <up_x>0.0</up_x>
+    <up_z>0.0</up_z>
+    <up_y>1.0</up_y>
+    <fov>70</fov>
+    <time>3.850240568188913</time>
+    <frame>0</frame>
+  </SerializedCamera>
+</Cameras>
+</SerializedWorld>
