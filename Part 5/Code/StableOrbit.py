@@ -1,6 +1,3 @@
-# BRUKER IKKE KODEMAL
-# Skrevet av Bastian Eggum Huuse og Bendik Thune
-
 # Regular imports
 import numpy             as np
 import matplotlib.pyplot as plt
@@ -14,48 +11,26 @@ import ast2000tools.constants as const
 import ast2000tools.utils     as utils
 from ast2000tools.space_mission import SpaceMission
 
-# Ast init
-seed = utils.get_seed('bmthune')
-mission = SpaceMission(seed)
+# Constants
 G = const.G
 
-def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,planet_vel, planet_mass):
-
-    """
-    This function performs the entire orbit simulation, displays the results, and plots the final simulated orbit.
-
-    Parameters:
-    spacecraft_pos  : Array(float) | Position of spacecraft in solar system frame (in m)
-    spacecraft_vel  : Array(float) | Velocity of spacecraft in solar system frame (in m/s)
-    spacecraft_mass : float        | Mass of spacecraft (in kg)
-    planet_pos      : Array(float) | Position of planet in solar system frame (in m)
-    planet_vel      : Array(float) | Velocity of planet in solar system frame (in m/s)
-    planet_mass     : float        | Mass of planet (in kg)
-    """
+# Assume a Spacecraft position, a Planet position, and a Spacecraft velocity
+def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos, planet_mass):
 
     """
     Part 1, finding the initial conditions
     """
 
-    print("Printing initial conditions in two-body-system: ")
-
     # Finding distance from planet
     r_vec = spacecraft_pos - planet_pos
     r = np.linalg.norm(r_vec)
-    print(f"r   : {r / 1000:10.5e} km")
-    print(f"h   : {(r - mission.system.radii[1] * 1000)/1000:10.5e} km")
 
     # Finding radial velocity
     r_hat = r_vec / np.linalg.norm(r_vec)
-    relative_vel = spacecraft_vel - planet_vel
-    v_r = np.dot(relative_vel,r_hat)
-
-    print(f"v_r : {v_r:10.5e} m/s")
+    v_r = np.dot(spacecraft_vel,r_hat)
 
     # Finding angle
     if(r_vec[0] == 0):
-        # Not included in the flowchart.
-        # If x-coordinate is 0, this division is illegal, so we introduce a small number instead
         theta = np.arctan(r_vec[1]/(0.000001))
     else:
         theta = np.arctan(r_vec[1]/r_vec[0])
@@ -63,34 +38,29 @@ def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,
         theta += (r_vec[1]/abs(r_vec[1]))*np.pi
 
     # Finding angular velocity
-    v_theta_vec = relative_vel - (v_r * r_hat) # v_theta is orthogonal to v_r, so we simply remove the part of Spacecraft_vel that corresponds to the component v_r
+    v_theta_vec = spacecraft_vel - (v_r *r_hat) # v_theta is orthogonal to v_r, so we simply remove the part of Spacecraft_vel that corresponds to the component v_r
     v_theta = np.linalg.norm(v_theta_vec)/r
-    print(f"v_t : {v_theta:10.5e} r/s")
-    print(f"t_p : {((2*np.pi)/v_theta)/(60*60*24):10.5e} days")
 
     # Finding the direction of the angular velocity
     dir = np.cross(r_hat,v_theta_vec)/np.linalg.norm(np.cross(v_theta_vec,r_hat))
     v_theta *= dir
 
     # Finding the angular momentum (using v_theta and r)
-    # The angular momentum is conserved through the entire movement.
     l = ReducedMass(spacecraft_mass,planet_mass)*(r**2)*v_theta
-
-    print("\n")
 
     """
     Part 2, simulating the two-body-problem
     """
 
     # Performing a singular orbit
-    R,V_R,THETA,V_THETA,t_0 = SingleOrbit(r,v_r,theta,v_theta,spacecraft_mass,planet_mass,l)
+    R,V_R,THETA,V_THETA,t = SingleOrbit(r,v_r,theta,v_theta,spacecraft_mass,planet_mass,l)
 
     # Performing analysis
     print("Printing data from first analysis:\n")
-    peri_0,apo_0,a_0,b_0,e_0 = OrbitAnalysis(R,THETA)
-    PrintAnalysis(a_0,b_0,e_0,t_0,apo_0,peri_0)
+    peri,apo,a,b,e = OrbitAnalysis(R,THETA)
+    PrintAnalysis(a,b,e,t,apo,peri)
 
-    # Performing 2 more orbits
+    # Performing 2 more loops
     for i in range(2):
         R,V_R,THETA,V_THETA,t = SingleOrbit(R[-1],V_R[-1],THETA[-1],V_THETA[-1],spacecraft_mass,planet_mass,l)
 
@@ -99,84 +69,33 @@ def OrbitSimulation(spacecraft_pos, spacecraft_vel, spacecraft_mass, planet_pos,
     peri,apo,a,b,e = OrbitAnalysis(R,THETA)
     PrintAnalysis(a,b,e,t,apo,peri)
 
-    print("Printing relative differences between first and second analyses:\n")
-    DiffAnalysis((a_0,a),(b_0,b),(e_0,e),(t_0,t),(apo_0,apo),(peri_0,peri))
-
-    # Finding out how many orbits are in two years, using the previously calculated orbit time
-    two_years = 2*(60*60*24*365)
-    num_orbits = int(np.floor(two_years/t))
-
-    # Performing two year's worth of orbits
-    total_time = 0
-    for i in range(num_orbits):
-        R,V_R,THETA,V_THETA,t = SingleOrbit(R[-1],V_R[-1],THETA[-1],V_THETA[-1],spacecraft_mass,planet_mass,l)
-        total_time += t
-
-    # Performing the final analysis
-    print(f"Printing data from final analysis conducted after {(total_time * 2) /(two_years)} years.:\n")
-    peri,apo,a,b,e = OrbitAnalysis(R,THETA)
-    PrintAnalysis(a,b,e,t,apo,peri)
-
-    print("Printing relative differences between first and final analyses:\n")
-    DiffAnalysis((a_0,a),(b_0,b),(e_0,e),(t_0,t),(apo_0,apo),(peri_0,peri))
-
     # Plotting final orbit
-    ax = plt.axes()
-    ax.plot((planet_pos[0] + R*np.cos(THETA)),(planet_pos[1] + R*np.sin(THETA)),color = "firebrick")
-    planet = plt.Circle((planet_pos[0],planet_pos[1]), R[0]/10, color = 'royalblue')
-    ax.add_patch(planet)
-
-    plt.xlabel("Posisjon langs x-aksen [m]") 
-    plt.ylabel("Posisjon langs y-aksen [m]") 
+    plt.plot((planet_pos[0] + R*np.cos(THETA)),(planet_pos[1] + R*np.sin(THETA)))
+    plt.plot(planet_pos[0],planet_pos[1],"o")
     plt.axis("equal")
+
     plt.show()
 
 @njit
 def SingleOrbit(r,v_r,theta,v_theta,m1,m2,l):
 
-    """
-    Function that performs a single orbit around the planet
-
-    Parameters:
-    r       : float | initial distance between planet and spacecraft
-    v_r     : float | initial radial velocity between planet and spacecraft
-    theta   : float | initial angle between planet and spacecraft
-    v_theta : float | initial angular velocity between planet and spacecraft
-    m1      : float | mass of spacecraft
-    m2      : float | mass of planet
-    l       : float | angular momentum for the system (this is a conserved value)
-
-    returns:
-    Array(float) | All calculated distances between planet and spacecraft
-    Array(float) | All calculated radial velocities between planet and spacecraft
-    Array(float) | All calculated angles between planet and spacecraft
-    Array(float) | All calculated angular velocities between planet and spacecraft
-    float        | total orbit time.
-    """
-
-    # Defining our time interval, and our maximum time
-    # We assume that the orbit will take no longer that 10 days to complete
     dt = 1
-    t = 10*60*60*24
+    t = 60*60*24
     N = int(t/dt)
 
-    # Defining our arrays
     R = np.zeros(N)
     V_R = np.zeros(N)
     THETA = np.zeros(N)
     V_THETA = np.zeros(N)
 
-    # Setting initial values
     R[0] = r
     V_R[0] = v_r
     THETA[0] = theta
     V_THETA[0] = v_theta
 
-    # Defining acceleration array (this is not returned, but neccesary for leapfrog integration)
     A_R = np.zeros(N)
     A_R[0] = RadialAcceleration(R[0],V_THETA[0],m1,m2)
 
-    # Looping
     for i in range(1,N):
 
         # Updating R
@@ -199,86 +118,59 @@ def SingleOrbit(r,v_r,theta,v_theta,m1,m2,l):
 
 def OrbitAnalysis(R,THETA):
 
-    """
-    Function that analyses the data from an orbit and computes several attributes of the orbit
-
-    Parameters : 
-    R     : Array(float) | All computed distances between planet and spacecraft for one orbit
-    THETA : Array(float) | All computed angles between planet and spacecraft for one orbit
-
-    Returns :
-    float | periapsis of the orbit
-    float | apoapsis of the orbit
-    float | semi-major axis of the orbit
-    float | semi-minor axis of the orbit
-    float | eccentricity of the orbit
-    """
-
+    # Finding periapsis, apoapsis, and semi_major_axis
     periapsis = min(R)
     apoapsis = max(R)
-    semi_major = (periapsis + apoapsis)/2
-    eccentricity = (semi_major - periapsis)/semi_major
-    semi_minor = ((semi_major**2)*(1-eccentricity**2))**0.5
+    semi_major = periapsis + apoapsis
+
+    # Finding semi minor requires a loop:
+    peri_index = int(np.where(R == periapsis)[0][0])
+    peri_angle = THETA[peri_index]
+    semi_minor_angle = peri_angle + np.pi/2
+    #semi_minor_index = np.where()
+
+    i = 0
+    for i in range(peri_index,len(THETA)-1):
+        if(THETA[i] % semi_minor_angle < THETA[i+1] % semi_minor_angle):
+            break
+
+    semi_minor = R[i] * 2
+    eccentricity = (1-(semi_minor/semi_major)**2)**0.5
 
     return periapsis,apoapsis,semi_major,semi_minor,eccentricity
 
 def PrintAnalysis(a,b,e,p,apo,peri):
 
-    """
-    Function that prints the data returned by OrbitAnalysis (along with time)
-    Note that distances are converted from meters to kilometers,
-    and time intervals are converted from seconds to hours
-    """
-
-    print(f"Semi-major axis : {a / 1000:15.3f} km")
-    print(f"Semi-minor axis : {b / 1000:15.3f} km")
-    print(f"Eccentricity    : {e:15.10f}")
-    print(f"Orbital period  : {p/(60*60*24):15.3f} days")
-    print(f"Apoapsis        : {apo/1000:15.3f} km")
-    print(f"Periapsis       : {peri/1000:15.3f} km\n")
-
-def DiffAnalysis(a,b,e,p,apo,peri):
-
-    """
-    Function that prints the relative differences between two sets of data returned by OrbitAnalysis (along with time)
-    All parameters are tuples containing two values from to different orbits.
-    """
-
-    print(f"Semi-major axis : {RelativeTuple(a):.7f}")
-    print(f"Semi-minor axis : {RelativeTuple(b):.7f}")
-    print(f"Eccentricity    : {RelativeTuple(e):.7f}")
-    print(f"Orbital period  : {RelativeTuple(p):.7f}")
-    print(f"Apoapsis        : {RelativeTuple(apo):.7f}")
-    print(f"Periapsis       : {RelativeTuple(peri):.7f}\n")
-
-def RelativeTuple(t):
-    # Function that computes the relative difference between two values contained in a tuple
-    return abs((t[0]-t[1])/t[1])
+    print(f"Semi-major axis : {a:20} m")
+    print(f"Semi-minor axis : {b:20} m")
+    print(f"Eccentricity    : {e:20}")
+    print(f"Orbital period  : {p:20} s")
+    print(f"Apoapsis        : {apo:20} m")
+    print(f"Apoapsis        : {peri:20} m\n")
 
 @njit
 def GravitationalForce(r,m1,m2):
-    # Function that computes the gravitational force between two objects
     return (G*m1*m2/r**2)
 
 @njit
 def ReducedMass(m1,m2):
-    # Function that computes the reduced mass between two objects
     return (m1*m2)/(m1+m2)
 
 @njit
 def RadialAcceleration(r,v_theta,m1,m2):
-    # Function that computes the radial acceleration between two objects in a two-body system.
     a_r = -GravitationalForce(r,m1,m2)/ReducedMass(m1,m2) + r*v_theta**2
     return a_r
 
 @njit
 def AngularVelocity(r,m1,m2,l):
-    # Function that computes the angular velocity between two objects in a two-body system.
     v_theta = l/(ReducedMass(m1,m2)*r**2)
     return v_theta
 
-
 if __name__ == "__main__":
+
+    # Ast init
+    seed = utils.get_seed('bmthune')
+    mission = SpaceMission(seed)
 
     Filepath = "NumericalOrbitData.npz"
     planet_positions = NumericalOrbitFunction(Filepath)
@@ -292,94 +184,18 @@ if __name__ == "__main__":
     v_p = planet_positions.GetVelocity(t_0,1) * (const.AU / (60*60*24*365))
     m_p = mission.system.masses[1] * const.m_sun
 
-    #v_0 = v_0 - v_p
+    v_0 = v_0 - v_p
 
-    # Printing initial conditions
-    print("Printing inital conditions: ")
-    print(f"Time of simulation: {t_0:7.4e}")
-    print(f"Rocket : |r_0 : [{r_0[0]:7.5e},{r_0[1]:7.5e}], v_0 : [{v_0[0]:7.5e},{v_0[1]:7.5e}], m_0 : {m_0:7.5e}|")
-    print(f"Planet : |r_p : [{r_p[0]:7.5e},{r_p[1]:7.5e}], v_p : [{v_p[0]:7.5e},{v_p[1]:7.5e}], m_p : {m_p:7.5e}|\n\n")
+    # # Planet info
+    # planet_position = planet_positions(3,1) * const.AU
+    # planet_radius = mission.system.radii[1] * 1000
+    # planet_mass = mission.system.masses[1] * const.m_sun
 
-    # Displaying initial conditions
-    r_l = r_0 - r_p
-    v_l = v_0 - v_p
-    ax = plt.axes()
-    # Adding the rocket velocity
-    ax.quiver(r_l[0],r_l[1],v_l[0],v_l[1])
-    # Adding the rocket
-    ax.scatter(r_l[0],r_l[1],color = "firebrick")
-    # Adding the planet
-    planet = plt.Circle((0, 0), r_l[0]/10, color = 'royalblue')
-    ax.add_patch(planet)
-    # Showing plot
-    plt.xlabel("Posisjon langs x-aksen [m]") 
-    plt.ylabel("Posisjon langs y-aksen [m]") 
-    plt.axis("equal")
-    plt.show()
+    # # Spacecraft info
+    # spacecraft_direction = np.array([1,0])/np.linalg.norm(np.array([1,0]))
+    # spacecraft_position = planet_position + spacecraft_direction * planet_radius * 3
+    # spacecraft_velocity = np.array([0.1,1]) * ((G*planet_mass)/np.linalg.norm(spacecraft_position - planet_position))**0.5
+    # spacecraft_mass = mission.spacecraft_mass
 
-    OrbitSimulation(r_0,v_0,m_0,r_p,v_p,m_p)
+    OrbitSimulation(r_0,v_0,m_0,r_p,m_p)
 
-"""
-
-Output:
-
-Printing inital conditions:
-Time of simulation: 3.8499e+00
-Rocket : |r_0 : [4.35405e+11,3.75135e+11], v_0 : [-1.63204e+04,1.67970e+04], m_0 : 1.13740e+03|
-Planet : |r_p : [4.35419e+11,3.75119e+11], v_p : [-1.56074e+04,1.74085e+04], m_p : 2.75444e+23|
-
-
-Printing initial conditions in two-body-system:
-r   : 2.08647e+04 km
-h   : 1.85601e+04 km
-v_r : 8.33766e-03 m/s
-v_t : 4.50190e-05 r/s
-t_p : 1.61536e+00 days
------------ Finished  initialization -----------
-
-Printing data from first analysis:
-
-Semi-major axis :       20892.900 km
-Semi-minor axis :       20892.881 km
-Eccentricity    :    0.0013525927
-Orbital period  :           1.620 days
-Apoapsis        :       20921.160 km
-Periapsis       :       20864.641 km
-
-Printing data from second analysis:
-
-Semi-major axis :       20892.900 km
-Semi-minor axis :       20892.881 km
-Eccentricity    :    0.0013541199
-Orbital period  :           1.620 days
-Apoapsis        :       20921.192 km
-Periapsis       :       20864.609 km
-
-Printing relative differences between first and second analyses:
-
-Semi-major axis : 0.0000000
-Semi-minor axis : 0.0000000
-Eccentricity    : 0.0011278
-Orbital period  : 0.0000000
-Apoapsis        : 0.0000015
-Periapsis       : 0.0000015
-
-Printing data from final analysis conducted after 1.9969463470319635 years.:
-
-Semi-major axis :       20892.925 km
-Semi-minor axis :       20892.893 km
-Eccentricity    :    0.0017454974
-Orbital period  :           1.620 days
-Apoapsis        :       20929.393 km
-Periapsis       :       20856.456 km
-
-Printing relative differences between first and final analyses:
-
-Semi-major axis : 0.0000012
-Semi-minor axis : 0.0000006
-Eccentricity    : 0.2250961
-Orbital period  : 0.0000000
-Apoapsis        : 0.0003934
-Periapsis       : 0.0003924
-
-"""

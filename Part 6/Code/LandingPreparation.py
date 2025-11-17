@@ -57,6 +57,21 @@ def AngleAtZero(coordinate_at_time,elapsed_time,p_theta):
 
     return theta_0
 
+def FindAngle(landing_sequence):
+
+    t,r,v = landing_sequence.orient()
+
+    # Finding angle
+    if(r[0] == 0):
+        # Not included in the flowchart.
+        # If x-coordinate is 0, this division is illegal, so we introduce a small number instead
+        theta = np.arctan(r[1]/(0.000001))
+    else:
+        theta = np.arctan(r[1]/r[0])
+    if(r[0] < 0):
+        theta += (r[1]/abs(r[1]))*np.pi 
+
+    return theta,t
 
 if __name__ == "__main__":
 
@@ -66,9 +81,44 @@ if __name__ == "__main__":
 
     # Beginning landing sequence
     landing = mission.begin_landing_sequence()
+    landing.look_in_direction_of_planet(1)
 
     # Getting initial conditions
-    t_0,r_0,v_0 = landing.orient()
+    t_0,r_vec_0,v_vec_0 = landing.orient()
 
-    # Moving into spherical coordinates
-    
+    # Getting planet spin
+    p_theta = (2*np.pi)/(mission.system.rotational_periods[1]*24*60*60)
+
+    d_t = (60*60*24)*0.03
+    coords_list = []
+
+    thetas = []
+
+    N = 10
+    for n in range(N):
+
+        # Finding the position at the current time
+        r = mission.system.radii[1] * 1000
+        theta,t = FindAngle(landing)
+
+        # Defining our coordinate vector
+        coord_vector = np.array((r,theta,0))
+
+        # Finding the vector at time = 0
+        theta_0 = AngleAtZero(coord_vector,t,p_theta)
+        coord_vector_0 = np.array((r,theta_0,0))
+
+        # saving data
+        coord_info = (coord_vector,coord_vector_0,t)
+        coords_list.append(coord_info)
+
+        # Taking photo
+        landing.take_picture(f"Preparation_image_at_{t}_time")
+
+        # Updating position
+        landing.fall(d_t)
+
+        thetas.append(theta)
+
+    plt.plot(range(len(thetas)),np.sin(thetas))
+    plt.show()
