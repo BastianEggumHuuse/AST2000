@@ -78,7 +78,6 @@ boost_v_launch = np.array([
 travel = mission.begin_interplanetary_travel()
 travel.restart()
 
-
 vs = []
 rs = []
 

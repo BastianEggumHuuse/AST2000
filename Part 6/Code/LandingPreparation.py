@@ -57,6 +57,21 @@ def AngleAtZero(coordinate_at_time,elapsed_time,p_theta):
 
     return theta_0
 
+def FindAngle(landing_sequence):
+
+    t,r,v = landing_sequence.orient()
+
+    # Finding angle
+    if(r[0] == 0):
+        # Not included in the flowchart.
+        # If x-coordinate is 0, this division is illegal, so we introduce a small number instead
+        theta = np.arctan(r[1]/(0.000001))
+    else:
+        theta = np.arctan(r[1]/r[0])
+    if(r[0] < 0):
+        theta += (r[1]/abs(r[1]))*np.pi 
+
+    return theta,t
 
 if __name__ == "__main__":
 
@@ -68,7 +83,4 @@ if __name__ == "__main__":
     landing = mission.begin_landing_sequence()
 
     # Getting initial conditions
-    t_0,r_0,v_0 = landing.orient()
-
-    # Moving into spherical coordinates
-    
+    t_0,r_vec_0,v_vec_0 = landing.orient()
