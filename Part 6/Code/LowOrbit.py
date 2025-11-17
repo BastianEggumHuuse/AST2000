@@ -40,7 +40,7 @@ for n in range(N):
     for i in range(I):
         landing.fall(3600*24 * 3.5)
         t,r,v = landing.orient()
-        r_mean_i += np.linalg.norm(r)
+        r_mean_i += np.linalg.norm(r) 
 
     r_mean_i *= 1/I
 

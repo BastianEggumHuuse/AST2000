@@ -121,12 +121,12 @@ t_o,R_o,V_o = travel.orient()
 R_launch = np.concatenate((R_launch,np.array([R_o])))
 V_launch = np.concatenate((V_launch,np.array([V_o])))
 
-for i in range(10):
-    print(f"Time-step {i}")
-    print("Position: ")
-    print(f"orientation : {rs[i][0]} | simulation : {rs[i][1]}")
-    print("Velocity: ")
-    print(f"orientation : {vs[i][0]} | simulation : {vs[i][1]}")
+# for i in range(10):
+#     print(f"Time-step {i}")
+#     print("Position: ")
+#     print(f"orientation : {rs[i][0]} | simulation : {rs[i][1]}")
+#     print("Velocity: ")
+#     print(f"orientation : {vs[i][0]} | simulation : {vs[i][1]}")
 
 a_launch_0 = (V_launch[2] - V_launch[1])/dt
 
@@ -156,6 +156,7 @@ print(f'fuel{((const.G_sol * mission.system.masses[1]/(np.linalg.norm(r)))**0.5)
 
 v_stable = ((const.G_sol * mission.system.masses[1]/(np.linalg.norm(r)))**0.5) * e + FindR.GetVelocity(t_o, 1)
 dV = -(v_stable - V_o) 
+print("Stable: ",(v_stable - FindR.GetVelocity(t_o, 1)) * (const.AU / (60*60*24*365)))
 print(dV)
 travel.boost(dV)
 
