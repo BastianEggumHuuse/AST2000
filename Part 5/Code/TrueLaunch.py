@@ -1,3 +1,6 @@
+# BRUKER IKKE KODEMAL
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
+
 # Regular imports
 import numpy             as np
 import matplotlib.pyplot as plt
@@ -40,6 +43,8 @@ M[:-1] = mission.system.masses
 M[-1] = mission.system.star_mass
 FindR = NumericalOrbitFunction(FilePath)
 
+N_Steps = 100
+
 # List of boost times (simulation)
 boost_t_sim = np.array([
     0,
@@ -74,12 +79,18 @@ travel = mission.begin_interplanetary_travel()
 travel.restart()
 
 
+vs = []
+rs = []
+
 for i in range(len(boost_t_launch)-1):
 
     #print("\nNew trajectory step:\n")
     
     # Orienting ourselves
     t_o,R_o,V_o = travel.orient()
+
+    vs.append([V_o,V_sim[-1]])
+    rs.append([R_o,R_sim[-1]])
 
     # Updating launch data
     R_launch = np.concatenate((R_launch,np.array([R_o])))
@@ -110,7 +121,12 @@ t_o,R_o,V_o = travel.orient()
 R_launch = np.concatenate((R_launch,np.array([R_o])))
 V_launch = np.concatenate((V_launch,np.array([V_o])))
 
-# Plotting
+for i in range(10):
+    print(f"Time-step {i}")
+    print("Position: ")
+    print(f"orientation : {rs[i][0]} | simulation : {rs[i][1]}")
+    print("Velocity: ")
+    print(f"orientation : {vs[i][0]} | simulation : {vs[i][1]}")
 
 a_launch_0 = (V_launch[2] - V_launch[1])/dt
 
