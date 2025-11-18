@@ -122,12 +122,23 @@ V_launch = np.concatenate((V_launch,np.array([V_o])))
 a_launch_0 = (V_launch[2] - V_launch[1])/dt
 print("acc_0", a_launch_0)
 
+def Lerp(R_0,R_1, I):
+    dR_x = -R_0[0] + R_1[0]
+    dR_y = -R_0[1] + R_1[1]
+    
+    return R_0[0] + I* dR_x, R_0[1] + I*dR_y
 
 fig, ax = plt.subplots()
 
 ax.plot(R_planets[0][0],R_planets[1][0])
 ax.plot(R_planets[0][1],R_planets[1][1])
-R_p = FindR(t_o, 1)
+R_0 = FindR(t_o, 1)
+R_1 = FindR(t_o+FindR.dt, 1)
+I = (t_o % FindR.dt)/FindR.dt 
+
+R_p = Lerp(R_0,R_1, I)
+
+
 ax.plot(R_p[0], R_p[1], 'o', color = 'blue' )
 ax.plot(R_sim[:,0],R_sim[:,1], color = 'red')
 
@@ -137,11 +148,12 @@ l = np.linalg.norm(R_launch[-1][-1])*(M[1]/(M[-1]*10))**0.5
 OrbitRadi = plt.Circle(R_p, l, color = 'blue', fill = False, ls = '-')
 ax.add_patch(OrbitRadi)
 
-
+plt.show()
 r = R_o - R_p
 
 r_hat = r/np.linalg.norm(r)
 e = -np.array([r_hat[1],-r_hat[0]])
+
 
 v_stable = ((const.G_sol * mission.system.masses[1]/(np.linalg.norm(r)))**0.5) * e + FindR.GetVelocity(t_o, 1)
 dV = (v_stable - V_o) 

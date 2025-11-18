@@ -24,13 +24,8 @@ landing.verbose = False
 t,r_0,v_0 = landing.orient()
 
 
-v = np.sqrt((const.G*mission.system.masses[1]*const.m_sun/np.linalg.norm((r_0))))
-v_hat = -np.array((r_0[1], -r_0[0],0))/np.linalg.norm(r_0)
 
-dv = v*v_hat - v_0
 
-print(r_0, v*v_hat ,v_0*(60*60*24*365)/const.AU)
-landing.boost(dv)
 
 landing.look_in_direction_of_motion()
 landing.start_video()
