@@ -12,46 +12,6 @@ import ast2000tools.utils     as utils
 from ast2000tools.space_mission import SpaceMission
 
 
-def FindR(Filepath,t,p):
-    """
-    Method that returns the position of a given planet along the x and y axes at a given time.
-
-    t       : float        | the desired point in time
-    p       : int          | the desired planet index
-
-    returns : Array(float) | the position of the given planet at the given time
-    """
-    npz = np.load(Filepath)
-
-    # Setting total time, delta time, and number of time steps, from the read file
-    config       = npz["config"]
-    TotalTime    = config[0]
-    dt           = config[1]
-    NumSteps     = int(config[2])
-
-    OrbitTimes   = npz["OrbitTimes"]
-
-        # Setting r from read file
-    r = npz["r"]
-    # Wrapping the t-value
-    # if t is less than zero, we make it wrap around to the end of the simulation
-    # This stops index-issues.
-    if(t < 0):
-        t = OrbitTimes[p] - t
-
-    # Finding the index of the given time
-    # This deserves an explanation. Since the positions are stored in an array with a length of NumSteps,
-    # we can't just insert t into this array to get the value (since t is a floating number)
-    # t/self.TotalTime gives us the percentage of the simulation the time t is at.
-    # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
-    # We multiply this number with the total amount of steps, to get the closes time index to our current time.
-    # We then floor that index (round down) and turn it into an integer.
-    Index = int(np.floor((t/TotalTime)*NumSteps))
-
-    # Finding x and y positions at this index
-    x = (r[0][p][Index])
-    y = (r[1][p][Index])
-
 class NumericalOrbitFunction:
 
     def __init__(self,Filepath):
@@ -110,7 +70,7 @@ class NumericalOrbitFunction:
         # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
         # We multiply this number with the total amount of steps, to get the closes time index to our current time.
         # We then floor that index (round down) and turn it into an integer.
-        Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
+        Index = int(np.floor(((t)/self.TotalTime)*self.NumSteps))
 
         # Finding x and y positions at this index
         x = (self.r[0][p][Index])

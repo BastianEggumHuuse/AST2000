@@ -48,16 +48,23 @@ R_p = Numericalsim.range(0,10)
 plt.plot(R_p[0][0],R_p[1][0])
 plt.plot(R_p[0][1],R_p[1][1])
 
+colors = ['red','orange', 'yellow', 'green', 'blue', 'indigo', 'purple', 'brown']
+for i in range(len(t)):
+    
+    m = i//len(colors)
 
-for t in t:
-    R_0 = Numericalsim(t, 0)
-    R_1 = Numericalsim(t, 1)
-    plt.plot((R_0[0],R_1[0]),(R_0[1],R_1[1]))
-    plt.plot(R_0[0], R_0[1], 'o')
-    plt.plot(R_1[0], R_1[1], 'o')
+    color = colors[i-m*len(colors)]
+
+    R_0 = Numericalsim(t[i], 0) #planet 0, planet 1
+    R_1 = Numericalsim(t[i], 1)
+    plt.plot((R_0[0],R_1[0]),(R_0[1],R_1[1]), color =color)
+    plt.plot(R_0[0], R_0[1], 'o',color =color)
+    plt.plot(R_1[0], R_1[1], 'o',color =color)
+    plt.xlabel('Distanse langs x-aksen [AU]')
+    plt.ylabel('Distanse langs y-aksen [AU]')
  
 
-t = 2.8
+t = 11*0.2
 
 R_0 = Numericalsim(t, 0)
 R_1 = Numericalsim(t, 1)
@@ -76,11 +83,14 @@ R_0_s = Numericalsim(t, 0)
 R_1_s = Numericalsim(t, 1)
 
 DV = [
-    (t, np.array([0,0])),
-    (t + 0.24, np.array([0.14,0.29])),
-    (t + 0.47, np.array([-0.1,0])),
-    (t + 0.479, np.array([0,0]))
-      ]
+    (t, np.array([0.4,0])),
+    (t + 0.15, np.array([0.3,0.4])),
+    (t + 0.39, np.array([0,0.6])),
+    (t + 0.79, np.array([0,0])),
+    (t + 0.79, np.array([0.0,0])),
+    (t + 0.883, np.array([0,0])),
+    
+    ]   
 
 for i in range(len(DV)-1):
     V[-1] += DV[i][1]
