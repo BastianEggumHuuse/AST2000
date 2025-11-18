@@ -60,6 +60,7 @@ boost_t_launch = np.array([
     0.40,
     0.15,
     0.71
+
         ])
 
 # List of boost dvs (launch)
@@ -69,12 +70,8 @@ boost_v_launch = np.array([
     (0.1,0),
     (0,0),
     (-0.0855,0),
-   
     (0,0),
-    (0,0),
-    (0,0),
-    (0,0),
-    (0,0)
+ 
      ])
 # Beginning travel
 travel = mission.begin_interplanetary_travel()
@@ -87,7 +84,7 @@ for i in range(len(boost_t_launch)-1):
     
     # Orienting ourselves
     t_o,R_o,V_o = travel.orient()
-
+    print(i)
     # Updating launch data
     R_launch = np.concatenate((R_launch,np.array([R_o])))
     V_launch = np.concatenate((V_launch,np.array([V_o])))

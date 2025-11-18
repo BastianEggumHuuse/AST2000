@@ -87,10 +87,12 @@ DV = [
     (t + 0.15, np.array([0.3,0.4])),
     (t + 0.39, np.array([0,0.6])),
     (t + 0.79, np.array([0,0])),
-    (t + 0.79, np.array([0.0,0])),
+    (t + 0.79, np.array([0,0])),
     (t + 0.883, np.array([0,0])),
     
     ]   
+
+fuelMass = 5000
 
 for i in range(len(DV)-1):
     V[-1] += DV[i][1]
@@ -99,12 +101,15 @@ for i in range(len(DV)-1):
     R = np.concatenate((R,R_c))
     V = np.concatenate((V,V_c))
     t += t_c
+    fuelMass -= FuelEstimate(fuelMass, mission, DV[i][1])
+
+
 R_0 = Numericalsim(t, 0)
 R_1 = Numericalsim(t, 1)
 l = np.linalg.norm(R[-1])*(M[1]/(M[-1]*10))**0.5
 fig, ax = plt.subplots()
 
-
+print(f'Remaning fuel after launch = :{fuelMass}')
 
 ax.plot(R_p[0][0],R_p[1][0])
 ax.plot(R_p[0][1],R_p[1][1])
@@ -112,13 +117,14 @@ ax.plot(R_0[0], R_0[1], 'o')
 ax.plot(R_1[0], R_1[1], 'o')
 ax.plot(R_0_s[0], R_0_s[1], 'o')
 ax.plot(R_1_s[0], R_1_s[1], 'o')
-
+ax.set_xlabel('x :[AU]')
+ax.set_ylabel('y :[AU]')
 OrbitRadi = plt.Circle(R_1, l, color = 'Lime', fill = False, ls = '-')
 ax.add_patch(OrbitRadi)
 
 ax.plot(R_0[0], R_0[1], 'o')
 ax.plot(R_1[0], R_1[1], 'o')
 ax.plot(R[:,0],R[:,1])   
-
+print(f' Distance to target planet over target distance = {np.linalg.norm(R[-1]-R_1)/l}')
 plt.show()
 

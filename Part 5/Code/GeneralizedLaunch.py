@@ -185,8 +185,8 @@ class FuelRocket:
         TotalForce = Force * self.NumMotors
         TotalFuelConsumption = FuelConsumption * self.NumMotors
 
-        print(f"Calculated Force per motor : {Force:.5e}, Calculated Fuel Consumption per motor : {FuelConsumption:.5e}")
-        print(f"Calculated Force           : {TotalForce:.5e}, Calculated Fuel Consumption      : {TotalFuelConsumption:.5e}")
+        #print(f"Calculated Force per motor : {Force:.5e}, Calculated Fuel Consumption per motor : {FuelConsumption:.5e}")
+        #print(f"Calculated Force           : {TotalForce:.5e}, Calculated Fuel Consumption      : {TotalFuelConsumption:.5e}")
         return(TotalForce,TotalFuelConsumption)
 
     def TimeStep(self):
