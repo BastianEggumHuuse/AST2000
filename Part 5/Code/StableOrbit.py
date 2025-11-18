@@ -284,12 +284,12 @@ if __name__ == "__main__":
     planet_positions = NumericalOrbitFunction(Filepath)
 
     r_0 = np.array((2.91050526,2.50762015)) * const.AU
-    v_0 = np.array((-3.44042026,3.54089592)) * (const.AU / (60*60*24*365))
+    v_0 = np.array((-3.49099422,3.50311777)) * (const.AU / (60*60*24*365))
     t_0 = 3.8499120193480745
     m_0 = mission.spacecraft_mass + 37.4
 
-    r_p = planet_positions(t_0,1) * const.AU
-    v_p = planet_positions.GetVelocity(t_0,1) * (const.AU / (60*60*24*365))
+    r_p = np.array((2.9105565103377136,2.507558388282323)) * const.AU
+    v_p = planet_positions.GetVelocity(t_0,1) * (const.AU / (60*60*24*365)) # Note that we don't lerp the velocity
     m_p = mission.system.masses[1] * const.m_sun
 
     #v_0 = v_0 - v_p
