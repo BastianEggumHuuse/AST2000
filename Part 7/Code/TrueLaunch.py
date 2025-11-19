@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 from numba import njit
 import pickle as pkl 
 
-from CalculatingTra import Lerp
-
 # AST imports
 import ast2000tools.constants as const
 import ast2000tools.utils     as utils
@@ -19,20 +17,17 @@ from GeneralizedLaunch import NumericalOrbitFunction
 with open("Mission.pkl", 'rb') as file:
     mission = pkl.load(file)
 
-"""
-Same as with Plan.py, this code doesn't have a flowchart.
-The loop here is even simpler, being just
+def Lerp(R_0,R_1, I):
 
-1) Orient (done by ast2000tools)
-2) Boost  (done by ast2000tools)
-3) Coast  (done by ast2000tools)
-4) Repeat
+    # Finding the difference between R_0 and R_1
+    dR_x = R_1[0] - R_0[0]
+    dR_y = R_1[1] - R_0[1]
+    
+    # Lerping between R_0 and R_1 for both coordinates
+    R_x = R_0[0] + I * dR_x
+    R_y = R_0[1] + I * dR_y
 
-Note: This code doesn't really follow the plan detailed in Plan.py at all,
-because we get completely different results when applying this plan through the Coast function
-detailed in CalculatingTra.py
-We spent a stupid amount of time trying to fix this, and ended up not being able to :(
-"""
+    return R_x,R_y 
 
 # Launch variables
 R_launch = np.array([mission._position_after_launch])

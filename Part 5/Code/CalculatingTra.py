@@ -11,28 +11,39 @@ from GeneralizedLaunch import NumericalOrbitFunction
 # AST imports
 import ast2000tools.constants as const
 import ast2000tools.utils     as utils
-
 from ast2000tools.space_mission import SpaceMission
 
+# Importing the numerical planet positions and velocities
 FilePath = "NumericalOrbitData.npz"
 PlanetPositionFunction = NumericalOrbitFunction(FilePath)
 
+# We want to use numba to speed up the computing process, but 
+# NumericalOrbitFunction is a class, which numba isn't a huge fan of
+# Therefore, we also load the data locally, to find planet positions.
 npz = np.load(FilePath)
-config       = npz["config"]
-TotalTime    = float(config[0])
-NumSteps     = int(config[2])
+TotalTime    = float(npz["config"][0])
+NumSteps     = int(npz["config"][2])
 OrbitTimes   = npz["OrbitTimes"]
-r = npz["r"]
+r            = npz["r"]
+# Storing all this data in a handy tuple
 Info = (TotalTime, NumSteps, OrbitTimes, r)
+
+# Jit also doesn't like the constants class, so we save some constants we need.
+AU = const.AU
+G_sol = const.G_sol
 
 @njit
 def FindR(t,p, info):
     
     """
-    Method that returns the position of a given planet along the x and y axes at a given time.
+    Function that returns the position of a given planet along the x and y axes at a given time.
+    This function is copied directly from the __call__ method of NumericalOrbitFunction,
+    which is found within GeneralizedLaunch.py. See that file for comments.
 
+    Parameters:
     t       : float        | the desired point in time
     p       : int          | the desired planet index
+    info    : tuple        | tuple containing TotalTime,NumSteps,OrbitTimes, and planet positions.
 
     returns : Array(float) | the position of the given planet at the given time
     """
@@ -40,65 +51,88 @@ def FindR(t,p, info):
     TotalTime    = info[0]
     NumSteps     = info[1]
     OrbitTimes   = info[2]
-    r = info[3]
+    r            = info[3]
     
-
-    # Setting total time, delta time, and number of time steps, from the read file
-
-
-        # Setting r from read file
-    
-    # Wrapping the t-value
-    # if t is less than zero, we make it wrap around to the end of the simulation
-    # This stops index-issues.
     if(t < 0):
         t = OrbitTimes[p] - t
-    
-    # Finding the index of the given time
-    # This deserves an explanation. Since the positions are stored in an array with a length of NumSteps,
-    # we can't just insert t into this array to get the value (since t is a floating number)
-    # t/self.TotalTime gives us the percentage of the simulation the time t is at.
-    # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
-    # We multiply this number with the total amount of steps, to get the closes time index to our current time.
-    # We then floor that index (round down) and turn it into an integer.
+
     Index = int(np.floor((t/TotalTime)*NumSteps)) 
 
-    # Finding x and y positions at this index
     x = (r[0][p][Index])
     y = (r[1][p][Index])
-    # Returning vector
     return(np.array([x,y]))
-AU = const.AU
-G_sol = const.G_sol
 
 @njit
 def Lerp(R_0,R_1, I):
-    dR_x = -R_0[0] + R_1[0]
-    dR_y = -R_0[1] + R_1[1]
+
+    """
+    Linear interpolation function. Lerps between the 2D vectors R_0 and R_1.
+
+    Parameters :
+    R_0 : Array(float) | Vector we lerp from
+    R_1 : Array(float) | Vector we lerp to
+    I   : float        | How far between R_0 and R_1 to interpolate. Always between 0 and 1.
+
+    returns :
+    float | The x-coordinate of the interpolated vector
+    float | The y-coordinate of the interpolated vector
+    """
+
+    # Finding the difference between R_0 and R_1
+    dR_x = R_1[0] - R_0[0]
+    dR_y = R_1[1] - R_0[1]
     
-    return R_0[0] + I* dR_x, R_0[1] + I*dR_y
+    # Lerping between R_0 and R_1 for both coordinates
+    R_x = R_0[0] + I * dR_x
+    R_y = R_0[1] + I * dR_y
+
+    return R_x,R_y 
 
 @njit
 def GravitationalAks(R,K,N_k,dt, M,T_0, info):
     
+    """
+    Function that finds the total Gravitational Acceleration of the rocket.
+    (We aquire a lot of parameters since numba doesn't like classes :[ )
+
+    Parameters :
+    R    : Array(float) | Array containing all positions
+    K    : int          | The current timestep
+    N_k  : int          | How many times the smaller timestep (rocket timestep) goes into the larger timestep (planet timestep)
+    dt   : float        | Rocket timestep in years
+    M    : Array(float) | Array containing all planet masses
+    T_0  : float        | Start time in years (The time after reaching escape velocity)
+    info : tuple        | Tuple containing info that FindR needs
+
+    returns:
+    float | total gravitational acceleration on the x-axis
+    float | total gravitational acceleration on the y-axis
+    """
+
+    # Finding the gravitational acceleration from the sun (the suns mass is the last mass in the list)
     a_x = -G_sol *M[-1]*R[K][0]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
     a_y = -G_sol *M[-1]*R[K][1]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
 
-    
+    # Looping over all planets and computing gravitational acceleration
     for j in range(len(M)-1):
         
+        # Finding positions that are closest to the current timestep
+        # R_0 is backward in time, R_1 is forward in time
         R_0 = FindR(T_0 + K*dt, j, info)
-                
         R_1 = FindR(T_0 + (K+N_k-1)*dt,j, info)
 
+        # Computing the "true" planet position by lerping between R_0 and R_1
         R_p_x, R_p_y = Lerp(R_0, R_1, (K%N_k)/N_k) 
 
-        r_x = -R[K][0] + R_p_x
-        r_y = -R[K][1] + R_p_y
+        # Computing difference between rocket position and planet position
+        r_x = R_p_x - R[K][0] 
+        r_y = R_p_y - R[K][1]
 
+        # Computing most of the newtons gravitational equation
+        # This bit is the same along both axes
         gamma = G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
-
             
+        # Computing the gravitational acceleration on both axes, and adding them to the total acceleration
         a_x += r_x * gamma
         a_y += r_y * gamma
 
@@ -106,12 +140,21 @@ def GravitationalAks(R,K,N_k,dt, M,T_0, info):
 
 def GravitationAccelerations(R,K,N_k,dt, M,T_0, info):
 
+    """
+    This function does the exact same as the one above it, 
+    but returns each acceleration individually (as opposed to the sum),
+    as well as which bodies said accelerations come from.
+
+    This function therefore has no comments :)
+    """
+
     A = []
     Names = []
 
     a_x = -G_sol *M[-1]*R[K][0]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
     a_y = -G_sol *M[-1]*R[K][1]/ (((R[K][0])**2 + R[K][1]**2)**(3/2))
     a_sol = np.array([a_x,a_y])
+
     Names.append("Sol")
     A.append(np.linalg.norm(a_sol))
 
@@ -127,7 +170,6 @@ def GravitationAccelerations(R,K,N_k,dt, M,T_0, info):
         r_y = -R[K][1] + R_p_y
 
         gamma = G_sol * M[j]/((r_x**2 + r_y**2)**(3/2))
-
             
         a_x += r_x * gamma
         a_y += r_y * gamma
@@ -139,7 +181,26 @@ def GravitationAccelerations(R,K,N_k,dt, M,T_0, info):
 
 
 @njit
-def timestep(R,v,a,dt, N_k, K, M, T_0, info):
+def timestep(R,v,a, K, N_k, dt, M, T_0, info):
+
+    """
+    Function that computes one timestep of the trajectory, using leapfrog integration.
+
+    Parameters :
+    R    : Array(float) | Array containing all positions
+    v    : Array(float) | Array containing all velocities
+    a    : Array(float) | Array containing all accelerations
+    K    : int          | The current timestep
+    N_k  : int          | How many times the smaller timestep (rocket timestep) goes into the larger timestep (planet timestep)
+    dt   : float        | Rocket timestep in years
+    M    : Array(float) | Array containing all planet masses
+    T_0  : float        | Start time in years (The time after reaching escape velocity)
+    info : tuple        | Tuple containing info that FindR needs
+
+    returns:
+    None
+    """
+
     R[K+1][0] = R[K][0] + v[K][0] * dt + 1/2*a[K][0]*dt**2
     R[K+1][1] = R[K][1] + v[K][1] * dt + 1/2*a[K][1]*dt**2
 
@@ -147,39 +208,62 @@ def timestep(R,v,a,dt, N_k, K, M, T_0, info):
     
     v[K+1][0] = v[K][0] + 0.5*(a[K][0] + a[K+1][0])*dt
     v[K+1][1] = v[K][1] + 0.5*(a[K][1] + a[K+1][1])*dt
- 
-    
 
 @njit
 def Main(R_0, v_0, dt,dT, n, M,T_0, info):
+
+    """
+    The main function which computes the trajectory for all timesteps
+
+    Parameters :
+    R_0  : Array(float) | The initial position of the rocket
+    v_0  : Array(float) | The initial velocity of the rocket
+    dt   : float        | Rocket timestep in years
+    dT   : float        | Planet timestep in years (larger than rocket)
+    n    : int          | Amount of steps to simulate
+    M    : Array(float) | Array containing all planet masses
+    T_0  : float        | Start time in years (The time after reaching escape velocity)
+    info : tuple        | Tuple containing info that FindR needs
+
+    returns:
+    Array(float) | Array containing all positions
+    Array(float) | Array containing all velocities
+    Array(float) | Array containing all accelerations
+    float        | Time of simulation
+    """
+
+    # We simulate one more step than asked.
+    # This is mainly for the case where we ask for 1 step, which normally would become 0 steps.
     N = n+1
-
     
+    # Finding how many times dt goes into dT
     N_k = np.floor(dT/dt)
-    R = np.zeros((N,2))
-    R[0] = R_0
     
-
+    # Defining our Arrays
+    R = np.zeros((N,2))
     v = np.zeros((N,2))
-    v[0] = v_0
-
     a = np.zeros((N,2))
+
+    # Setting our initial values
+    R[0] = R_0
+    v[0] = v_0
     a[0] = np.array(GravitationalAks(R,0,N_k,dt, M,T_0, info))
 
+    # Computing trajectory
     for K in range(N-1):
-        timestep(R,v,a,dt,N_k, K, M,T_0, info)
+        timestep(R,v,a,K,N_k,dt,M,T_0, info)
         
+    # Computing time
     T = N*dt
+
     return R,v,a, T
 
 if __name__ == '__main__':
-    with open("Mission.pkl", 'rb') as file:
-        mission = pkl.load(file)
-    R_0 = mission._position_after_launch
     
     # Interpolation Tests
     print("---  Interpolation  Tests  ---")
 
+    # Testing multiple different interpolations against their expected outputs
     Interpolations = [
         [np.array([0,0]),np.array([1,0]),0.4,np.array([0.4,0])],
         [np.array([2,0]),np.array([3,0]),0.4,np.array([2.4,0])],
@@ -192,6 +276,7 @@ if __name__ == '__main__':
 
     print("")
 
+    # Testing multiple different interpolations against their expected lengths
     for i in Interpolations:
         Lerped = np.array(Lerp(i[0],i[1],i[2])) - i[0]
         Lerped = np.linalg.norm(Lerped) / np.linalg.norm(i[1] - i[0])
@@ -200,6 +285,12 @@ if __name__ == '__main__':
 
     print("--- Finished Interpolation --- \n\n")
 
+
+    # Loading our spacemission class
+    with open("Mission.pkl", 'rb') as file:
+        mission = pkl.load(file)
+    # Harvesting initial conditions
+    R_0 = mission._position_after_launch
     v_0 =mission._velocity_after_launch
     M = np.zeros(mission.system._number_of_planets + 1)
     M[:-1] = mission.system.masses
@@ -207,14 +298,16 @@ if __name__ == '__main__':
     T_0 = mission.time_after_launch
     dT = PlanetPositionFunction.dt
     dt = 1/1000000
-    T_0 = mission.time_after_launch# + dT
+    T_0 = mission.time_after_launch
 
+    # Defining length of simulation, and translating to rocket timesteps
     t = 3.14
     N = int(t / dt)#3140000 * 2
     
+    # Running simulation
     R, v, a, T = Main(R_0, v_0, dt,dT, N, M ,T_0, Info)
+    # Transposing array to access our data
     R_T = R.T
-    ranged = PlanetPositionFunction.range(0,6)
 
     print("---    Gravity    Tests    ---")
 
@@ -245,6 +338,7 @@ if __name__ == '__main__':
     A_1_index = A_1.index(A_1_second)
     Name_1_second = Names_1[A_1_index]
 
+    # Printing the two strongest forces at t = 0Y and t = 0.5Y (after launch)
     print("Strongest force at t = 0 and t = 0.5")
     print(f"|t = 0 : [{Name_0_first:10} : {A_0_first:7.4e} AU/Y^2]|, |t = 0.5 : [{Name_1_first:10} : {A_1_first:7.4e} AU/Y^2]|")
     print("Second strongest force at t = 0 and t = 0.5")
@@ -252,14 +346,15 @@ if __name__ == '__main__':
 
     print("--- Finished Gravity Tests ---\n\n")
 
+    # Plotting the trajectory along with the trajectory of the planets.
     ax = plt.axes()
     ax.plot(r[0][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],r[1][0][int(T_0/dT):int(T_0/dT)+int(N*dt/dT)],label = "Planet 1 bane")
+    ranged = PlanetPositionFunction.range(0,6)
     ax.plot(ranged[0][1],ranged[1][1],label = "Planet 2 bane")
     ax.plot(R_T[0], R_T[1],color = "limegreen", label = "Simulert rakettbane")
-        # Adding the star (not to scale)
+    # Adding the star (not to scale)
     star = plt.Circle((0, 0), 0.75, color = 'gold')
     ax.add_patch(star)
-
 
     plt.xlabel("Position langs x-aksen [AU]")
     plt.ylabel("Position langs y-aksen [AU]")
@@ -291,5 +386,4 @@ Strongest force at t = 0 and t = 0.5
 Second strongest force at t = 0 and t = 0.5
 |t = 0 : [Sol        : 1.2167e+01 AU/Y^2]|, |t = 0.5 : [Planet 3   : 8.8837e-04 AU/Y^2]|
 --- Finished Gravity Tests ---
-
 """
