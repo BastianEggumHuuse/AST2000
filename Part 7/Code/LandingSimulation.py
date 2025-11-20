@@ -117,7 +117,7 @@ class LandingSimulation:
             # Exit clause
             if(np.linalg.norm(R[n]) <= self.planet_radius and self.landed == False):
                 self.final_t = self.t + n*self.dt
-
+                
                 ground_velocity = V[n] - (((R[n][0]**2 + R[n][1]**2)**0.5) * self.planet_rotation) * (np.cross(R[n],self.z_hat)/np.linalg.norm(R[n]))
 
                 if(np.linalg.norm(ground_velocity) < 3):
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         landing = pkl.load(file)
 
     t_0,r_0,v_0 = landing.orient()
-    v_0 = np.array([1,0,0])#(2*np.pi) / (mission.system.rotational_periods[1]*24*60*60)*(np.cross(r_0,np.array([0,0,1])))#np.array([0,0,0])
+    v_0 = np.array([0,0,-187]) + 1610*(np.cross(r_0,np.array([0,0,1])))/np.linalg.norm(r_0)
     print(np.linalg.norm(v_0))
     # Initializing simulation
     LandingSim = LandingSimulation(
@@ -185,33 +185,48 @@ if __name__ == "__main__":
     
     # Running simulation
     LandingSim.fall(800)
-    LandingSim.open_parachute()
-    LandingSim.fall(3000)
+    #LandingSim.open_parachute()
+    LandingSim.fall(30000)
 
     # Printing info
-    
+    #Start angles spherical cordinates:
+    start_position_r = np.linalg.norm(r_0)
+    start_position_phi = ComputeAngle(r_0)
+    start_position_theta = np.arccos(r_0[2]/np.linalg.norm(r_0))
+    position_t_0 = np.array([start_position_r,start_position_phi,start_position_theta])
     # Turning into spherical coordinates
     lander_position_r     = np.linalg.norm(LandingSim.R[-1])
     lander_position_phi   = ComputeAngle(LandingSim.R[-1])
-    lander_position_theta = np.pi/4 + np.arcsin(LandingSim.R[-1][2]/np.linalg.norm(LandingSim.R[-1]))
+    lander_position_theta = np.arccos(LandingSim.R[-1][2]/np.linalg.norm(LandingSim.R[-1]))
     lander_position_t     = np.array([lander_position_r,lander_position_phi,lander_position_theta])
 
     destination_position_0 = np.array([2304594.3015970597,3.5822217279404853,1.608027384048026])
     destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
-
+    
+    print('Ship(t = 0) : ', position_t_0)
     print("Lander      : ", lander_position_t)
     print("Destination : ", destination_position_t)
 
     # Plotting
     ax = plt.axes()
-    ax.plot(np.linspace(0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.V,keepdims=True,axis = 1))
-    plt.axvline(LandingSim.final_t - LandingSim.t_0)
+    ax.plot(np.linspace(0, -LandingSim.t_0 + LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.V,keepdims=True,axis = 1))
+    plt.axvline(LandingSim.final_t-LandingSim.t_0)
+    plt.show()
+
+    ax = plt.axes()
+    ax.plot(np.linspace(LandingSim.t_0,LandingSim.sim_t,len(LandingSim.R)),soloutions.Rho(np.linalg.norm(LandingSim.R,keepdims=True,axis = 1),LandingSim.r_limit,LandingSim.T_limit) )
+
+    plt.show
+    ax = plt.axes()
+    ax.plot(np.linspace(LandingSim.t_0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.R,keepdims=True,axis = 1) - mission.system.radii[1]*1000)
     plt.show()
     ax = plt.axes()
-    ax.plot(np.linspace(0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.R,keepdims=True,axis = 1) - mission.system.radii[1]*1000)
-    plt.axvline(LandingSim.final_t - LandingSim.t_0)
-    plt.show()
-    ax = plt.axes()
+    
     ax.plot(LandingSim.R[:,0],LandingSim.R[:,1])
+    Planet = plt.Circle((0,0), LandingSim.planet_radius, color = 'blue', fill = False, ls = '-')
+    ax.add_patch(Planet)
+    Aro = OrbitRadi = plt.Circle((0,0), LandingSim.r_limit, color = 'red', fill = False, ls = '-')
+    ax.add_patch(Aro)
+
     plt.axis("equal")
     plt.show()
