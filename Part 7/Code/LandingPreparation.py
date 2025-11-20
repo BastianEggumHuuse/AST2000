@@ -137,7 +137,7 @@ if __name__ == "__main__":
     boost = np.array([0,0,-1000])
     landing.boost(boost)
     landing.fall(100)
-    landing.take_picture(f"Target.xml")
+    landing.take_picture(f"Target_2.xml")
     boost = np.array([0,0,-10])
 
     r           = mission.system.radii[1] * 1000
