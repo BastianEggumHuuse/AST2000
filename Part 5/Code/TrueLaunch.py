@@ -21,10 +21,6 @@ with open("Mission.pkl", 'rb') as file:
 t = mission.time_after_launch
 fuelMass = 3535.634180709576
 
-# Simulation variables
-R_sim = np.array([mission._position_after_launch])
-V_sim = np.array([mission._velocity_after_launch])
-
 # Launch variables
 R_launch = np.array([mission._position_after_launch])
 V_launch = np.array([mission._velocity_after_launch])
@@ -42,16 +38,7 @@ M[:-1] = mission.system.masses
 M[-1] = mission.system.star_mass
 FindR = NumericalOrbitFunction(FilePath)
 
-# List of boost times (simulation)
-boost_t_sim = np.array([
-    0,
-    0.24,
-    0.47,
-    0.479,
-    ])
 
-# List of boost dvs (simulation)
-boost_v_sim = np.zeros((len(boost_t_sim),2))
 # List of boost times (launch)
 boost_t_launch = np.array([
     0,
@@ -91,19 +78,10 @@ for i in range(len(boost_t_launch)-1):
 
     # Boosting
     travel.boost(boost_v_launch[i])
-    # Boosting sim
-    if(i < len(boost_t_sim) - 1):
-        V_sim[-1] += boost_v_sim[i]
     
     # Coasting
     travel.coast(boost_t_launch[i+1])
-    # Coasting sim
-    if(i  < len(boost_t_sim) - 1):
-        N = round((boost_t_sim[i+1] - boost_t_sim[i])/dt)
-        R_c, V_c, A_c, t_c  = Coast(R_sim[-1], V_sim[-1], dt, dT, N, M, t, Info)
-        R_sim = np.concatenate((R_sim,R_c))
-        V_sim = np.concatenate((V_sim,V_c))
-        t += t_c
+    
 
     
 
@@ -126,8 +104,9 @@ def Lerp(R_0,R_1, I):
     return R_0[0] + I* dR_x, R_0[1] + I*dR_y
 
 fig, ax = plt.subplots()
-
-ax.plot(R_planets[0][0],R_planets[1][0])
+ax.set_xlabel('x retning [AU]')
+ax.set_ylabel('y rettning [AU]')
+ax.plot(R_planets[0][0],R_planets[1][0]) 
 ax.plot(R_planets[0][1],R_planets[1][1])
 R_0 = FindR(t_o, 1)
 R_1 = FindR(t_o+FindR.dt, 1)
@@ -137,7 +116,7 @@ R_p = Lerp(R_0,R_1, I)
 
 
 ax.plot(R_p[0], R_p[1], 'o', color = 'blue' )
-ax.plot(R_sim[:,0],R_sim[:,1], color = 'red')
+
 
 ax.plot(R_launch[:,0],R_launch[:,1], '.', color = 'green')
 
@@ -147,7 +126,7 @@ ax.add_patch(OrbitRadi)
 
 plt.show()
 r = R_o - R_p
-
+print(f' Vi er nå {np.linalg.norm(r)} AU unna planeten som er {np.linalg.norm(r)* const.AU/1000} km')
 r_hat = r/np.linalg.norm(r)
 e = -np.array([r_hat[1],-r_hat[0]])
 

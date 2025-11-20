@@ -93,8 +93,8 @@ def ChiSquareSigma(fluxes, noises, S, F_min):
 njit
 def ChiRange(fluxes, noises, L_0,M):
 
-    T_min = 1; T_max = 700; N_T = T_max//10
-    F_min_min = 0.5; F_min_max = 1; N_F_min = int((F_min_max - F_min_min) * 100)
+    T_min = 100; T_max = 500; N_T = 600//10
+    F_min_min = 0.5; F_min_max = 1; N_F_min = int((F_min_max - F_min_min) * 500)
 
     T = np.linspace(T_min,T_max,N_T)
     F_min = np.linspace(F_min_min,F_min_max,N_F_min)
@@ -177,7 +177,7 @@ if __name__ == "__main__":
  
     # Files we will extract data from.
     noise_path = "sigma_noise.txt"
-    flux_path = "spectrum_seed78_600nm_3000nm.txt"
+    flux_path = "spectrum_seed83_600nm_3000nm.txt"
 
     """
     This way of reading the data is very very slow
