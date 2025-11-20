@@ -8,6 +8,7 @@ from numba import njit
 import pickle as pkl 
 
 import Analytiskeløsninger as soloutions
+from LandingPreparation import CoordinateAtTime,ComputeAngle
 
 # AST imports
 import ast2000tools.constants as const
@@ -43,8 +44,8 @@ class LandingSimulation:
 
         self.t_0     = t_0
         self.t       = self.t_0
-        self.sim_t   = 0
-        self.final_t = 0
+        self.sim_t   = t_0
+        self.final_t = t_0
         self.dt      = dt
 
     def _initialize_density(self,r_0):
@@ -116,19 +117,19 @@ class LandingSimulation:
             # Exit clause
             if(np.linalg.norm(R[n]) <= self.planet_radius and self.landed == False):
                 self.final_t = self.t + n*self.dt
-                Ground_velocity = V[n] - (((R[n][0]**2 + R[n][1]**2)**0.5) *self.planet_rotation) * (np.cross(R[n],self.z_hat)/np.linalg.norm(R[n]))
 
-                if(np.linalg.norm(Ground_velocity) < 3):
-                    self.land(f"Lander has hit the ground with velocity {np.linalg.norm(Ground_velocity)}.")
+                ground_velocity = V[n] - (((R[n][0]**2 + R[n][1]**2)**0.5) * self.planet_rotation) * (np.cross(R[n],self.z_hat)/np.linalg.norm(R[n]))
+
+                if(np.linalg.norm(ground_velocity) < 3):
+                    self.land(f"Lander has hit the ground with velocity {np.linalg.norm(ground_velocity)}.")
                 else:
-                    self.crash(f"Lander has hit the ground with velocity {np.linalg.norm(Ground_velocity)}.")
+                    self.crash(f"Lander has hit the ground with velocity {np.linalg.norm(ground_velocity)}.")
 
-            
             if(self.landed):
-                R[n+1] = np.array([0,0,self.planet_radius])
-                V[n+1] = np.zeros(3)
-                A[n+1] = np.zeros(3)
-            
+                R[n+1] = R[n]
+                V[n+1] = V[n]
+                A[n+1] = A[n]
+
             else:
                 self._time_step(R,V,A,n)
 
@@ -153,7 +154,7 @@ class LandingSimulation:
     def land(self,message):
         print(f"A landing has occured at t = {self.final_t}, sim_time {self.final_t - self.t_0}")
         print(message)
-        print("_--^* Landed Succesfully *^--_")
+        print("_--^*# Landed Succesfully #*^--_")
         self.landed = True
 
     def crash(self,message):
@@ -187,9 +188,28 @@ if __name__ == "__main__":
     LandingSim.open_parachute()
     LandingSim.fall(3000)
 
+    # Printing info
+    
+    # Turning into spherical coordinates
+    lander_position_r     = np.linalg.norm(LandingSim.R[-1])
+    lander_position_phi   = ComputeAngle(LandingSim.R[-1])
+    lander_position_theta = np.pi/4 + np.arcsin(LandingSim.R[-1][2]/np.linalg.norm(LandingSim.R[-1]))
+    lander_position_t     = np.array([lander_position_r,lander_position_phi,lander_position_theta])
+
+    destination_position_0 = np.array([2304594.3015970597,3.5822217279404853,1.608027384048026])
+    destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
+
+    print("Lander      : ", lander_position_t)
+    print("Destination : ", destination_position_t)
+
     # Plotting
     ax = plt.axes()
     ax.plot(np.linspace(0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.V,keepdims=True,axis = 1))
+    plt.axvline(LandingSim.final_t - LandingSim.t_0)
+    plt.show()
+    ax = plt.axes()
+    ax.plot(np.linspace(0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.R,keepdims=True,axis = 1) - mission.system.radii[1]*1000)
+    plt.axvline(LandingSim.final_t - LandingSim.t_0)
     plt.show()
     ax = plt.axes()
     ax.plot(LandingSim.R[:,0],LandingSim.R[:,1])
