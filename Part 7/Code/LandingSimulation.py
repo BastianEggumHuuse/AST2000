@@ -43,7 +43,7 @@ class LandingSimulation:
 
         self.t_0     = t_0
         self.t       = self.t_0
-        self.sim_t   = t_0
+        self.sim_t   = 0
         self.final_t = t_0
         self.dt      = dt
 
@@ -181,17 +181,7 @@ if __name__ == "__main__":
 
     # Printing info
     
-    # Turning into spherical coordinates
-    lander_position_r     = np.linalg.norm(LandingSim.R[-1])
-    lander_position_phi   = ComputeAngle(LandingSim.R[-1])
-    lander_position_theta = np.pi/4 + np.arcsin(LandingSim.R[-1][2]/np.linalg.norm(LandingSim.R[-1]))
-    lander_position_t     = np.array([lander_position_r,lander_position_phi,lander_position_theta])
-
-    destination_position_0 = np.array([2304594.3015970597,3.5822217279404853,1.608027384048026])
-    destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
-
-    print("Lander      : ", lander_position_t)
-    print("Destination : ", destination_position_t)
+    print(LandingSim.sim_t)
 
     # Plotting
     ax = plt.axes()
