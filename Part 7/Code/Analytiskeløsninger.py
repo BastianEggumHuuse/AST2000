@@ -33,7 +33,7 @@ g = const.G * mission.system.masses[1]*const.m_sun /(r_s**2)
 def FindR(T, T_s):
     for i in range(len(T)):
         if T[i] <= T_s/2:
-            print(T[i])
+      
             return i
     return len(T) 
 
@@ -76,10 +76,14 @@ def Rho(r,r_limit,T_limit):
 
 if __name__ == "__main__":
 
-    R = np.linspace(r_s, r_s+30000, 1000000)
-    T,Rho, j = TandRho(R)
+    R = np.linspace(r_s, 2305110.6806785692+1000, 1000000)
 
-    print(T[0], T_s)
-    plt.plot(R,Rho)
+    T,Rhos, j = TandRho(R)
+    #print(R[j], r_s)
+    
+    #print(T[j], T_s)
+
+    Rhos = rho_abdi(R)
+    plt.plot(R,Rhos)
 
     plt.show()

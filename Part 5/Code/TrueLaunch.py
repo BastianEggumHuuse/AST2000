@@ -28,12 +28,15 @@ The loop here is even simpler, being just
 3) Coast  (done by ast2000tools)
 4) Repeat
 
+<<<<<<< HEAD
+=======
 Note: This code doesn't really follow the plan detailed in Plan.py at all,
 because we get completely different results when applying this plan through the Coast function
 detailed in CalculatingTra.py
 We spent a stupid amount of time trying to fix this, and ended up not being able to :(
 """
 
+>>>>>>> be47fa71f320639412386a9464ed25fe59082703
 # Launch variables
 R_launch = np.array([mission._position_after_launch])
 V_launch = np.array([mission._velocity_after_launch])
@@ -46,12 +49,17 @@ npz          = np.load(FilePath)
 config       = npz["config"]
 R_planets    = npz["r"]
 
+<<<<<<< HEAD
+
+# List of boost times (launch)
+=======
 M            = np.zeros(mission.system._number_of_planets + 1)
 M[:-1]       = mission.system.masses
 M[-1]        = mission.system.star_mass
 
 
 # List of boost times 
+>>>>>>> be47fa71f320639412386a9464ed25fe59082703
 boost_t_launch = np.array([
     0,
     0.24,
@@ -88,13 +96,36 @@ for i in range(len(boost_t_launch)-1):
     
     # Coasting
     travel.coast(boost_t_launch[i+1])
+<<<<<<< HEAD
+    
+=======
+>>>>>>> be47fa71f320639412386a9464ed25fe59082703
 
 # Orienting ourselves a final time
 t_o,R_o,V_o = travel.orient()
 R_launch = np.concatenate((R_launch,np.array([R_o])))
 V_launch = np.concatenate((V_launch,np.array([V_o])))
 
+<<<<<<< HEAD
+# Plotting
+
+a_launch_0 = (V_launch[2] - V_launch[1])/dt
+print("acc_0", a_launch_0)
+
+def Lerp(R_0,R_1, I):
+    dR_x = -R_0[0] + R_1[0]
+    dR_y = -R_0[1] + R_1[1]
+    
+    return R_0[0] + I* dR_x, R_0[1] + I*dR_y
+
+fig, ax = plt.subplots()
+ax.set_xlabel('x retning [AU]')
+ax.set_ylabel('y rettning [AU]')
+ax.plot(R_planets[0][0],R_planets[1][0]) 
+ax.plot(R_planets[0][1],R_planets[1][1])
+=======
 # Finding position of planet at the end of the coasting
+>>>>>>> be47fa71f320639412386a9464ed25fe59082703
 R_0 = FindR(t_o, 1)
 R_1 = FindR(t_o+FindR.dt, 1)
 I = (t_o % FindR.dt)/FindR.dt 
@@ -108,7 +139,12 @@ ax.plot(R_planets[0][0],R_planets[1][0])
 ax.plot(R_planets[0][1],R_planets[1][1])
 # Plotting the destination planet
 ax.plot(R_p[0], R_p[1], 'o', color = 'blue' )
+<<<<<<< HEAD
+
+
+=======
 # Plotting the rocket trajectory
+>>>>>>> be47fa71f320639412386a9464ed25fe59082703
 ax.plot(R_launch[:,0],R_launch[:,1], '.', color = 'green')
 
 # Plotting the area we need to be in to perform orbital injection maneuver.
@@ -116,6 +152,10 @@ l = np.linalg.norm(R_launch[-1][-1])*(M[1]/(M[-1]*10))**0.5
 OrbitRadi = plt.Circle(R_p, l, color = 'blue', fill = False, ls = '-')
 ax.add_patch(OrbitRadi)
 plt.show()
+<<<<<<< HEAD
+r = R_o - R_p
+print(f' Vi er nå {np.linalg.norm(r)} AU unna planeten som er {np.linalg.norm(r)* const.AU/1000} km')
+=======
 
 
 """
@@ -124,6 +164,7 @@ Down here, we perform our orbital injection maneuver.
 
 # Finding distance between planet and rocket
 r = R_o - R_p
+>>>>>>> be47fa71f320639412386a9464ed25fe59082703
 r_hat = r/np.linalg.norm(r)
 # Finding tangential vector
 e = -np.array([r_hat[1],-r_hat[0]])
