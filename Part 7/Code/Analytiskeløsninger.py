@@ -37,7 +37,7 @@ def FindR(T, T_s):
             return i
     return len(T) 
 
-def T_adi(rho, T_s, mu, gamma):
+def T_adi(rho):
     
     a = P_s**(1-gamma) * T_s**gamma 
 
@@ -52,8 +52,8 @@ def rho_abdi(r):
     return rho
 
 def TandRho(r):
-    rho = rho_abdi(r, r_s, rho_s, T_s, mu, gamma)
-    T = T_adi(rho, T_s, mu, gamma)
+    rho = rho_abdi(r)
+    T = T_adi(rho)
     j = FindR(T, T_s)
     
    
@@ -63,12 +63,23 @@ def TandRho(r):
     return T, rho, j
     
 
+def Rho(r,r_limit,T_limit):
+    
+    if r > r_limit:
+        rho_limit = rho_abdi(r_limit)
+        rho = rho_limit*np.exp(mu*const.m_p*g/(const.k_B*T_limit)*(r_limit-r))
+    else:
+        rho = rho_abdi(r)
+    
 
-        
-R = np.linspace(r_s, r_s+30000, 1000000)
-T,Rho, j = TandRho(R,r_s, rho_s, T_s, mu, gamma)
+    return rho
 
-print(T[0], T_s)
-plt.plot(R,Rho)
+if __name__ == "__main__":
 
-plt.show()
+    R = np.linspace(r_s, r_s+30000, 1000000)
+    T,Rho, j = TandRho(R)
+
+    print(T[0], T_s)
+    plt.plot(R,Rho)
+
+    plt.show()

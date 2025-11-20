@@ -1,6 +1,7 @@
 # Bruker ikke kodemal!!!
 # Skrevet av Bastian Eggum Huuse og Bendik Thune
 
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle as pckl
@@ -11,6 +12,46 @@ import ast2000tools.constants as const
 import ast2000tools.utils     as utils
 from ast2000tools.space_mission import SpaceMission
 
+
+def FindR(Filepath,t,p):
+    """
+    Method that returns the position of a given planet along the x and y axes at a given time.
+
+    t       : float        | the desired point in time
+    p       : int          | the desired planet index
+
+    returns : Array(float) | the position of the given planet at the given time
+    """
+    npz = np.load(Filepath)
+
+    # Setting total time, delta time, and number of time steps, from the read file
+    config       = npz["config"]
+    TotalTime    = config[0]
+    dt           = config[1]
+    NumSteps     = int(config[2])
+
+    OrbitTimes   = npz["OrbitTimes"]
+
+        # Setting r from read file
+    r = npz["r"]
+    # Wrapping the t-value
+    # if t is less than zero, we make it wrap around to the end of the simulation
+    # This stops index-issues.
+    if(t < 0):
+        t = OrbitTimes[p] - t
+
+    # Finding the index of the given time
+    # This deserves an explanation. Since the positions are stored in an array with a length of NumSteps,
+    # we can't just insert t into this array to get the value (since t is a floating number)
+    # t/self.TotalTime gives us the percentage of the simulation the time t is at.
+    # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
+    # We multiply this number with the total amount of steps, to get the closes time index to our current time.
+    # We then floor that index (round down) and turn it into an integer.
+    Index = int(np.floor((t/TotalTime)*NumSteps))
+
+    # Finding x and y positions at this index
+    x = (r[0][p][Index])
+    y = (r[1][p][Index])
 
 class NumericalOrbitFunction:
 
@@ -70,7 +111,7 @@ class NumericalOrbitFunction:
         # (if t/self.TotalTime = 0.5, t is halfway through the simulation).
         # We multiply this number with the total amount of steps, to get the closes time index to our current time.
         # We then floor that index (round down) and turn it into an integer.
-        Index = int(np.floor(((t)/self.TotalTime)*self.NumSteps))
+        Index = int(np.floor((t/self.TotalTime)*self.NumSteps))
 
         # Finding x and y positions at this index
         x = (self.r[0][p][Index])
@@ -174,7 +215,7 @@ class FuelRocket:
     def SimulateEngine(self):
 
         # Initializing motor
-        #print("Initializing motor...")
+        print("Initializing motor...")
 
         # Calculating the force and fuelconsumption of one motor
         Force = 1.26686e-10
@@ -185,8 +226,8 @@ class FuelRocket:
         TotalForce = Force * self.NumMotors
         TotalFuelConsumption = FuelConsumption * self.NumMotors
 
-        #print(f"Calculated Force per motor : {Force:.5e}, Calculated Fuel Consumption per motor : {FuelConsumption:.5e}")
-        #print(f"Calculated Force           : {TotalForce:.5e}, Calculated Fuel Consumption      : {TotalFuelConsumption:.5e}")
+        print(f"Calculated Force per motor : {Force:.5e}, Calculated Fuel Consumption per motor : {FuelConsumption:.5e}")
+        print(f"Calculated Force           : {TotalForce:.5e}, Calculated Fuel Consumption      : {TotalFuelConsumption:.5e}")
         return(TotalForce,TotalFuelConsumption)
 
     def TimeStep(self):
@@ -703,7 +744,7 @@ def TrilaterationAlgorithm(t,Distances):
 
     # Defining star-distance and the range of angles
     StarDistance = Distances[-1]
-    Grain = 15
+    Grain = 10
     Range = np.linspace(0,2*np.pi,2**(Grain))
     
     # Defining an array of distances that doesn't include the sun
@@ -868,7 +909,7 @@ class NumericalOrbit:
         # which gives us the arrays with dimentions (2,NumPlanets,NSteps), letting us plot for all timesteps.
         return(self.r.T,self.v.T,self.a.T,self.t)
 
-def main(mission, t_0):
+def main(mission, t_0,generate_planet_trajectories = True):
 
     
     """
@@ -876,25 +917,26 @@ def main(mission, t_0):
 
     First, it creates the file containing the planet positions
     """
-    system = mission.system
-    # Getting initial conditions
-    R0 = system.initial_positions
-    V0 = system.initial_velocities
-    # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
-    # To make sure we pass the 20 rotations mark, we multiply the time with 2
-    OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
-    TotalTime = OrbitTimes[0] * 20 * 2
+    if(generate_planet_trajectories):
+        system = mission.system
+        # Getting initial conditions
+        R0 = system.initial_positions
+        V0 = system.initial_velocities
+        # Calculating the time the simulation will run. Here we assume that the orbit is a perfect circle, which it isn't, but it's very close.
+        # To make sure we pass the 20 rotations mark, we multiply the time with 2
+        OrbitTimes = (2*np.pi)*((system.semi_major_axes**3)/(const.G_sol*(system.star_mass + system.masses)))**(1/2)#np.linalg.norm(R0.T[0]) * 2 * np.pi/np.linalg.norm(V0.T[0])
+        TotalTime = OrbitTimes[0] * 20 * 2
 
-    # Instantiating the Numerical Orbit class (and running the loop)
-    # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
-    # Increasing the steps per year would then only reduce performance.
-    Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
-    r,v,a,t = Orbit.loop()
+        # Instantiating the Numerical Orbit class (and running the loop)
+        # We found that 10000 steps per year is sufficient, as all tests provide reasonable results with these parameters
+        # Increasing the steps per year would then only reduce performance.
+        Orbit = NumericalOrbit(mission = mission,const = const, TotalTime = TotalTime, StepsPerYear = 10000, InitialPos = R0, InitialVel = V0)
+        r,v,a,t = Orbit.loop()
 
-    # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
-    # We use this file later, to circumvent having to run the simulation again.
-    config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
-    np.savez("NumericalOrbitData",r = r, v = v, a = a,config = config,OrbitTimes = OrbitTimes)
+        # Saving the array r, the planets' orbit times, and the total time, delta time, and number of timesteps.
+        # We use this file later, to circumvent having to run the simulation again.
+        config = np.array([Orbit.T,Orbit.dt,Orbit.NSteps])
+        np.savez("NumericalOrbitData",r = r, v = v, a = a,config = config,OrbitTimes = OrbitTimes)
 
     """
     Then, it simulates the launch of the rocket
@@ -921,6 +963,7 @@ def main(mission, t_0):
     r_p = GenRocket.R_planets(t_0,0)
     z = r_p[0] + 1j*r_p[1]
     Gen_Pos, Gen_Vel = GenRocket.SolarSystemPosition(t_0, np.angle(z))
+
 
     print(f"\nGeneralized Position in solar system frame at t = {t_0}: [x : {Gen_Pos[0]:.3f} AU, y : {Gen_Pos[1]:.2e} AU]")
     print(f"Generalized Velocity in solar system frame at t = {t_0}: [x : {Gen_Vel[0]:.3f} AU/Y, y : {Gen_Vel[1]:.3f} AU/Y]")
@@ -980,7 +1023,11 @@ if __name__ == "__main__":
     seed = utils.get_seed('bmthune')
     mission = SpaceMission(seed)  
 
-    main(mission, t_0= 0.2*11)
+    if(len(sys.argv) > 1):
+        if(float(sys.argv[1]) < 1):
+            main(mission,t_0 = 0.2*11, generate_planet_trajectories = False)
+    else:
+        main(mission, t_0= 0.2*11)
 
     with open ("Mission.pkl", 'wb') as file:
         pckl.dump(mission, file)
