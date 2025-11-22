@@ -1,0 +1,69 @@
+# Skrevet av Bastian Eggum Huuse og Bendik Thune
+
+# Regular imports
+import numpy             as np
+import matplotlib.pyplot as plt
+import pickle as pkl 
+
+# AST imports
+import ast2000tools.constants as const
+import ast2000tools.utils     as utils
+from ast2000tools.space_mission import SpaceMission
+from ast2000tools.star_population import StarPopulation
+
+# Making the background dark :)
+plt.style.use('dark_background')
+
+#Unpickling launch
+with open("Mission.pkl", 'rb') as file:
+        mission = pkl.load(file)
+
+# A lot of this code is stolen from the AST2000 documentation :)
+
+# Getting information about the stars
+stars = StarPopulation()
+T = stars.temperatures
+L = stars.luminosities 
+r = stars.radii        
+c = stars.colors
+s = np.maximum(1e3*(r - r.min())/(r.max() - r.min()), 1.0) # Make point areas proportional to star radii
+
+# Plotting the stars
+ax = plt.axes()
+ax.scatter(T,L,color = c,s = s)
+
+# Computing luminosity of our star using the Stefan-boltzmann-law
+t_sun = mission.system.star_temperature
+r_sun = mission.system.star_radius * 1000
+l_sun = const.sigma*(t_sun**4)*(4*np.pi*r_sun**2)
+# Plotting this luminosity in yellow
+ax.plot(t_sun,l_sun/const.L_sun,"*",color = "gold")
+
+# Inserting luminosity calculated from the fusion within the star's core
+l_sun_core = 5.266950248114703e+23
+# Plotting this luminosity in green
+ax.plot(t_sun,l_sun_core/const.L_sun,"*",color = "blue")
+
+# Printing the luminosities for comparison
+print(f"Luminosity computed with the Stefan-Boltzmann-law: {l_sun:.5e} w")
+print(f"Luminosity computed from fusion                  : {l_sun_core:.5e} w")
+
+ax.set_xscale("log")
+ax.set_xticks([35000, 18000, 10000, 6000, 3000])
+ax.set_xticklabels(list(map(str, ax.get_xticks())))
+ax.set_xlim(40000, 2000)
+ax.set_xlabel(r'Temperature [K]')
+
+ax.set_yscale('log')
+ax.set_ylim(1e-4, 1e6)
+ax.set_ylabel(r'Luminosity [$L_\odot$]')
+
+ax.set_aspect(0.2)
+plt.show()
+
+"""
+Output:
+
+Luminosity computed with the Stefan-Boltzmann-law: 6.56153e+27 w
+Luminosity computed from fusion                  : 5.26695e+23 w
+"""
