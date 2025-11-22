@@ -21,18 +21,23 @@ with open("Mission.pkl", 'rb') as file:
 with open("Landing.pkl", 'rb') as file:
     Landing = pkl.load(file)
 
+Landing.fall(1230)
 
 Landing.adjust_parachute_area(13)
-Landing.look_in_direction_of_planet(1)
+Landing.look_in_direction_of_motion()
 
 t,r,v = Landing.orient()
-dv = np.array([0,0,-187]) -594*(np.cross(r,np.array([0,0,1])))/np.linalg.norm(r) - v
+dv = v_0 = np.array([0,0,-180]) -870*(np.cross(r,np.array([0,0,1])))/np.linalg.norm(r) - v
+print(dv)
+Landing.look_in_direction_of_motion()
 print(Landing.orient())
 Landing.start_video()
 Landing.verbose = True
 Landing.launch_lander(dv)
 Landing.fall(800)
+Landing.look_in_direction_of_motion()
 Landing.deploy_parachute()
-Landing.fall(50000)
-Landing.finish_video('TrueLand_2.xml')
+Landing.fall(5000)
+Landing.look_in_direction_of_motion()
+Landing.finish_video('TrueLand_1.xml', 10000)
 
