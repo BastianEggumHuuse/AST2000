@@ -28,7 +28,7 @@ Landing.look_in_direction_of_motion()
 
 t,r,v = Landing.orient()
 dv = v_0 = np.array([0,0,-180]) -870*(np.cross(r,np.array([0,0,1])))/np.linalg.norm(r) - v
-print(dv)
+
 Landing.look_in_direction_of_motion()
 print(Landing.orient())
 Landing.start_video()

@@ -169,7 +169,6 @@ class LandingSimulation:
         i : int          | index of current time step
         """
 
-        A[i+1] = self._compute_acceleration(R[i],V[i])
         A[i+1] = self._compute_acceleration(R[i],V[i],i)
         V[i+1] = V[i] + A[i+1] * self.dt
         R[i+1] = R[i] + V[i+1] * self.dt
@@ -293,7 +292,7 @@ if __name__ == "__main__":
     landing.fall(1200)
     t_0,r_0,v_0 = landing.orient()
     v_0 = np.array([0,0,-180]) -861*(np.cross(r_0,np.array([0,0,1])))/np.linalg.norm(r_0)
-    print(np.linalg.norm(v_0))
+
 
     # Initializing simulation
     LandingSim = LandingSimulation(
@@ -348,3 +347,37 @@ if __name__ == "__main__":
 
     plt.axis("equal")
     plt.show()
+
+r"""
+
+Initializing landing simulation at t = 82980.0
+
+c:\Users\tmthu\OneDrive\Documents\Bendik\UiO\AST2200\Prosjekt\Git3\AST2000\Part 7\Code\Analytiskeløsninger.py:51: RuntimeWarning: invalid value encountered in power
+  rho = (2/5*(-a*g/gamma * (mu*const.m_p/const.k_B)**gamma * r + C))**(5/2)
+Density Initialized.
+
+Falling for 800 seconds.
+Opening parachute.
+Falling for 4000 seconds.
+A landing has occured at t = 86970.04, sim_time 3990.0399999999936
+Lander has hit the ground with velocity 2.9784796244091205.
+_--^*# Landed Succesfully #*^--_
+                     `. ___
+                    __,' __`.                _..----....____
+        __...--'``;.   ,.   ;``--..__     .'    ,-._    _.-'
+  _..-''-------'   `'   `'   `'     O ``-''._   (,;') _,'
+,'________________                          \`-._`-','
+ `._              ```````````------...___   '-.._'-:
+    ```--.._      ,.                     ````--...__\-.
+            `.--. `-`                       ____    |  |`
+              `. `.                       ,'`````.  ;  ;`
+                `._`.        __________   `.      \'__/`
+                   `-:._____/______/___/____`.     \  `
+                               |       `._    `.    \
+                               `._________`-.   `.   `.___
+                                             SSt  `------'`'
+Ship(t = 0) :  [2.68468998e+06 4.65440989e+00 1.57079633e+00]
+Ship(t = 0) :  [2.30459430e+06 4.81072576e+00 1.60839426e+00]
+Lander      :  [2.30459427e+06 4.99915807e+00 1.60835421e+00]
+Destination :  [2.30459430e+06 4.99924734e+00 1.60839426e+00]
+"""
