@@ -200,7 +200,7 @@ if __name__ == "__main__":
     lander_position_theta = np.arccos(LandingSim.R[-1][2]/np.linalg.norm(LandingSim.R[-1]))
     lander_position_t     = np.array([lander_position_r,lander_position_phi,lander_position_theta])
 
-    destination_position_0 = np.array([2304594.3015970597,3.5822217279404853,1.608027384048026])
+    destination_position_0 = np.array([2304594.3015970597,275.46455752275926,121.88530065855205])#[2304594.3015970597,3.5822217279404853,1.608027384048026])
     destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
     
     print('Ship(t = 0) : ', position_t_0)

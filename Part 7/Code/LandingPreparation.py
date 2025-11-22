@@ -106,21 +106,21 @@ if __name__ == "__main__":
 
     thetas = []
 
-    # N = 10
+    N = 10
     # for n in range(N):
 
-    #     # Finding the position at the current time
+    #   # Finding the position at the current time
     #     r = mission.system.radii[1] * 1000
-    #     theta,t = FindAngle(landing)
+    #     r_vec_1, theta,t = FindAngle(landing)
 
-    #     # Defining our coordinate vector
+    #    # Defining our coordinate vector
     #     coord_vector = np.array((r,theta,0))
 
-    #     # Finding the vector at time = 0
+    # # #     # Finding the vector at time = 0
     #     theta_0 = AngleAtZero(coord_vector,t,p_theta)
     #     coord_vector_0 = np.array((r,theta_0,0))
 
-    #     # saving data
+    # # #     # saving data
     #     coord_info = (coord_vector,coord_vector_0,t)
     #     coords_list.append(coord_info)
 
@@ -131,14 +131,14 @@ if __name__ == "__main__":
     #     landing.fall(d_t)
 
     #     thetas.append(theta)
-    _,_,t_0 = FindAngle(landing)
+    # _,_,t_0 = FindAngle(landing)
     print("Initial angle: ", np.rad2deg(FindAngle(landing)[1]))
-
-    boost = np.array([0,0,-1000])
+   
+    boost = np.array([0,0,-0])
     landing.boost(boost)
-    landing.fall(100)
+    landing.fall(d_t+30)
     landing.take_picture(f"Target_2.xml")
-    boost = np.array([0,0,-10])
+ 
 
     r           = mission.system.radii[1] * 1000
     r_vec,phi,t = FindAngle(landing)
