@@ -64,7 +64,7 @@ landing.finish_video()
 
 with open ("Landing.pkl", 'wb') as file:
     pkl.dump(landing, file)
-
+print(landing.orient())
 plt.plot(np.arange(len(r_mean)),np.ones(len(r_mean))*np.linalg.norm(r_0))
 plt.plot(np.arange(len(r_mean)),r_mean)
 plt.show()
