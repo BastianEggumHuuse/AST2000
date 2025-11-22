@@ -134,7 +134,7 @@ if __name__ == "__main__":
     # _,_,t_0 = FindAngle(landing)
     print("Initial angle: ", np.rad2deg(FindAngle(landing)[1]))
    
-    boost = np.array([0,0,-0])
+    boost = np.array([0,0,-100])
     landing.boost(boost)
     landing.fall(d_t+30)
     landing.take_picture(f"Target_2.xml")
@@ -142,14 +142,14 @@ if __name__ == "__main__":
 
     r           = mission.system.radii[1] * 1000
     r_vec,phi,t = FindAngle(landing)
-    theta       = np.arccos((-1000 * (t-t_0))/np.linalg.norm(r_vec))
+    theta       =  np.arccos(r_vec[2]/np.linalg.norm(r_vec))
 
     r_0     = r
     phi_0   = AngleAtZero(np.array((r,phi,theta)),t-t_0,p_theta)
     theta_0 = theta
 
     print("Our landing position at time t = 0:")
-    print(f"[{r_0},{np.rad2deg(phi_0)},{np.rad2deg(theta_0)}]")
+    print(f"[{r_0},{(phi_0)},{(theta_0)}]")
     print(f"Our landing position (angles) at time t = {t-t_0}:")
     print(f"[{r},{np.rad2deg(phi)},{np.rad2deg(theta)}]")
     print(f"Our landing position (rads) at time t = {t-t_0}:")

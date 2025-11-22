@@ -61,7 +61,7 @@ class LandingSimulation:
         # Initializing arrays
         self.R = np.array([r_0])
         self.V = np.array([v_0])
-        self.A = np.array([self._compute_acceleration(r_0,v_0)])
+        self.A = np.array([self._compute_acceleration(r_0,v_0, 0)])
 
         # Initializing time
         # A lot of different t values are stored here that aren't mentioned in the flowchart.
@@ -108,7 +108,7 @@ class LandingSimulation:
         return v - (((r[0]**2 + r[1]**2)**0.5) * self.planet_rotation) * (np.cross(self.z_hat,r)/np.linalg.norm(r))
 
 
-    def _compute_acceleration(self,r,v):
+    def _compute_acceleration(self,r,v,n):
 
         """
         Method that computes the total acceleration of the lander at a point in time
@@ -143,7 +143,7 @@ class LandingSimulation:
             a_d = ((0.5 * soloutions.Rho(np.linalg.norm(r),self.r_limit,self.T_limit) * self.lander_area * np.linalg.norm(v_d)**2)/self.mass) * -v_d_hat
         
         # Calculating the drag pressure the lander experiences
-        P_d = ((0.5 * soloutions.Rho(np.linalg.norm(r),self.r_limit,self.T_limit) * np.linalg.norm(v_d)**2)/self.mass)
+        P_d = ((0.5 * soloutions.Rho(np.linalg.norm(r),self.r_limit,self.T_limit) * np.linalg.norm(v_d)**2))
         
         # Checking if the lander burns
         if P_d > self.lander_limit:
@@ -170,6 +170,7 @@ class LandingSimulation:
         """
 
         A[i+1] = self._compute_acceleration(R[i],V[i])
+        A[i+1] = self._compute_acceleration(R[i],V[i],i)
         V[i+1] = V[i] + A[i+1] * self.dt
         R[i+1] = R[i] + V[i+1] * self.dt
 
@@ -263,6 +264,7 @@ class LandingSimulation:
         print(f"A landing has occured at t = {self.final_t}, sim_time {self.final_t - self.t_0}")
         print(message)
         print("_--^*# Landed Succesfully #*^--_")
+        print("                     `. ___                                  \n                    __,' __`.                _..----....____ \n        __...--'``;.   ,.   ;``--..__     .'    ,-._    _.-'\n  _..-''-------'   `'   `'   `'     O ``-''._   (,;') _,'    \n,'________________                          \\`-._`-','       \n `._              ```````````------...___   '-.._'-:         \n    ```--.._      ,.                     ````--...__\\-.      \n            `.--. `-`                       ____    |  |`    \n              `. `.                       ,'`````.  ;  ;`    \n                `._`.        __________   `.      \\'__/`     \n                   `-:._____/______/___/____`.     \\  `      \n                               |       `._    `.    \\        \n                               `._________`-.   `.   `.___   \n                                             SSt  `------'`' ")
         self.landed = True
 
     def crash(self,message):
@@ -288,9 +290,9 @@ if __name__ == "__main__":
     with open("Landing.pkl", 'rb') as file:
         landing = pkl.load(file)
 
-    # Orienting to get our initial position, velocity, and time
+    landing.fall(1200)
     t_0,r_0,v_0 = landing.orient()
-    v_0 = np.array([0,0,-187]) -594*(np.cross(r_0,np.array([0,0,1])))/np.linalg.norm(r_0)
+    v_0 = np.array([0,0,-180]) -861*(np.cross(r_0,np.array([0,0,1])))/np.linalg.norm(r_0)
     print(np.linalg.norm(v_0))
 
     # Initializing simulation
@@ -304,7 +306,7 @@ if __name__ == "__main__":
     # Running simulation
     LandingSim.fall(800)
     LandingSim.open_parachute()
-    LandingSim.fall(5000)
+    LandingSim.fall(4000)
 
     # Info time :)
 
@@ -319,8 +321,7 @@ if __name__ == "__main__":
     lander_position_theta = np.arccos(LandingSim.R[-1][2]/np.linalg.norm(LandingSim.R[-1]))
     lander_position_t     = np.array([lander_position_r,lander_position_phi,lander_position_theta])
 
-    # Finding our destination position (in spherical coordinates) at our landing time
-    destination_position_0 = np.array([2304594.3015970597,275.46455752275926,121.88530065855205])#[2304594.3015970597,3.5822217279404853,1.608027384048026])
+    destination_position_0 = np.array([2304594.3015970597,4.8107257594915245,1.6083942634485817])#[2304594.3015970597,3.5822217279404853,1.608027384048026])
     destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
     
     print('Ship(t = 0) : ', position_t_0)
