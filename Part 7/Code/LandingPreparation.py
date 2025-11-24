@@ -147,9 +147,9 @@ if __name__ == "__main__":
     r_0     = r
     phi_0   = AngleAtZero(np.array((r,phi,theta)),t-t_0,p_theta)
     theta_0 = theta
-
+    
     print("Our landing position at time t = 0:")
-    print(f"[{r_0},{(phi_0)},{(theta_0)}]")
+    print(f"[{r_0},{np.rad2deg((phi_0))},{(theta_0)}]")
     print(f"Our landing position (angles) at time t = {t-t_0}:")
     print(f"[{r},{np.rad2deg(phi)},{np.rad2deg(theta)}]")
     print(f"Our landing position (rads) at time t = {t-t_0}:")
