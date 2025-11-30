@@ -86,12 +86,9 @@ def ChiSquare(fluxes, noises,l_0,m, T, F_min):
                     flux     = fluxes[i][1]
                     noise    = noises[i][1]
 
-<<<<<<< HEAD
-=======
                     # Calculating sigma
                     sigma_l = Sigma_l(l_0,k,t,m)
                     # Calculating line profile flux
->>>>>>> e34fba0d0bc5e3ef62f6ba2d0c43adafae0ea113
                     F_l = 1 + (f_min - 1)*np.exp(-((l_i-l_center)**2)/(2*sigma_l**2))
                     # Adding to Chi
                     X += ((flux - F_l)/noise)**2

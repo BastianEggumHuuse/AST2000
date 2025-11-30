@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     #     phis.append(phi)
    
-    boost = np.array([0,0,-100])
+    boost = np.array([0,0,0])
     landing.boost(boost)
     landing.fall(d_t)
     landing.take_picture(f"target_just_before.xml")

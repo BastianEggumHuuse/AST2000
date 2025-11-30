@@ -24,10 +24,15 @@ G   = const.G
 m_h = const.m_p
 k   = const.k_B
 
+<<<<<<< HEAD
+# We assume mean molecular mass to be 1
+mu  = 1.75
+=======
 mu  = 1
 mu_2  = 1.0062693333333335
 mu_3 = (0.75 * 1 + 0.25 * 4)
 mu = mu_3
+>>>>>>> e34fba0d0bc5e3ef62f6ba2d0c43adafae0ea113
 
 T_c = T_r + (2/3)*np.pi*G*rho*(r**2)*(mu*m_h/k)
 
@@ -46,13 +51,14 @@ e_pp  = e_0pp * rho * (X_H**2) * (T_6**4)
 # Computing reaction rate for the CNO
 e_0CNO = 8.24 * 10**(-31)
 X_CNO  = (0.002 * ((12 + 13 + 15)/3)) / (0.745 * 1 + 0.253 * 4 + 0.002 * ((12 + 13 + 15)/3)) 
-e_CNO  = e_0CNO * X_H * X_CNO * rho * T_6**(20)
+e_CNO  = e_0CNO * X_H * X_CNO * rho* T_6**(20)
 
 # Summing these rates together
 e = e_pp + e_CNO
 # Computing luminosity
 L = e * (rho * (4/3) * np.pi * (0.2 * r)**3)
-print(f"Star luminosity  : {L:.5e} W")
+print(e)
+print(f"Star luminosity  : {L/const.L_sun:.5e} W")
 
 """
 Output :
