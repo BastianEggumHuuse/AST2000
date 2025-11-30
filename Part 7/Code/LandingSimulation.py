@@ -289,6 +289,7 @@ if __name__ == "__main__":
     with open("Landing.pkl", 'rb') as file:
         landing = pkl.load(file)
 
+    t_t, r_test, v_test = landing.orient()
     landing.fall(1200)
     t_0,r_0,v_0 = landing.orient()
     v_0 = np.array([0,0,-180]) -861*(np.cross(r_0,np.array([0,0,1])))/np.linalg.norm(r_0)
@@ -311,8 +312,8 @@ if __name__ == "__main__":
 
     # Turning start position into spherical coordinates
     start_position_r = np.linalg.norm(r_0)
-    start_position_phi = ComputeAngle(r_0)
-    start_position_theta = np.arccos(r_0[2]/np.linalg.norm(r_0))
+    start_position_phi = (ComputeAngle(r_0))
+    start_position_theta =(np.arccos(r_0[2]/np.linalg.norm(r_0)))
     position_t_0 = np.array([start_position_r,start_position_phi,start_position_theta])
     # Turning end position into spherical coordinates
     lander_position_r     = np.linalg.norm(LandingSim.R[-1])
@@ -323,23 +324,29 @@ if __name__ == "__main__":
     destination_position_0 = np.array([2304594.3015970597,4.8107257594915245,1.6083942634485817])#[2304594.3015970597,3.5822217279404853,1.608027384048026])
     destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
     
-    print('Ship(t = 0) : ', position_t_0)
-    print('Ship(t = 0) : ', destination_position_0)
+    print('Ship(t = 0) : ', np.rad2deg(position_t_0))
+    print('Dest(t = 0) : ', (destination_position_0))
     print("Lander      : ", lander_position_t)
-    print("Destination : ", destination_position_t)
+    print("Destination : ", np.rad2deg(destination_position_t))
 
     # Plotting
     ax = plt.axes()
+    ax.set_xlabel('Tid [s]')
+    ax.set_ylabel('Fart [m/s]')
     ax.plot(np.linspace(0, LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.V,keepdims=True,axis = 1))
     plt.axvline(LandingSim.final_t-t_0)
     plt.show()
 
     ax = plt.axes()
+    ax.set_xlabel('Tid [s]')
+    ax.set_ylabel('Distance to planet surface [m]')
     ax.plot(np.linspace(0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.R,keepdims=True,axis = 1) - mission.system.radii[1]*1000)
     plt.show()
     ax = plt.axes()
     
     ax.plot(LandingSim.R[:,0],LandingSim.R[:,1])
+    ax.set_xlabel('X [m]')
+    ax.set_ylabel('Y[m]')
     Planet = plt.Circle((0,0), LandingSim.planet_radius, color = 'blue', fill = False, ls = '-')
     ax.add_patch(Planet)
     Aro = OrbitRadi = plt.Circle((0,0), LandingSim.r_limit, color = 'red', fill = False, ls = '-')
@@ -377,7 +384,7 @@ _--^*# Landed Succesfully #*^--_
                                `._________`-.   `.   `.___
                                              SSt  `------'`'
 Ship(t = 0) :  [2.68468998e+06 4.65440989e+00 1.57079633e+00]
-Ship(t = 0) :  [2.30459430e+06 4.81072576e+00 1.60839426e+00]
+Dest(t = 0) :  [2.30459430e+06 4.81072576e+00 1.60839426e+00]
 Lander      :  [2.30459427e+06 4.99915807e+00 1.60835421e+00]
 Destination :  [2.30459430e+06 4.99924734e+00 1.60839426e+00]
 """

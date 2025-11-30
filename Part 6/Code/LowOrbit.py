@@ -31,32 +31,32 @@ landing.look_in_direction_of_motion()
 landing.start_video()
 
 N = 1000
-r_mean = []
+R = []
 r_ø = 2.7e6
+print(f'Ønsket distangse over bakken : {r_ø/1000 - landing.system.radii[1]}km' )
 for n in range(N):
 
-    I = 1
-    r_mean_i = 0
-    for i in range(I):
-        landing.fall(60)
-        t,r,v = landing.orient()
-        r_mean_i += np.linalg.norm(r)
+
+    
+    landing.fall(60)
+    t,r,v = landing.orient()
+    
     if np.linalg.norm(r) < r_ø:
         v_s = np.sqrt((const.G*mission.system.masses[1]*const.m_sun/np.linalg.norm((r))))
         v_hat = -np.array((r[1], -r[0],0))/np.linalg.norm(r)
         dv = v_s*v_hat - v
-        print(dv)
+        
         landing.boost(dv)
        
         break
-    r_mean_i *= 1/I
-
-    r_mean.append(r_mean_i)
+    
+    
+    R.append(r)
     v_hat = v / np.linalg.norm(v_0)
     dv = -1000 * v_hat
     dv_i = dv/N
     landing.boost(dv_i)
-
+R = np.array(R)
 landing.fall(30000)
 landing.finish_video()
 
@@ -64,7 +64,32 @@ landing.finish_video()
 
 with open ("Landing.pkl", 'wb') as file:
     pkl.dump(landing, file)
+R_T = np.zeros(100)
+T_T = np.zeros(100)
 
-plt.plot(np.arange(len(r_mean)),np.ones(len(r_mean))*np.linalg.norm(r_0))
-plt.plot(np.arange(len(r_mean)),r_mean)
+for i in range (100):
+    r_mean = 0
+    for k in range(100):
+       
+        landing.fall(20)
+        
+        t_o,r,v = landing.orient()
+        r_mean += np.linalg.norm(r)
+    
+    R_T[i] = r_mean/100
+    
+    T_T[i] = t_o
+
+
+
+plt.plot(0,0,'o')
+plt.xlabel('X [m]')
+plt.ylabel('Y [m]')
+plt.plot(R[:,0], R[:,1])
 plt.show()
+plt.plot(T_T,R_T)
+plt.ylabel('Gjennomsnitt radius [m]')
+plt.xlabel('TId [s]')
+plt.show()
+landing.orient()
+print(np.linalg.norm(r))
