@@ -50,3 +50,6 @@ drag_velocity_2  = radial_velocity**2# + air_velocity**2
 area = (2 * const.G * planet_mass * lander_mass) / (rho_s * drag_velocity_2 * surface_radius**2)
 print(f"Neccesary area: {area} m^2")
 
+r = (area/np.pi)**0.5
+print(f"Circle with radius {r} m")
+

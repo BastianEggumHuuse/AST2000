@@ -289,7 +289,11 @@ if __name__ == "__main__":
     with open("Landing.pkl", 'rb') as file:
         landing = pkl.load(file)
 
+<<<<<<< HEAD
     t_t, r_test, v_test = landing.orient()
+=======
+    t_1,r_1,v_1 = landing.orient()
+>>>>>>> e34fba0d0bc5e3ef62f6ba2d0c43adafae0ea113
     landing.fall(1200)
     t_0,r_0,v_0 = landing.orient()
     v_0 = np.array([0,0,-180]) -861*(np.cross(r_0,np.array([0,0,1])))/np.linalg.norm(r_0)
@@ -324,8 +328,15 @@ if __name__ == "__main__":
     destination_position_0 = np.array([2304594.3015970597,4.8107257594915245,1.6083942634485817])#[2304594.3015970597,3.5822217279404853,1.608027384048026])
     destination_position_t = CoordinateAtTime(destination_position_0,LandingSim.final_t - LandingSim.t_0,LandingSim.planet_rotation)
     
+<<<<<<< HEAD
     print('Ship(t = 0) : ', np.rad2deg(position_t_0))
     print('Dest(t = 0) : ', (destination_position_0))
+=======
+    print(np.rad2deg(ComputeAngle(r_1)))
+    print(np.rad2deg(start_position_phi))
+    print('Ship(t = 0) : ', position_t_0)
+    print('Ship(t = 0) : ', destination_position_0)
+>>>>>>> e34fba0d0bc5e3ef62f6ba2d0c43adafae0ea113
     print("Lander      : ", lander_position_t)
     print("Destination : ", np.rad2deg(destination_position_t))
 
@@ -341,9 +352,13 @@ if __name__ == "__main__":
     ax.set_xlabel('Tid [s]')
     ax.set_ylabel('Distance to planet surface [m]')
     ax.plot(np.linspace(0,LandingSim.sim_t,len(LandingSim.R)),np.linalg.norm(LandingSim.R,keepdims=True,axis = 1) - mission.system.radii[1]*1000)
+    plt.xlabel("Tid [s]")
+    plt.ylabel("Distanse fra overflaten [m]")
+    plt.axvline(LandingSim.final_t-t_0,color = "green")
+    plt.axvline(800,color = "red")
     plt.show()
+
     ax = plt.axes()
-    
     ax.plot(LandingSim.R[:,0],LandingSim.R[:,1])
     ax.set_xlabel('X [m]')
     ax.set_ylabel('Y[m]')
@@ -351,6 +366,8 @@ if __name__ == "__main__":
     ax.add_patch(Planet)
     Aro = OrbitRadi = plt.Circle((0,0), LandingSim.r_limit, color = 'red', fill = False, ls = '-')
     ax.add_patch(Aro)
+    plt.xlabel("Posisjon langs x-aksen [m]")
+    plt.ylabel("Posisjon langs y-aksen [m]")
 
     plt.axis("equal")
     plt.show()

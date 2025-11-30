@@ -24,8 +24,15 @@ G   = const.G
 m_h = const.m_p
 k   = const.k_B
 
+<<<<<<< HEAD
 # We assume mean molecular mass to be 1
 mu  = 1.75
+=======
+mu  = 1
+mu_2  = 1.0062693333333335
+mu_3 = (0.75 * 1 + 0.25 * 4)
+mu = mu_3
+>>>>>>> e34fba0d0bc5e3ef62f6ba2d0c43adafae0ea113
 
 T_c = T_r + (2/3)*np.pi*G*rho*(r**2)*(mu*m_h/k)
 
