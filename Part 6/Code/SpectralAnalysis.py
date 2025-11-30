@@ -37,6 +37,7 @@ def ChiSquare(fluxes, noises,l_0,m, T, F_min):
                 f_min    = F_min[i_f]
 
                 X = 0
+                sigma_l = Sigma_l(l_0,k,t,m)
 
                 # Looping over all fluxes
                 for i in range(len(fluxes)):
@@ -44,7 +45,6 @@ def ChiSquare(fluxes, noises,l_0,m, T, F_min):
                     flux     = fluxes[i][1]
                     noise    = noises[i][1]
 
-                    sigma_l = Sigma_l(l_0,k,t,m)
                     F_l = 1 + (f_min - 1)*np.exp(-((l_i-l_center)**2)/(2*sigma_l**2))
                     X += ((flux - F_l)/noise)**2
 
