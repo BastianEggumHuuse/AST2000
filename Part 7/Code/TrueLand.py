@@ -37,7 +37,7 @@ Landing.launch_lander(dv)
 Landing.fall(800)
 Landing.look_in_direction_of_motion()
 Landing.deploy_parachute()
-Landing.fall(5000)
+Landing.fall(800000)
 Landing.look_in_direction_of_motion()
 Landing.finish_video('TrueLand_1.xml', 10000)
 
