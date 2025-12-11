@@ -24,7 +24,7 @@ def ChiSquareOptimization(fluxes, noises,l_0,m,step_length = 1):
     print(f"Running Algorithm for l_0 = {l_0:5} nm")
 
     # Getting ranges:
-    d_l = (1/3) * l_0 * 10**(-3)
+    d_l = (1/3) * l_0 * 10**(-4)
 
     l_max = l_0 + d_l
     l_min = l_0 - d_l
@@ -120,10 +120,6 @@ if __name__ == "__main__":
     noise_path = "sigma_noise.txt"
     flux_path = "spectrum_seed78_600nm_3000nm.txt"
 
-    """
-    This way of reading the data is very very slow
-    so maybe we change it ?
-    """
 
     fluxes = np.loadtxt(flux_path)
     noises = np.loadtxt(noise_path)
