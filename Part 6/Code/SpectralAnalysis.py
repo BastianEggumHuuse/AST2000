@@ -76,6 +76,7 @@ def ChiSquare(fluxes, noises,l_0,m, T, F_min):
 
                 # Initializing a Chi value to sum over
                 X = 0
+                sigma_l = Sigma_l(l_0,k,t,m)
 
                 # Looping over all fluxes
                 for i in range(len(fluxes)):
