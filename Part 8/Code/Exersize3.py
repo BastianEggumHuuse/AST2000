@@ -35,7 +35,7 @@ def Part2():
     print(f"{t_m_m}")
     print(f"{t_m_m/(60*60*24*365.25):.3f} Y\n") # Works!!
 
-def Part3():
+def Part345():
 
     c = 3*10**8
     v = 0.99
@@ -118,4 +118,5 @@ def Part3():
     print(f"T_m: {(T_m):.3f} Y")
     print(f"T_total: {(T_total):.3f} Y\n")
 
-Part3()
+#Part2()
+#Part345()
