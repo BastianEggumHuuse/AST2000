@@ -8,4 +8,5 @@ Seed = utils.get_seed('bmthune')
 
 Experiment = RelativityExperiments(Seed)
 
-Experiment.antimatter_spaceship(1)
+
+Experiment.gps(1)
