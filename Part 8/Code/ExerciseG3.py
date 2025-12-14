@@ -62,48 +62,48 @@ print(f"dr_n = {dr_n / (2*M):e} r_s\n")
 PART 2)
 """
 
-print("3)\n")
+# print("3)\n")
 
-x ,y = np.loadtxt("black_hole_descent_frame_1.txt")
-x_l ,y_l = np.loadtxt("black_hole_descent_frame_1_with_light_travel.txt")
+# x ,y = np.loadtxt("black_hole_descent_frame_1.txt")
+# x_l ,y_l = np.loadtxt("black_hole_descent_frame_1_with_light_travel.txt")
 
-diffs = lambda x : x[2:] - x[1:-1]
+# diffs = lambda x : x[2:] - x[1:-1]
 
-dy = diffs(y)
-dy_l = diffs(y_l)
+# dy = diffs(y)
+# dy_l = diffs(y_l)
 
-ax = plt.axes()
-
-
-ax.plot(x[2:],dy,color = "blue",label = "no light travel")
-ax.plot(x_l[2:],dy_l,color = "green",label = "light travel")
-ax.legend()
-
-plt.title("Time differences for frame 1")
-plt.xlabel("Ray index")
-plt.ylabel("Time difference [s]")
-print("plotting...\n")
-plt.show()
-
-print("6) \n")
-
-x ,y = np.loadtxt("black_hole_descent_frame_2.txt")
-x_l ,y_l = np.loadtxt("black_hole_descent_frame_2_with_light_travel.txt")
-
-diffs = lambda x : x[2:] - x[1:-1]
-
-dy = diffs(y)
-dy_l = diffs(y_l)
-
-ax = plt.axes()
+# ax = plt.axes()
 
 
-ax.plot(x[2:],dy,color = "red",label = "no light travel")
-ax.plot(x_l[2:],dy_l,color = "orange",label = "light travel")
-ax.legend()
+# ax.plot(x[2:],dy,color = "blue",label = "no light travel")
+# ax.plot(x_l[2:],dy_l,color = "green",label = "light travel")
+# ax.legend()
 
-plt.title("Time differences for frame 2  ")
-plt.xlabel("Ray index")
-plt.ylabel("Time difference [s]")
-print("plotting...\n")
-plt.show()
+# plt.title("Time differences for frame 1")
+# plt.xlabel("Ray index")
+# plt.ylabel("Time difference [s]")
+# print("plotting...\n")
+# plt.show()
+
+# print("6) \n")
+
+# x ,y = np.loadtxt("black_hole_descent_frame_2.txt")
+# x_l ,y_l = np.loadtxt("black_hole_descent_frame_2_with_light_travel.txt")
+
+# diffs = lambda x : x[2:] - x[1:-1]
+
+# dy = diffs(y)
+# dy_l = diffs(y_l)
+
+# ax = plt.axes()
+
+
+# ax.plot(x[2:],dy,color = "red",label = "no light travel")
+# ax.plot(x_l[2:],dy_l,color = "orange",label = "light travel")
+# ax.legend()
+
+# plt.title("Time differences for frame 2  ")
+# plt.xlabel("Ray index")
+# plt.ylabel("Time difference [s]")
+# print("plotting...\n")
+# plt.show()
