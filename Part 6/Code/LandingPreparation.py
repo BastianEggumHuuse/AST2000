@@ -140,10 +140,10 @@ if __name__ == "__main__":
 
     #     phis.append(phi)
    
-    boost = np.array([0,0,0])
+    boost = np.array([0,0,-100])
     landing.boost(boost)
     landing.fall(d_t)
-    landing.take_picture(f"target_just_before.xml")
+    landing.take_picture(f"target_just_before.xml") #The images in the blog had 0 z dv
     landing.fall(30)
     landing.take_picture(f"target_just_right.xml")
 
