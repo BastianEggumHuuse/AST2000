@@ -59,3 +59,28 @@ v_e_l_l = (v_e + v_rel)/(1+v_rel * v_e)
 print(f"v_p_lab         : {v_p_l_l}")
 print(f"v_e_lab         : {v_e_l_l}")
 print(f"Size difference : {(v_e_l_l - v_rel) / abs(v_p_l_l-v_rel)}\n")
+
+"""
+Kjøretidseksempler:
+Mass of proton 1.673e-27 kg
+Mass of neutron 1.675e-27 kg
+Mass of electron 9.109e-31 kg
+
+Speed of proton after neutron decay -0.001265599877649209
+Speed of electron after neutron decay 0.9185615217035612
+
+E_p : 3.712271565817748e-27 kg
+P_p : 3.314105796213702e-27 kg
+
+E_e : 9.320863157292805e-30 kg
+P_e : 9.276242860912045e-30 kg
+
+v_p_lab         : 0.8927433614312272
+v_e_lab         : 0.9952128579051343
+Size difference : 398.2755140581752
+
+v_p_lab         : 0.8927433614312275
+v_e_lab         : 0.9952128579051341
+Size difference : 398.2755140585193
+
+"""

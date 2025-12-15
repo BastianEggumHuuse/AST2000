@@ -120,3 +120,42 @@ def Part345():
 
 Part2()
 Part345()
+
+"""
+Kjøretidseksempel:
+t = 201.53623849722413
+897188408.3067509
+28.430 Y
+
+126564000.00000018
+4.011 Y
+
+tm_b : 8.977e+08 Seconds
+tm_b : 28.446 Years
+
+t_bm : 1.266e+08 Seconds
+t_bm : 4.013 Years
+
+tmm_bmm : 28.446 Years
+t_bmm : 399.290 Years
+
+g : -3.333e-10 1/s
+t_b : 6.360e+09 s
+t_turn : 9.330e+09 s
+t_turn : 295.650 Y
+
+t_turn_m : 9.330e+09 s
+t_turn_m : 295.650 Y
+
+dt_turn: 94.114 Y
+
+t_destiny: 389.763 Y
+t_destiny: 587.402 Y
+t_final: 592.227 Y
+
+0.99
+0.1
+
+T_m: 74.574 Y
+T_total: 206.148 Y
+"""
