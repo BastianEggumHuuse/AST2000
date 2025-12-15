@@ -6,7 +6,6 @@ from   ast2000tools.solar_system import SolarSystem
 import ast2000tools.constants as const
 from   ast2000tools.relativity import RelativityExperiments
 
-from RelativeTrilateration import TrilaterationAlgorithm
 
 LorentzFactor   = lambda v : 1/(1-v**2)
 
@@ -49,10 +48,10 @@ def findlocation(p_1,p_2,t_0,t_1,t_2, kvandrant3 = True):
 
     
     phi_s1 = np.arctan(p_1[1]/p_1[0]) 
-    phi_p1 = np.arccos(-(d_1**2-np.linalg.norm(p_1)**2-r_p**2)/(2*np.linalg.norm(p_1)*r_p))
+    phi_p1 = np.arccos(-((d_1**2)-(np.linalg.norm(p_1)**2)-(r_p**2))/(2*np.linalg.norm(p_1)*r_p))
 
     phi_s2 = np.arctan(p_2[1]/p_2[0]) 
-    phi_p2 = np.arccos(-(d_2**2-np.linalg.norm(p_2)**2-r_p**2)/(2*np.linalg.norm(p_2)*r_p))
+    phi_p2 = np.arccos(-((d_2**2)-(np.linalg.norm(p_2))**2-(r_p)**2)/(2*np.linalg.norm(p_2)*r_p))
     
     if kvandrant3:
         phi_s1 += np.pi
@@ -65,8 +64,8 @@ def findlocation(p_1,p_2,t_0,t_1,t_2, kvandrant3 = True):
     theta_21 = phi_s2 + phi_p2
     theta_22 = phi_s2 - phi_p2
     
-    print(f'Ship 1 : {theta_11 :3f} og {theta_12 :3f}')
-    print(f'Ship 2 : {theta_21 :3f} og {theta_22 :3f}\n')
+    print(f'Ship 1 : {theta_11 :3f} og {theta_12 :3f} radianer')
+    print(f'Ship 2 : {theta_21 :3f} og {theta_22 :3f} radianer\n')
 
     dif = 1e-3
     if abs(theta_11 - theta_21) < dif or abs(theta_11 - theta_22) < dif:
@@ -75,7 +74,7 @@ def findlocation(p_1,p_2,t_0,t_1,t_2, kvandrant3 = True):
         theta = theta_12
     else:
         raise ValueError('Ingen theta like')
-
+    print(theta)
 
     x = np.cos(theta)*r_p ; y = np.sin(theta)*r_p
     print(f"x : {x}, y : {y}\n")
@@ -92,17 +91,18 @@ print(f"Dist 2 MCast : {d_2} / Dist 2 Trilateration {d_2_t}\n")
 print("4)\n")
 #converting everything to rel units
 def GetRelT(t_1, t_2):
+
     v_rel = v/const.c_km_pr_s
-    t_1_m = t_1 #* const.c_km_pr_s 
-    t_2_m = t_2 #* const.c_km_pr_s 
+    t_1_m = t_1 * const.c_km_pr_s #Lowkey er dette unødvendig siden jeg kunne bare gjort hele greia i sekunder, men nå er det her
+    t_2_m = t_2 * const.c_km_pr_s 
     m_p_r = m_p * G/(const.c_km_pr_s**2) 
     print(m_p_r)
 
-    t_r_1 = t_1_m * ((1-2*m_p_r/(r_p) )/(1-2*(m_p_r)/r_h - v_rel**2))**0.5
-    t_r_2 = t_2_m * ((1-2*m_p_r/(r_p) )/(1-2*(m_p_r)/r_h - v_rel**2))**0.5
+    t_r_1 = t_1_m * ((1-2*m_p_r/(r_p))/(1-2*(m_p_r)/r_h - v_rel**2))**0.5
+    t_r_2 = t_2_m * ((1-2*m_p_r/(r_p))/(1-2*(m_p_r)/r_h - v_rel**2))**0.5
     
-    t_rs_1 = t_r_1#/const.c_km_pr_s
-    t_rs_2 = t_r_2#/const.c_km_pr_s
+    t_rs_1 = t_r_1/const.c_km_pr_s
+    t_rs_2 = t_r_2/const.c_km_pr_s
     return t_rs_1, t_rs_2
 t_r1, t_r2 = GetRelT(t_1,t_2)
 print(f'Tiden i sekunder i bakke refferanse system sattelitt 1 = {t_r1}')
@@ -122,11 +122,11 @@ print("6)\n")
 
 p_1 = np.array([4200.968,4132.315])
 t_1 = 13075.0391380
-p_2 = np.array( [5704.303,1478.206])
+p_2 = np.array([5704.303,1478.206])
 t_2 = 13075.0360543
 t = 13075.0611044
 
-pos, d_1, d_2 = findlocation(p_1, p_2, t, t_1,t_2, kvandrant3=False)
+pos_1, d_1, d_2 = findlocation(p_1, p_2, t, t_1,t_2, kvandrant3=False)
 
 t_r1, t_r2 = GetRelT(t_1,t_2)
 
@@ -137,5 +137,5 @@ print(f'Tiden i sekunder i bakke refferanse system sattelitt 2 = {t_r2}\n')
 pos_r_1, d_1_r, d_2_r = findlocation(p_1, p_2, t, t_r1,t_r2,kvandrant3=False)
 print(f'Pos Med Relativstisk Teori:   {pos_r_1}')
 print(f'Pos uten Relativistisk Teori: {pos}')
-print(f'Differanse =                        {np.linalg.norm(pos_r_1 - pos)*1000}m ')
+print(f'Differanse =                        {np.linalg.norm(pos_r_1 - pos_1)*1000}m ')
 print(f'før - etter:  {np.linalg.norm(pos_r-pos_r_1)*1000}')

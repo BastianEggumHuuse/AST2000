@@ -24,3 +24,10 @@ dl = l*(np.sqrt((1+v_a)/(1-v_a))-1)
 
 print(f"delta lambda   : {dl * 1e9:.5f} nm")
 print(f"shifted lambda : {(l - dl) * 1e9:.5f} nm")
+
+"""
+Kjøretidseksempler:
+lambda         : 587.00035 nm
+delta lambda   : 115.00017 nm
+shifted lambda : 472.00018 nm
+"""
