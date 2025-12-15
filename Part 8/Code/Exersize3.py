@@ -118,5 +118,5 @@ def Part345():
     print(f"T_m: {(T_m):.3f} Y")
     print(f"T_total: {(T_total):.3f} Y\n")
 
-#Part2()
-#Part345()
+Part2()
+Part345()
