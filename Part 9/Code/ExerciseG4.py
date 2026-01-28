@@ -139,3 +139,66 @@ print(f'Pos Med Relativstisk Teori:   {pos_r_1}')
 print(f'Pos uten Relativistisk Teori: {pos}')
 print(f'Differanse =                        {np.linalg.norm(pos_r_1 - pos_1)*1000}m ')
 print(f'før - etter:  {np.linalg.norm(pos_r-pos_r_1)*1000}')
+
+r"""
+
+1)
+
+Height : 3588.1267062477327 km
+
+2)
+
+Orbital velocity : 2.824375324566139 km/s
+
+3)
+
+Ship 1 : 5.748602 og 2.470989 radianer
+Ship 2 : 6.795792 og 2.470997 radianer
+
+2.4709893179124736
+x : -1805.5271697189335, y : 1432.2103666619405
+
+Dist 1 MCast : 6471.559832352707 / Dist 1 Trilateration 6471.559832352708
+Dist 2 MCast : 7428.497358284006 / Dist 2 Trilateration 7428.508437661471
+
+4)
+
+2.045492516758199e-07
+Tiden i sekunder i bakke refferanse system sattelitt 1 = 209.80888229797188
+Tiden i sekunder i bakke refferanse system sattelitt 2 = 209.80569029797192
+
+5)
+
+Ship 1 : 5.748602 og 2.470989 radianer
+Ship 2 : 6.795792 og 2.470996 radianer
+
+2.470989027498616
+x : -1805.5267537851203, y : 1432.2108910119898
+
+Pos Med Relativstisk Teori:   [-1805.52675379  1432.21089101]
+Pos uten Relativistisk Teori: [-1805.52716972  1432.21036666]
+Differanse =                        0.6692861205671872m
+6)
+
+Ship 1 : 2.470931 og -0.916611 radianer
+Ship 2 : 2.470892 og -1.963770 radianer
+
+2.470931106862804
+x : -1805.4437961911517, y : 1432.3154658670956
+
+2.045492516758199e-07
+Tiden i sekunder i bakke refferanse system sattelitt 1 = 13075.03913787361
+Tiden i sekunder i bakke refferanse system sattelitt 2 = 13075.03605417361
+
+Ship 1 : 2.470950 og -0.916630 radianer
+Ship 2 : 2.470919 og -1.963796 radianer
+
+2.4709496208028723
+x : -1805.4703136844216, y : 1432.282039743384
+
+Pos Med Relativstisk Teori:   [-1805.47031368  1432.28203974]
+Pos uten Relativistisk Teori: [-1805.52716972  1432.21036666]
+Differanse =                        42.667120780472075m
+før - etter:  90.81644645043565
+
+"""

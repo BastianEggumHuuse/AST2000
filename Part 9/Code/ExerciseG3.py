@@ -112,3 +112,35 @@ plt.xlabel("Ray index")
 plt.ylabel("Time difference [s]")
 print("plotting...\n")
 plt.show()
+
+r"""
+
+4)
+
+M = 4.151373e+10 meters
+r = 1.495979e+11 meters
+
+E/m natural units: 0.6990957981783487
+E/m SI units     : 6.283159690459399e+16
+
+7)
+
+d_tau = 6.104794e+09 meters
+d_t_1 = 7.000004e+09 meters
+d_t_n = 1.269981e+11 meters
+
+dr_1 = 9.354724e-01 AU
+dr_n = 5.677314e-01 AU
+
+dr_1 = 1.685523e+00 r_s
+dr_n = 1.022932e+00 r_s
+
+3)
+
+plotting...
+
+6)
+
+plotting...
+
+"""
